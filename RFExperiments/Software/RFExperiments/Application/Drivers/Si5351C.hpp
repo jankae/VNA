@@ -34,6 +34,7 @@ public:
 	bool SetCLK(uint8_t clknum, uint32_t frequency, PLL source);
 	bool Enable(uint8_t clknum);
 	bool Disable(uint8_t clknum);
+	bool Locked(PLL pll);
 private:
 	enum class Reg : uint8_t {
 		DeviceStatus = 0,

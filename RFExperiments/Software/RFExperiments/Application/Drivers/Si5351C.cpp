@@ -1,5 +1,9 @@
 #include "Si5351C.hpp"
 
+#define LOG_LEVEL	LOG_LEVEL_DEBUG
+#define LOG_MODULE	"SI5351"
+#include "Log.h"
+
 bool Si5351C::Init(uint32_t clkin_freq) {
 	bool success = true;
 
@@ -8,6 +12,7 @@ bool Si5351C::Init(uint32_t clkin_freq) {
 		if (clkinDiv < 3) {
 			clkinDiv++;
 		} else {
+			LOG_ERR("CLK in too high");
 			return false;
 		}
 	}
@@ -24,11 +29,17 @@ bool Si5351C::Init(uint32_t clkin_freq) {
 	// Disable all outputs
 	success &= WriteRegister(Reg::OutputEnableControl, 0xFF);
 
+	if(success) {
+		LOG_INFO("Initialized");
+	} else {
+		LOG_ERR("Initialization failed");
+	}
 	return success;
 }
 
 bool Si5351C::SetPLL(PLL pll, uint32_t frequency, PLLSource src) {
 	if (frequency < 600000000 || frequency > 900000000) {
+		LOG_ERR("Requested PLL frequency out of range (600-900MHz): %lu", frequency);
 		return false;
 	}
 	PLLConfig c;
@@ -40,6 +51,7 @@ bool Si5351C::SetPLL(PLL pll, uint32_t frequency, PLLSource src) {
 	uint32_t div20 = srcFreq * (1UL << 20) / frequency;
 	// Check for valid range
 	if (div20 < 15 * (1UL << 20) || div20 > 90 * (1UL << 20)) {
+		LOG_ERR("Calculated divider out of range (15-90)");
 		return false;
 	}
 	// Always use highest available c
@@ -50,6 +62,7 @@ bool Si5351C::SetPLL(PLL pll, uint32_t frequency, PLLSource src) {
 	c.P2 = (div20 & 0x3FFF) << 6;
 
 	FreqPLL[(int) pll] = frequency;
+	LOG_INFO("Setting PLL %c to %luHz", pll==PLL::A ? 'A' : 'B', frequency);
 	return WritePLLConfig(c, pll);
 }
 
@@ -68,6 +81,7 @@ bool Si5351C::SetCLK(uint8_t clknum, uint32_t frequency, PLL source) {
 		// outputs 6 and 7 are integer dividers only
 		uint32_t div = pllFreq / frequency;
 		if (div > 254 || div < 6) {
+			LOG_ERR("Divider on CLK6/7 out of range (6-254), would need %lu", div);
 			return false;
 		}
 		c.P1 = div;
@@ -78,6 +92,7 @@ bool Si5351C::SetCLK(uint8_t clknum, uint32_t frequency, PLL source) {
 			if (c.RDiv < 128) {
 				c.RDiv *= 2;
 			} else {
+				LOG_ERR("Unable to reach requested frequency");
 				return false;
 			}
 		}
@@ -90,15 +105,29 @@ bool Si5351C::SetCLK(uint8_t clknum, uint32_t frequency, PLL source) {
 		// lower 14 bit left shifted to 20bit border
 		c.P2 = (div20 & 0x3FFF) << 6;
 	}
+	LOG_INFO("Setting CLK%d to %luHz", clknum, frequency);
 	return WriteClkConfig(c, clknum);
 }
 
 bool Si5351C::Enable(uint8_t clknum) {
+	LOG_INFO("Enabling CLK%d", clknum);
 	return ClearBits(Reg::OutputEnableControl, 1 << clknum);
 }
 
 bool Si5351C::Disable(uint8_t clknum) {
+	LOG_INFO("Disabling CLK%d", clknum);
 	return SetBits(Reg::OutputEnableControl, 1 << clknum);
+}
+
+bool Si5351C::Locked(PLL pll) {
+	uint8_t mask = pll == PLL::A ? 0x20 : 0x40;
+	uint8_t value;
+	ReadRegister(Reg::DeviceStatus, &value);
+	if (value & mask) {
+		return false;
+	} else {
+		return true;
+	}
 }
 
 bool Si5351C::WritePLLConfig(PLLConfig config, PLL pll) {
