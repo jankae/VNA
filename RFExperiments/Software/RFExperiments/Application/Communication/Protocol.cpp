@@ -59,7 +59,7 @@ static Protocol::SweepSettings DecodeSweepSettings(uint8_t *buf) {
 }
 
 uint16_t Protocol::DecodeBuffer(uint8_t *buf, uint16_t len, PacketInfo *info) {
-	if (!info) {
+    if (!info || !len) {
 		return 0;
 	}
 	uint8_t *data = buf;
@@ -89,7 +89,7 @@ uint16_t Protocol::DecodeBuffer(uint8_t *buf, uint16_t len, PacketInfo *info) {
 	}
 
 	/* The complete frame has been received, check checksum */
-	uint32_t crc = *(uint16_t*) &data[length - 4];
+    uint32_t crc = *(uint32_t*) &data[length - 4];
 	uint32_t compare = CRC32(0, data, length - 4);
 	if(crc != compare) {
 		// CRC mismatch, remove header
