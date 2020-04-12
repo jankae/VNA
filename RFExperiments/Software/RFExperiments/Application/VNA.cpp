@@ -6,7 +6,7 @@
 #include "Sampling.hpp"
 #include "delay.hpp"
 
-#define LOG_LEVEL	LOG_LEVEL_DEBUG
+#define LOG_LEVEL	LOG_LEVEL_WARN
 #define LOG_MODULE	"VNA"
 #include "Log.h"
 

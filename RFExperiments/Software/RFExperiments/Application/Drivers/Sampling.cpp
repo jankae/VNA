@@ -2,7 +2,7 @@
 
 #include "stm.hpp"
 
-#define LOG_LEVEL	LOG_LEVEL_DEBUG
+#define LOG_LEVEL	LOG_LEVEL_WARN
 #define LOG_MODULE	"Sampling"
 #include "Log.h"
 

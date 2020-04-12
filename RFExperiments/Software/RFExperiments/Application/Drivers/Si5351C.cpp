@@ -1,6 +1,6 @@
 #include "Si5351C.hpp"
 
-#define LOG_LEVEL	LOG_LEVEL_DEBUG
+#define LOG_LEVEL	LOG_LEVEL_WARN
 #define LOG_MODULE	"SI5351"
 #include "Log.h"
 
