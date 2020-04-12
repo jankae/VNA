@@ -15,6 +15,8 @@ void VNACallback(VNA::Result res) {
 }
 
 void App() {
+	Log_Init();
+	LOG_INFO("Start");
 	VNA::Init();
 	while (1) {
 		VNA::Measure(1000000000, VNACallback, 32768);

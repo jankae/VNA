@@ -12,6 +12,7 @@ static uint16_t sampleBuffer[3][Sampling::MaxSamples];
 static uint16_t nsamples;
 
 static Sampling::Callback callback;
+static uint32_t starttime;
 
 bool Sampling::Start(Callback cb, uint16_t samples) {
 	callback = cb;
@@ -19,13 +20,15 @@ bool Sampling::Start(Callback cb, uint16_t samples) {
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t*) sampleBuffer[0], samples);
 	HAL_ADC_Start_DMA(&hadc2, (uint32_t*) sampleBuffer[1], samples);
 	HAL_ADC_Start_DMA(&hadc3, (uint32_t*) sampleBuffer[2], samples);
-	HAL_TIM_Base_Start(&htim4);
+	HAL_TIM_Base_Start_IT(&htim4);
+	starttime = HAL_GetTick();
 	LOG_INFO("Started");
 	return true;
 }
 
 static void ComputeComplex() {
-	LOG_INFO("Stopped");
+	uint32_t duration = HAL_GetTick() - starttime;
+	LOG_INFO("Stopped, took %lums", duration);
 	HAL_TIM_Base_Stop(&htim4);
 	int32_t refI = 0;
 	int32_t refQ = 0;

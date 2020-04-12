@@ -48,7 +48,7 @@ bool Si5351C::SetPLL(PLL pll, uint32_t frequency, PLLSource src) {
 
 	uint32_t srcFreq = src == PLLSource::XTAL ? FreqXTAL : FreqCLKINDiv;
 	// see https://www.silabs.com/documents/public/application-notes/AN619.pdf (page 3)
-	uint32_t div20 = srcFreq * (1UL << 20) / frequency;
+	uint32_t div20 = (uint64_t) frequency * (1UL << 20) / srcFreq;
 	// Check for valid range
 	if (div20 < 15 * (1UL << 20) || div20 > 90 * (1UL << 20)) {
 		LOG_ERR("Calculated divider out of range (15-90)");

@@ -78,6 +78,7 @@ static void SamplingCallback(Sampling::Result res) {
 	Mag2 = abs(res.Port2) / abs(res.Ref);
 	Phase2 = arg(res.Port2) / arg(res.Ref);
 	if (activePort == 1) {
+		activePort = 2;
 		ExcitatePort2();
 		Delay::ms(1);
 		Sampling::Start(SamplingCallback, samples);
