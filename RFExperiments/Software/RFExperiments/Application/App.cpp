@@ -9,13 +9,7 @@
 #include "Log.h"
 
 static bool newSettings = false;
-static Protocol::SweepSettings settings = {
-		.f_start = 50000000,
-		.f_stop = 1000000000,
-		.points = 1001,
-		.averaging = 32768,
-		.mdbm_excitation = 0,
-};
+static Protocol::SweepSettings settings;
 uint16_t pointCnt = 0;
 
 static bool done;
@@ -25,10 +19,15 @@ void VNACallback(VNA::Result res) {
 	done = true;
 }
 
-void App() {
+void App_Start() {
 	Log_Init();
 	LOG_INFO("Start");
 	VNA::Init();
+	// Wait for initial settings before starting sweep
+	while (!newSettings);
+	LOG_INFO("New settings received");
+	pointCnt = 0;
+	newSettings = false;
 	while (1) {
 		uint64_t freq = settings.f_start
 				+ (settings.f_stop - settings.f_start) * pointCnt
@@ -51,8 +50,8 @@ void App() {
 			packet.datapoint.S21Phase = result.S21Phase;
 			packet.datapoint.S22Mag = result.S22Mag;
 			packet.datapoint.S22Phase = result.S22Phase;
-			packet.datapoint.frequency = 1000000000;
-			packet.datapoint.pointNum = 0;
+			packet.datapoint.frequency = freq;
+			packet.datapoint.pointNum = pointCnt;
 			Communication::Send(packet);
 			done = false;
 			pointCnt++;
@@ -68,7 +67,7 @@ void App() {
 	}
 }
 
-void NewSettings(Protocol::SweepSettings s) {
+void App::NewSettings(Protocol::SweepSettings s) {
 	settings = s;
 	newSettings = true;
 }

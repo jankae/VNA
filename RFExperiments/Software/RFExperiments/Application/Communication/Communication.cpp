@@ -1,6 +1,7 @@
 #include <Communication.h>
 
 #include "stm.hpp"
+#include "../App.h"
 
 static uint8_t inputBuffer[1024];
 uint16_t inputCnt = 0;
@@ -30,7 +31,10 @@ void Communication::Input(uint8_t *buf, uint16_t len) {
 			memmove(inputBuffer, &inputBuffer[handled_len], remaining);
 			inputCnt = remaining;
 		}
-		// TODO handle parsed packet
+		switch(packet.type) {
+		case Protocol::PacketType::SweepSettings:
+			App::NewSettings(packet.settings);
+		}
 	} while (handled_len > 0);
 }
 

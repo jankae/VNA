@@ -109,6 +109,32 @@ Device::~Device()
     }
 }
 
+bool Device::Configure(Protocol::SweepSettings settings)
+{
+    unsigned char buffer[128];
+    Protocol::PacketInfo p;
+    p.type = Protocol::PacketType::SweepSettings;
+    p.settings = settings;
+    unsigned int length = Protocol::EncodePacket(p, buffer, sizeof(buffer));
+    if(!length) {
+        BOOST_LOG_TRIVIAL(error) << "Failed to encode packet";
+        return false;
+    }
+    int actual_length;
+    auto ret = libusb_bulk_transfer(m_handle, EP_Out_Addr, buffer, length, &actual_length, 0);
+    if(ret < 0) {
+        BOOST_LOG_TRIVIAL(error) << "Error sending data: "
+                                << libusb_strerror((libusb_error) ret);
+        return false;
+    }
+    return true;
+}
+
+void Device::SetCallback(std::function<void (Protocol::Datapoint)> callback)
+{
+    m_callback = callback;
+}
+
 void Device::ReceiveThread()
 {
     BOOST_LOG_TRIVIAL(info) << "Receive thread started" << flush;

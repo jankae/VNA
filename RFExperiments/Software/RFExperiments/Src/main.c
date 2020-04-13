@@ -143,7 +143,7 @@ int main(void)
    * Work-around: Enable Clk to DAC (see Errata Sheet)
    */
   __HAL_RCC_DAC_CLK_ENABLE();
-  App();
+  App_Start();
   while (1)
   {
     /* USER CODE END WHILE */

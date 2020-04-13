@@ -74,9 +74,19 @@ static void SamplingCallback(Sampling::Result res) {
 	// Calculate magnitude and phase relative to reference
 	float Mag1, Phase1, Mag2, Phase2;
 	Mag1 = abs(res.Port1) / abs(res.Ref);
-	Phase1 = arg(res.Port1) / arg(res.Ref);
+	Phase1 = arg(res.Port1) - arg(res.Ref);
+	if (Phase1 > M_PI) {
+		Phase1 -= 2 * M_PI;
+	} else if (Phase1 < -M_PI) {
+		Phase1 += 2 * M_PI;
+	}
 	Mag2 = abs(res.Port2) / abs(res.Ref);
-	Phase2 = arg(res.Port2) / arg(res.Ref);
+	Phase2 = arg(res.Port2) - arg(res.Ref);
+	if (Phase2 > M_PI) {
+		Phase2 -= 2 * M_PI;
+	} else if (Phase2 < -M_PI) {
+		Phase2 += 2 * M_PI;
+	}
 	if (activePort == 1) {
 		activePort = 2;
 		ExcitatePort2();

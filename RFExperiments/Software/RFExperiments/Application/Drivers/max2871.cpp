@@ -248,7 +248,7 @@ bool MAX2871::SetReference(uint32_t f_ref, bool doubler, uint16_t r,
 void MAX2871::Update() {
 	for(int8_t i=0;i<2;i++) {
 		Write(5, regs[5]);
-		Delay::ms(20);
+		Delay::ms(2);
 		Write(4, regs[4]);
 		Write(3, regs[3]);
 		Write(2, regs[2]);
