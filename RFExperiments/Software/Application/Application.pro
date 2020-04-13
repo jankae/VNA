@@ -5,6 +5,7 @@ HEADERS += \
     plot.h \
     smithchart.h \
     sparam.h \
+    valueinput.h \
     vna.h
 
 SOURCES += \
@@ -13,6 +14,7 @@ SOURCES += \
     device.cpp \
     main.cpp \
     smithchart.cpp \
+    valueinput.cpp \
     vna.cpp
 
 LIBS += -lboost_log -lusb-1.0
