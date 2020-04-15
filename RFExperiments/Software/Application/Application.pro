@@ -5,6 +5,7 @@ HEADERS += \
     plot.h \
     smithchart.h \
     sparam.h \
+    sparamtable.h \
     valueinput.h \
     vna.h
 
@@ -14,6 +15,7 @@ SOURCES += \
     device.cpp \
     main.cpp \
     smithchart.cpp \
+    sparamtable.cpp \
     valueinput.cpp \
     vna.cpp
 
@@ -21,3 +23,10 @@ LIBS += -lboost_log -lusb-1.0
 DEFINES += BOOST_ALL_DYN_LINK
 
 QT += widgets charts
+
+FORMS +=
+
+DISTFILES +=
+
+RESOURCES += \
+    icons.qrc

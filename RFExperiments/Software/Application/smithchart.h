@@ -3,18 +3,16 @@
 
 #include "plot.h"
 #include <QPen>
+#include <QVXYModelMapper>
 
 class SmithChart : public Plot
 {
     Q_OBJECT
 public:
-    SmithChart(QWidget *parent = 0);
+    SmithChart(SParamTable &datatable, QString parameter = "S11", QWidget *parent = 0);
 
-    void setTitle(const QString &title);
-    void setXAxis(Protocol::SweepSettings s);
-    void addPoint(int index, double frequency, SParam point);
-    void clearPoints();
-
+    virtual void setParameter(QString p);
+    virtual QList<QString> allowedParameters();
 protected:
     void paintEvent(QPaintEvent *event);
 
@@ -31,6 +29,9 @@ private:
     QPainterPath thinArcsPath;
     /// Path for the thick arcs
     QPainterPath thickArcsPath;
+
+    QLineSeries *m_real, *m_imag;
+    QVXYModelMapper *m_mapperReal, *m_mapperImag;
 };
 
 #endif // SMITHCHART_H

@@ -2,10 +2,13 @@
 #define VNA_H
 
 #include <QWidget>
+#include <QMainWindow>
+#include <QGridLayout>
 #include "device.h"
 #include "plot.h"
+#include "sparamtable.h"
 
-class VNA : public QWidget
+class VNA : public QMainWindow
 {
     Q_OBJECT
 public:
@@ -21,8 +24,15 @@ private:
     void NewDatapoint(Protocol::Datapoint d);
     Device device;
     Protocol::SweepSettings settings;
-    Plot *plotS12, *plotS21;
-    Plot *plotS11, *plotS22;
+    QList<Plot*> plots;
+    QGridLayout plotLayout;
+    bool fsPlot;
+    int fsRow, fsColumn, fsRowSpan, fsColumnSpan;
+private slots:
+    void ChangeValue(QAction *action);
+private:
+    void SettingsChanged();
+    SParamTable dataTable;
 };
 
 #endif // VNA_H

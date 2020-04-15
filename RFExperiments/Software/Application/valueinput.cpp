@@ -1,10 +1,12 @@
 #include "valueinput.h"
 #include <QGridLayout>
 #include <QKeyEvent>
+#include <QApplication>
+#include <QDesktopWidget>
 
 constexpr QSize ValueInput::minButtonSize;
 
-ValueInput::ValueInput(std::vector<Unit> units, const char *name, QString initialValue)
+ValueInput::ValueInput(std::vector<Unit> units, QString name, QString initialValue)
 {
     auto fontButton = QFont("Arial", 12);
     auto fontLabel = QFont("Arial", 30);
@@ -74,6 +76,7 @@ ValueInput::ValueInput(std::vector<Unit> units, const char *name, QString initia
     }
 
     setLayout(layout);
+    setWindowModality(Qt::ApplicationModal);
     show();
 }
 

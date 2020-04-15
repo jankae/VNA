@@ -19,7 +19,7 @@ public:
         QString name;
         double factor;
     };
-    ValueInput(std::vector<Unit> units, const char *name = "Value input", QString initialValue = QString());
+    ValueInput(std::vector<Unit> units, QString name = "Value input", QString initialValue = QString());
 
 signals:
     void ValueChanged(double value);

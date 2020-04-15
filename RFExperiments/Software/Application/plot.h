@@ -4,8 +4,10 @@
 #include <QWidget>
 #include <QtCharts/QChart>
 #include <QtCharts/QLineSeries>
+#include <QMenu>
 #include "device.h"
 #include "sparam.h"
+#include "sparamtable.h"
 
 QT_CHARTS_USE_NAMESPACE
 
@@ -13,28 +15,47 @@ class Plot : public QWidget
 {
     Q_OBJECT
 public:
-    Plot(QWidget *parent = nullptr) : QWidget(parent) {
-        m_db = new QLineSeries(this);
-        m_phase = new QLineSeries(this);
+    Plot(SParamTable &datatable, QWidget *parent = nullptr) : QWidget(parent) {
+        data = &datatable;
     };
-    virtual void setXAxis(Protocol::SweepSettings s) = 0;
-    virtual void addPoint(int index, double frequency, SParam point) {
-        if(index >= m_db->count()) {
-            m_db->append(frequency, point.db);
-            m_phase->append(frequency, point.phase);
-        } else {
-            m_db->replace(index, frequency, point.db);
-            m_phase->replace(index, frequency, point.phase);
-        }
-    }
-    virtual void clearPoints() {
-        m_db->clear();
-        m_phase->clear();
-    }
-    virtual void setTitle(const QString &title) = 0;
 
+    virtual void setXAxis(Protocol::SweepSettings s){};
+    virtual void setParameter(QString p) = 0;
+    virtual QList<QString> allowedParameters() = 0;
+
+    void contextMenuEvent(QContextMenuEvent *event)
+    {
+        contextmenu.exec(event->globalPos());
+    }
+
+    void mouseDoubleClickEvent(QMouseEvent *event) {
+        emit doubleClicked(this);
+    }
+
+signals:
+    void doubleClicked(QWidget *w);
 protected:
-    QLineSeries *m_db, *m_phase;
+    void createContextMenu(QString &selectedParameter) {
+        if(selectedParameter.isEmpty()) {
+            selectedParameter = allowedParameters()[0];
+        }
+        // Populate context menu
+        auto group = new QActionGroup(this);
+        for(auto p : allowedParameters()) {
+            auto action = new QAction(p);
+            action->setCheckable(true);
+            group->addAction(action);
+            if(!p.compare(selectedParameter)) {
+                action->setChecked(true);
+            }
+            connect(group, &QActionGroup::triggered, [=](QAction *a) {
+                setParameter(a->text());
+            });
+        }
+        contextmenu.addActions(group->actions());
+    }
+    SParamTable *data;
+    QMenu contextmenu;
 };
 
 #endif // PLOT_H

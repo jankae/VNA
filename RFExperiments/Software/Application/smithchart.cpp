@@ -2,38 +2,34 @@
 #include <QPainter>
 #include <array>
 
-SmithChart::SmithChart(QWidget *parent)
-    : Plot(parent)
+SmithChart::SmithChart(SParamTable &datatable, QString parameter, QWidget *parent)
+    : Plot(datatable, parent)
 {
-    // We define pens
     chartLinesPen = QPen(palette().windowText(), 0.75);
     thinPen = QPen(palette().windowText(), 0.25);
     textPen = QPen(palette().windowText(), 0.25);
     pointDataPen = QPen(QColor("red"), 4.0, Qt::SolidLine, Qt::RoundCap);
     lineDataPen = QPen(QColor("blue"), 1.0);
 
-}
+    m_real = new QLineSeries(this);
+    m_imag = new QLineSeries(this);
 
-void SmithChart::setTitle(const QString &title)
-{
+    m_mapperReal = new QVXYModelMapper(this);
+    m_mapperReal->setXColumn(SParamTable::Frequency);
+    m_mapperReal->setSeries(m_real);
+    m_mapperReal->setModel(&datatable);
 
-}
+    m_mapperImag = new QVXYModelMapper(this);
+    m_mapperImag->setXColumn(SParamTable::Frequency);
+    m_mapperImag->setSeries(m_imag);
+    m_mapperImag->setModel(&datatable);
 
-void SmithChart::setXAxis(Protocol::SweepSettings s)
-{
+    createContextMenu(parameter);
+    setParameter(parameter);
 
-}
-
-void SmithChart::addPoint(int index, double frequency, SParam point)
-{
-    Plot::addPoint(index, frequency, point);
-    update();
-}
-
-void SmithChart::clearPoints()
-{
-    Plot::clearPoints();
-    update();
+    connect(m_real, &QLineSeries::pointReplaced, [=](int) {
+        update();
+    });
 }
 
 void SmithChart::draw(QPainter * painter) {
@@ -59,9 +55,9 @@ void SmithChart::draw(QPainter * painter) {
 //    }
 
     painter->setPen(QPen(Qt::red));
-    for(int i=1;i<m_db->count();i++) {
-        auto last = SParam(m_db->at(i-1).y(), m_phase->at(i-1).y()).ReflectionToImpedance();
-        auto now = SParam(m_db->at(i).y(), m_phase->at(i).y()).ReflectionToImpedance();
+    for(int i=1;i<m_real->count();i++) {
+        auto last = std::complex<double>(m_real->at(i-1).y(), m_imag->at(i-1).y());
+        auto now = std::complex<double>(m_real->at(i).y(), m_imag->at(i).y());
         // transform into smith diagramm
         last /= ReferenceImpedance;
         now /= ReferenceImpedance;
@@ -74,6 +70,22 @@ void SmithChart::draw(QPainter * painter) {
         // draw line
         painter->drawLine(real(last), -imag(last), real(now), -imag(now));
     }
+}
+
+void SmithChart::setParameter(QString p)
+{
+    if(p == "S11") {
+        m_mapperReal->setYColumn(SParamTable::S11_ImpedanceReal);
+        m_mapperImag->setYColumn(SParamTable::S11_ImpedanceImag);
+    } else {
+        m_mapperReal->setYColumn(SParamTable::S22_ImpedanceReal);
+        m_mapperImag->setYColumn(SParamTable::S22_ImpedanceImag);
+    }
+}
+
+QList<QString> SmithChart::allowedParameters()
+{
+    return QList<QString>() << "S11" << "S22";
 }
 
 void SmithChart::paintEvent(QPaintEvent * /* the event */)
