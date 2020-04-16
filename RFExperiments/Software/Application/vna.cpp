@@ -10,6 +10,7 @@
 #include <QMenu>
 #include <QToolButton>
 #include "valueinput.h"
+#include <QSpinBox>
 
 constexpr Protocol::SweepSettings VNA::defaultSweep;
 
@@ -66,6 +67,28 @@ VNA::VNA(QWidget *parent)
     tbSweep->addAction(aStop);
     tbSweep->addAction(aSweep);
     tbSweep->addSeparator();
+    auto sbPoints = new QSpinBox(this);
+    sbPoints->setRange(11, 1001);
+    sbPoints->setValue(settings.points);
+    connect(sbPoints, QOverload<int>::of(&QSpinBox::valueChanged), [=](int i){
+        settings.points = i;
+        SettingsChanged();
+    });
+    tbSweep->addWidget(sbPoints);
+    tbSweep->addWidget(new QLabel("Points"));
+    tbSweep->addSeparator();
+
+    auto sbAvg = new QSpinBox(this);
+    sbAvg->setRange(1024, 32768);
+    sbAvg->setSingleStep(1024);
+    sbAvg->setValue(settings.averaging);
+    connect(sbAvg, QOverload<int>::of(&QSpinBox::valueChanged), [=](int i){
+        settings.averaging = i;
+        SettingsChanged();
+    });
+    tbSweep->addWidget(sbAvg);
+    tbSweep->addWidget(new QLabel("Averaging"));
+    tbSweep->addSeparator();
 
     connect(tbSweep, &QToolBar::actionTriggered, this, &VNA::ChangeValue);
 
@@ -79,7 +102,7 @@ VNA::VNA(QWidget *parent)
 
 void VNA::NewDatapoint(Protocol::Datapoint d)
 {
-    dataTable.addVNAResult(d);
+    pointBuffer.push_back(d);
 }
 
 void VNA::ChangeValue(QAction *action)
