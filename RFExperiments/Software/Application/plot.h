@@ -34,6 +34,9 @@ public:
 
 signals:
     void doubleClicked(QWidget *w);
+
+public slots:
+    virtual void dataChanged(){};
 protected:
     void createContextMenu(QString &selectedParameter) {
         if(selectedParameter.isEmpty()) {

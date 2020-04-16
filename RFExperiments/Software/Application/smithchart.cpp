@@ -3,7 +3,8 @@
 #include <array>
 
 SmithChart::SmithChart(SParamTable &datatable, QString parameter, QWidget *parent)
-    : Plot(datatable, parent)
+    : Plot(datatable, parent),
+      table(datatable)
 {
     chartLinesPen = QPen(palette().windowText(), 0.75);
     thinPen = QPen(palette().windowText(), 0.25);
@@ -11,25 +12,9 @@ SmithChart::SmithChart(SParamTable &datatable, QString parameter, QWidget *paren
     pointDataPen = QPen(QColor("red"), 4.0, Qt::SolidLine, Qt::RoundCap);
     lineDataPen = QPen(QColor("blue"), 1.0);
 
-    m_real = new QLineSeries(this);
-    m_imag = new QLineSeries(this);
-
-    m_mapperReal = new QVXYModelMapper(this);
-    m_mapperReal->setXColumn(SParamTable::Frequency);
-    m_mapperReal->setSeries(m_real);
-    m_mapperReal->setModel(&datatable);
-
-    m_mapperImag = new QVXYModelMapper(this);
-    m_mapperImag->setXColumn(SParamTable::Frequency);
-    m_mapperImag->setSeries(m_imag);
-    m_mapperImag->setModel(&datatable);
-
+    nPoints = 0;
     createContextMenu(parameter);
     setParameter(parameter);
-
-    connect(m_real, &QLineSeries::pointReplaced, [=](int) {
-        update();
-    });
 }
 
 void SmithChart::draw(QPainter * painter) {
@@ -55,9 +40,9 @@ void SmithChart::draw(QPainter * painter) {
 //    }
 
     painter->setPen(QPen(Qt::red));
-    for(int i=1;i<m_real->count();i++) {
-        auto last = std::complex<double>(m_real->at(i-1).y(), m_imag->at(i-1).y());
-        auto now = std::complex<double>(m_real->at(i).y(), m_imag->at(i).y());
+    for(int i=1;i<nPoints;i++) {
+        auto last = std::complex<double>(real[i-1], imag[i-1]);
+        auto now = std::complex<double>(real[i], imag[i]);
         // transform into smith diagramm
         last /= ReferenceImpedance;
         now /= ReferenceImpedance;
@@ -68,24 +53,29 @@ void SmithChart::draw(QPainter * painter) {
         last *= 512;
         now *= 512;
         // draw line
-        painter->drawLine(real(last), -imag(last), real(now), -imag(now));
+        painter->drawLine(std::real(last), -std::imag(last), std::real(now), -std::imag(now));
     }
 }
 
 void SmithChart::setParameter(QString p)
 {
     if(p == "S11") {
-        m_mapperReal->setYColumn(SParamTable::S11_ImpedanceReal);
-        m_mapperImag->setYColumn(SParamTable::S11_ImpedanceImag);
+        real = table.ParamArray(SParamTable::S11_ImpedanceReal);
+        imag = table.ParamArray(SParamTable::S11_ImpedanceImag);
     } else {
-        m_mapperReal->setYColumn(SParamTable::S22_ImpedanceReal);
-        m_mapperImag->setYColumn(SParamTable::S22_ImpedanceImag);
+        real = table.ParamArray(SParamTable::S22_ImpedanceReal);
+        imag = table.ParamArray(SParamTable::S22_ImpedanceImag);
     }
 }
 
 QList<QString> SmithChart::allowedParameters()
 {
     return QList<QString>() << "S11" << "S22";
+}
+
+void SmithChart::setXAxis(Protocol::SweepSettings s)
+{
+    nPoints = s.points;
 }
 
 void SmithChart::paintEvent(QPaintEvent * /* the event */)

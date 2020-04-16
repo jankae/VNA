@@ -1,56 +1,52 @@
 #include "sparamtable.h"
+#include <math.h>
+#include <sparam.h>
 
-SParamTable::SParamTable(QObject *parent) :
-    QAbstractTableModel(parent)
+SParamTable::SParamTable(int maxPoints)
+    : maxPoints(maxPoints)
 {
-    m_rowcount = 0;
-}
-
-int SParamTable::rowCount(const QModelIndex &parent) const
-{
-    return m_rowcount;
-}
-
-int SParamTable::columnCount(const QModelIndex &parent) const
-{
-    return column_count;
-}
-
-QVariant SParamTable::data(const QModelIndex &index, int role) const
-{
-    if (role == Qt::DisplayRole) {
-        return m_data[index.row()][index.column()];
+    // allocate arrays
+    for(int i=0;i<NumParams;i++) {
+        params.push_back(new double[maxPoints]);
     }
-    return QVariant();
 }
 
 void SParamTable::addVNAResult(Protocol::Datapoint d)
 {
-    Entry p;
-    p.frequency = d.frequency;
-    p.S11 = SParam(10.0 * log10(d.S11Mag), d.S11Phase * 180.0 / M_PI);
-    p.S12 = SParam(10.0 * log10(d.S12Mag), d.S12Phase * 180.0 / M_PI);
-    p.S21 = SParam(10.0 * log10(d.S21Mag), d.S21Phase * 180.0 / M_PI);
-    p.S22 = SParam(10.0 * log10(d.S22Mag), d.S22Phase * 180.0 / M_PI);
-    p.ImpedanceS11 = p.S11.ReflectionToImpedance();
-    p.ImpedanceS22 = p.S22.ReflectionToImpedance();
-    if(d.pointNum == m_rowcount) {
-        // this point needs a new row
-        beginInsertRows(QModelIndex(), d.pointNum, d.pointNum);
-        m_data.append(p);
-        m_rowcount++;
-        endInsertRows();
-    } else if(d.pointNum < m_rowcount) {
-        // can simply replace the point
-        m_data[d.pointNum] = p;
-        emit dataChanged(createIndex(d.pointNum, 0), createIndex(d.pointNum, column_count - 1));
+    if(d.pointNum >= maxPoints) {
+        return;
     }
+    auto S11 = SParam(10.0 * log10(d.S11Mag), d.S11Phase * 180.0 / M_PI);
+    auto S12 = SParam(10.0 * log10(d.S12Mag), d.S12Phase * 180.0 / M_PI);
+    auto S21 = SParam(10.0 * log10(d.S21Mag), d.S21Phase * 180.0 / M_PI);
+    auto S22 = SParam(10.0 * log10(d.S22Mag), d.S22Phase * 180.0 / M_PI);
+    params[Frequency][d.pointNum] = d.frequency;
+    params[S11_db][d.pointNum] = S11.db;
+    params[S11_phase][d.pointNum] = S11.phase;
+    params[S12_db][d.pointNum] = S12.db;
+    params[S12_phase][d.pointNum] = S12.phase;
+    params[S21_db][d.pointNum] = S21.db;
+    params[S21_phase][d.pointNum] = S21.phase;
+    params[S22_db][d.pointNum] = S22.db;
+    params[S22_phase][d.pointNum] = S22.phase;
+    auto ImpedanceS11 = S11.ReflectionToImpedance();
+    auto ImpedanceS22 = S22.ReflectionToImpedance();
+    params[S11_ImpedanceReal][d.pointNum] = ImpedanceS11.real();
+    params[S11_ImpedanceImag][d.pointNum] = ImpedanceS11.imag();
+    params[S22_ImpedanceReal][d.pointNum] = ImpedanceS22.real();
+    params[S22_ImpedanceImag][d.pointNum] = ImpedanceS22.imag();
 }
 
 void SParamTable::clearResults()
 {
-    beginRemoveRows(QModelIndex(), 0, m_rowcount - 1);
-    m_data.clear();
-    m_rowcount = 0;
-    endRemoveRows();
+    // TODO set to Nan?
+}
+
+double *SParamTable::ParamArray(int parameter)
+{
+    if(parameter < NumParams) {
+        return params[parameter];
+    } else {
+        throw std::runtime_error("Invalid parameter requested");
+    }
 }

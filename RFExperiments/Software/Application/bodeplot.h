@@ -2,16 +2,8 @@
 #define BODEPLOT_H
 
 #include "plot.h"
-#include <QtCharts/QChart>
-#include <QtCharts/QChartView>
-#include <QVXYModelMapper>
-
-QT_CHARTS_BEGIN_NAMESPACE
-class QLineSeries;
-class QValueAxis;
-QT_CHARTS_END_NAMESPACE
-
-QT_CHARTS_USE_NAMESPACE
+#include <qwt_plot_curve.h>
+#include <qwt_plot.h>
 
 class BodePlot : public Plot
 {
@@ -22,12 +14,15 @@ public:
     void setXAxis(Protocol::SweepSettings s);
     virtual void setParameter(QString p);
     virtual QList<QString> allowedParameters();
+public slots:
+    void dataChanged() override;
 private:
-    QChart *m_chart;
-    QValueAxis *m_axisX;
-    QValueAxis *m_axisY, *m_axisY2;
-    QLineSeries *m_series1, *m_series2;
-    QVXYModelMapper *m_mapper1, *m_mapper2;
+    int nPoints;
+    double *xparam, *param1, *param2;
+    SParamTable &table;
+    QwtPlotCurve *curve1;
+    QwtPlotCurve *curve2;
+    QwtPlot *plot;
 };
 
 #endif // BODEPLOT_H

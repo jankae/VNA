@@ -3,7 +3,7 @@
 
 #include "plot.h"
 #include <QPen>
-#include <QVXYModelMapper>
+#include "sparamtable.h"
 
 class SmithChart : public Plot
 {
@@ -13,6 +13,11 @@ public:
 
     virtual void setParameter(QString p);
     virtual QList<QString> allowedParameters();
+    virtual void setXAxis(Protocol::SweepSettings s);
+public slots:
+    void dataChanged() override {
+        update();
+    }
 protected:
     void paintEvent(QPaintEvent *event);
 
@@ -30,8 +35,10 @@ private:
     /// Path for the thick arcs
     QPainterPath thickArcsPath;
 
-    QLineSeries *m_real, *m_imag;
-    QVXYModelMapper *m_mapperReal, *m_mapperImag;
+    SParamTable &table;
+    int nPoints;
+    double *real;
+    double *imag;
 };
 
 #endif // SMITHCHART_H

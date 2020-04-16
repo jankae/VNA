@@ -15,7 +15,8 @@
 constexpr Protocol::SweepSettings VNA::defaultSweep;
 
 VNA::VNA(QWidget *parent)
-    : QMainWindow(parent)
+    : QMainWindow(parent),
+      dataTable(10001)
 {
     settings = defaultSweep;
     device.Configure(settings);
@@ -51,6 +52,7 @@ VNA::VNA(QWidget *parent)
                 fsPlot = false;
             }
         });
+        connect(this, &VNA::dataChanged, p, &Plot::dataChanged, Qt::QueuedConnection);
     }
 
     auto tbSweep = addToolBar("Sweep");
@@ -68,7 +70,7 @@ VNA::VNA(QWidget *parent)
     tbSweep->addAction(aSweep);
     tbSweep->addSeparator();
     auto sbPoints = new QSpinBox(this);
-    sbPoints->setRange(11, 1001);
+    sbPoints->setRange(11, 10001);
     sbPoints->setValue(settings.points);
     connect(sbPoints, QOverload<int>::of(&QSpinBox::valueChanged), [=](int i){
         settings.points = i;
@@ -79,8 +81,8 @@ VNA::VNA(QWidget *parent)
     tbSweep->addSeparator();
 
     auto sbAvg = new QSpinBox(this);
-    sbAvg->setRange(1024, 32768);
-    sbAvg->setSingleStep(1024);
+    sbAvg->setRange(128, 32768);
+    sbAvg->setSingleStep(128);
     sbAvg->setValue(settings.averaging);
     connect(sbAvg, QOverload<int>::of(&QSpinBox::valueChanged), [=](int i){
         settings.averaging = i;
@@ -102,7 +104,8 @@ VNA::VNA(QWidget *parent)
 
 void VNA::NewDatapoint(Protocol::Datapoint d)
 {
-    pointBuffer.push_back(d);
+    dataTable.addVNAResult(d);
+    emit dataChanged();
 }
 
 void VNA::ChangeValue(QAction *action)

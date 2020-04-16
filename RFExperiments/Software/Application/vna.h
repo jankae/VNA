@@ -18,7 +18,7 @@ private:
         .f_start = 1000000,
         .f_stop = 6000000000,
         .points = 101,
-        .averaging = 32768,
+        .averaging = 1024,
         .mdbm_excitation = 0,
     };
     void NewDatapoint(Protocol::Datapoint d);
@@ -33,6 +33,8 @@ private slots:
 private:
     void SettingsChanged();
     SParamTable dataTable;
+signals:
+    void dataChanged();
 };
 
 #endif // VNA_H
