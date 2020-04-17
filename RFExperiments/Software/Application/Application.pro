@@ -1,6 +1,7 @@
 HEADERS += \
     ../RFExperiments/Application/Communication/Protocol.hpp \
     bodeplot.h \
+    calibration.h \
     device.h \
     plot.h \
     smithchart.h \
@@ -12,6 +13,7 @@ HEADERS += \
 SOURCES += \
     ../RFExperiments/Application/Communication/Protocol.cpp \
     bodeplot.cpp \
+    calibration.cpp \
     device.cpp \
     main.cpp \
     smithchart.cpp \
