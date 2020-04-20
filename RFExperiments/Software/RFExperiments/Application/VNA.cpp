@@ -90,7 +90,7 @@ static void SamplingCallback(Sampling::Result res) {
 	if (activePort == 1) {
 		activePort = 2;
 		ExcitatePort2();
-		Delay::ms(1);
+//		Delay::ms(1);
 		Sampling::Start(SamplingCallback, samples);
 		result.S11Mag = Mag1;
 		result.S11Phase = Phase1;
@@ -122,7 +122,7 @@ bool VNA::Measure(uint64_t f, Callback cb, uint16_t nsamples) {
 	LO1.Update();
 	ExcitatePort1();
 	activePort = 1;
-	Delay::ms(1);
+//	Delay::ms(1);
 	samples = nsamples;
 	Sampling::Start(SamplingCallback, samples);
 	return true;
