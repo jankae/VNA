@@ -59,7 +59,7 @@ BodePlot::BodePlot(SParamTable &datatable, QString parameter, QWidget *parent):
     createContextMenu(parameter);
 
     nPoints = 0;
-    plot = new QwtPlot;
+    plot = new QwtPlot(this);
     plot->enableAxis(QwtPlot::yRight);
     plot->setCanvasBackground(Qt::white);
     auto pal = plot->palette();
@@ -82,6 +82,7 @@ BodePlot::BodePlot(SParamTable &datatable, QString parameter, QWidget *parent):
     layout->addWidget(plot);
     layout->setContentsMargins(0, 0, 0, 0);
     setLayout(layout);
+    plot->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 }
 
 

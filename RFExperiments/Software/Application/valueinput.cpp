@@ -12,6 +12,8 @@ ValueInput::ValueInput(std::vector<Unit> units, QString name, QString initialVal
     auto fontLabel = QFont("Arial", 30);
 
     input = initialValue;
+    // always use dots instead of comma
+    input.replace(',', '.');
     this->units = units;
     setWindowTitle(name);
 
@@ -21,7 +23,7 @@ ValueInput::ValueInput(std::vector<Unit> units, QString name, QString initialVal
     // Add Label
     label = new QLabel();
     layout->addWidget(label, 0, 0, 2, 4);
-    label->setText(initialValue);
+    label->setText(input);
     label->setAlignment(Qt::AlignCenter);
     label->setFont(fontLabel);
 
@@ -40,6 +42,9 @@ ValueInput::ValueInput(std::vector<Unit> units, QString name, QString initialVal
     bDot = new QPushButton(".");
     bDot->setFont(fontButton);
     bDot->setMinimumSize(minButtonSize);
+    if(input.contains('.')) {
+        bDot->setDisabled(true);
+    }
     layout->addWidget(bDot, 5, 0);
     connect(bDot, &QPushButton::clicked, [=]() {this->AddToInput(".");});
     auto bZero = new QPushButton("0");

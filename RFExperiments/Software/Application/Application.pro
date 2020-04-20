@@ -1,5 +1,9 @@
 HEADERS += \
     ../RFExperiments/Application/Communication/Protocol.hpp \
+    Menu/menu.h \
+    Menu/menuaction.h \
+    Menu/menuitem.h \
+    Menu/menuvalue.h \
     bodeplot.h \
     calibration.h \
     device.h \
@@ -12,6 +16,10 @@ HEADERS += \
 
 SOURCES += \
     ../RFExperiments/Application/Communication/Protocol.cpp \
+    Menu/menu.cpp \
+    Menu/menuitem.cpp \
+    Menu/menulabel.cpp \
+    Menu/menuvalue.cpp \
     bodeplot.cpp \
     calibration.cpp \
     device.cpp \

@@ -1,8 +1,10 @@
 <RCC>
-    <qresource prefix="/icons">
-        <file>center.png</file>
-        <file>span.png</file>
-        <file>start.png</file>
-        <file>stop.png</file>
+    <qresource prefix="/icons"/>
+    <qresource prefix="/">
+        <file>icons/center.png</file>
+        <file>icons/plus.svg</file>
+        <file>icons/span.png</file>
+        <file>icons/start.png</file>
+        <file>icons/stop.png</file>
     </qresource>
 </RCC>

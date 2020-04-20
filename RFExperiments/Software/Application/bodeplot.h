@@ -10,10 +10,14 @@ class BodePlot : public Plot
     Q_OBJECT
 public:
     BodePlot(SParamTable &datatable, QString parameter = "S21", QWidget *parent = 0);
-
-    void setXAxis(Protocol::SweepSettings s);
-    virtual void setParameter(QString p);
-    virtual QList<QString> allowedParameters();
+    ~BodePlot() {
+        delete curve1;
+        delete curve2;
+        delete plot;
+    }
+    void setXAxis(Protocol::SweepSettings s) override;
+    virtual void setParameter(QString p) override;
+    virtual QList<QString> allowedParameters() override;
 public slots:
     void dataChanged() override;
 private:

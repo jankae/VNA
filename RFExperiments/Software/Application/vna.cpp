@@ -11,6 +11,11 @@
 #include <QToolButton>
 #include "valueinput.h"
 #include <QSpinBox>
+#include <algorithm>
+#include "Menu/menu.h"
+#include "Menu/menuaction.h"
+#include "Menu/menuvalue.h"
+
 
 constexpr Protocol::SweepSettings VNA::defaultSweep;
 
@@ -30,6 +35,18 @@ VNA::VNA(QWidget *parent)
 
     // no plot is in fullscreen mode
     fsPlot = false;
+
+    auto button = new QPushButton(QIcon(":/icons/plus.svg"), "Add plot");
+    plotLayout.addWidget(button, 0, 0, Qt::AlignCenter);
+    plotLayout.addWidget(new QPushButton("Dummy"), 0, 1, Qt::AlignCenter);
+    plotLayout.addWidget(new QPushButton("Dummy"), 1, 0, Qt::AlignCenter);
+    plotLayout.addWidget(new QPushButton("Dummy"), 1, 1, Qt::AlignCenter);
+    for(int i=0;i<plotLayout.columnCount();i++) {
+        plotLayout.setColumnStretch(i, 1);
+    }
+    for(int i=0;i<plotLayout.rowCount();i++) {
+        plotLayout.setRowStretch(i, 1);
+    }
 
     plotLayout.addWidget(plots[0], 0, 0);
     plotLayout.addWidget(plots[1], 0, 1);
@@ -53,49 +70,106 @@ VNA::VNA(QWidget *parent)
             }
         });
         connect(this, &VNA::dataChanged, p, &Plot::dataChanged, Qt::QueuedConnection);
+        connect(p, &Plot::deleteRequest, [=](Plot *p) {
+            auto it = std::find(plots.begin(), plots.end(), p);
+            if(it != plots.end()) {
+                plots.erase(it);
+                delete p;
+            }
+        });
     }
 
-    auto tbSweep = addToolBar("Sweep");
-    addToolBar(Qt::RightToolBarArea, tbSweep);
-    tbSweep->setIconSize(QSize(64, 64));
-    tbSweep->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    auto aStart = new QAction(QPixmap(":/icons/start.png"), "Start", this);
-    auto aCenter = new QAction(QPixmap(":/icons/center.png"), "Center", this);
-    auto aStop = new QAction(QPixmap(":/icons/stop.png"), "Stop", this);
-    auto aSweep = new QAction(QPixmap(":/icons/span.png"), "Span", this);
-    tbSweep->addSeparator();
-    tbSweep->addAction(aCenter);
-    tbSweep->addAction(aStart);
-    tbSweep->addAction(aStop);
-    tbSweep->addAction(aSweep);
-    tbSweep->addSeparator();
-    auto sbPoints = new QSpinBox(this);
-    sbPoints->setRange(11, 10001);
-    sbPoints->setValue(settings.points);
-    connect(sbPoints, QOverload<int>::of(&QSpinBox::valueChanged), [=](int i){
-        settings.points = i;
+    auto menuLayout = new QStackedLayout;
+    auto mMain = new Menu(*menuLayout);
+    auto mFrequency = new Menu(*menuLayout);
+    auto mCenter = new MenuValue("Center Frequency", (settings.f_start + settings.f_stop)/2, "Hz");
+
+    mFrequency->addItem(mCenter);
+    auto mStart = new MenuValue("Start Frequency", settings.f_start, "Hz");
+    mFrequency->addItem(mStart);
+    auto mStop = new MenuValue("Stop Frequency", settings.f_stop, "Hz");
+    mFrequency->addItem(mStop);
+    mFrequency->finalize();
+    mMain->addMenu(mFrequency, "Frequency");
+    auto mSpan = new Menu(*menuLayout);
+    auto mSpanWidth = new MenuValue("Span", settings.f_stop - settings.f_start, "Hz");
+    mSpan->addItem(mSpanWidth);
+    auto mSpanZoomIn = new MenuAction("Zoom in");
+    mSpan->addItem(mSpanZoomIn);
+    auto mSpanZoomOut = new MenuAction("Zoom out");
+    mSpan->addItem(mSpanZoomOut);
+    auto mSpanFull = new MenuAction("Full span");
+    mSpan->addItem(mSpanFull);
+    mSpan->finalize();
+    mMain->addMenu(mSpan, "Span");
+    mMain->finalize();
+
+    auto updateMenuValues = [=]() {
+        mStart->setValueQuiet(settings.f_start);
+        mStop->setValueQuiet(settings.f_stop);
+        mSpanWidth->setValueQuiet(settings.f_stop - settings.f_start);
+        mCenter->setValueQuiet((settings.f_stop + settings.f_start)/2);
+    };
+
+    // Frequency and span connections
+    connect(mCenter, &MenuValue::valueChanged, [=](double newval){
+        auto old_span = settings.f_stop - settings.f_start;
+        settings.f_start = newval - old_span / 2;
+        settings.f_stop = newval + old_span / 2;
+        updateMenuValues();
         SettingsChanged();
     });
-    tbSweep->addWidget(sbPoints);
-    tbSweep->addWidget(new QLabel("Points"));
-    tbSweep->addSeparator();
-
-    auto sbAvg = new QSpinBox(this);
-    sbAvg->setRange(128, 32768);
-    sbAvg->setSingleStep(128);
-    sbAvg->setValue(settings.averaging);
-    connect(sbAvg, QOverload<int>::of(&QSpinBox::valueChanged), [=](int i){
-        settings.averaging = i;
+    connect(mStart, &MenuValue::valueChanged, [=](double newval){
+        settings.f_start = newval;
+        if(settings.f_stop < newval) {
+            settings.f_stop = newval;
+        }
+        updateMenuValues();
         SettingsChanged();
     });
-    tbSweep->addWidget(sbAvg);
-    tbSweep->addWidget(new QLabel("Averaging"));
-    tbSweep->addSeparator();
-
-    connect(tbSweep, &QToolBar::actionTriggered, this, &VNA::ChangeValue);
+    connect(mStop, &MenuValue::valueChanged, [=](double newval){
+        settings.f_stop = newval;
+        if(settings.f_start > newval) {
+            settings.f_start = newval;
+        }
+        updateMenuValues();
+        SettingsChanged();
+    });
+    connect(mSpanWidth, &MenuValue::valueChanged, [=](double newval){
+        auto old_center = (settings.f_start + settings.f_stop) / 2;
+        settings.f_start = old_center - newval / 2;
+        settings.f_stop = old_center + newval / 2;
+        updateMenuValues();
+        SettingsChanged();
+    });
+    connect(mSpanZoomIn, &MenuAction::triggered, [=](){
+        auto center = (settings.f_start + settings.f_stop) / 2;
+        auto old_span = settings.f_stop - settings.f_start;
+        settings.f_start = center - old_span / 4;
+        settings.f_stop = center + old_span / 4;
+        updateMenuValues();
+        SettingsChanged();
+    });
+    connect(mSpanZoomOut, &MenuAction::triggered, [=](){
+        auto center = (settings.f_start + settings.f_stop) / 2;
+        auto old_span = settings.f_stop - settings.f_start;
+        settings.f_start = center - old_span;
+        settings.f_stop = center + old_span;
+        updateMenuValues();
+        SettingsChanged();
+    });
+    connect(mSpanFull, &MenuAction::triggered, [=](){
+        settings.f_start = 0;
+        settings.f_stop = 6000000000;
+        updateMenuValues();
+        SettingsChanged();
+    });
 
     auto central = new QWidget;
-    central->setLayout(&plotLayout);
+    auto mainLayout = new QHBoxLayout;
+    central->setLayout(mainLayout);
+    mainLayout->addLayout(&plotLayout);
+    mainLayout->addLayout(menuLayout);
     setCentralWidget(central);
     //setLayout(mainLayout);
     device.SetCallback(callback);
@@ -106,47 +180,6 @@ void VNA::NewDatapoint(Protocol::Datapoint d)
 {
     dataTable.addVNAResult(d);
     emit dataChanged();
-}
-
-void VNA::ChangeValue(QAction *action)
-{
-    std::vector<ValueInput::Unit> u;
-    u.push_back(ValueInput::Unit("Hz", 1.0));
-    u.push_back(ValueInput::Unit("kHz", 1000.0));
-    u.push_back(ValueInput::Unit("MHz", 1000000.0));
-    u.push_back(ValueInput::Unit("GHz", 1000000000.0));
-    auto dialog = new ValueInput(u, action->text());
-    if(action->text() == "Start") {
-        connect(dialog, &ValueInput::ValueChanged, [=](double newval) {
-            settings.f_start = newval;
-            if(settings.f_stop < newval) {
-                settings.f_stop = newval;
-            }
-            SettingsChanged();
-        });
-    } else if(action->text() == "Stop") {
-        connect(dialog, &ValueInput::ValueChanged, [=](double newval) {
-            settings.f_stop = newval;
-            if(settings.f_start > newval) {
-                settings.f_start = newval;
-            }
-            SettingsChanged();
-        });
-    } else if(action->text() == "Center") {
-        connect(dialog, &ValueInput::ValueChanged, [=](double newval) {
-            auto old_span = settings.f_stop - settings.f_start;
-            settings.f_start = newval - old_span / 2;
-            settings.f_stop = newval + old_span / 2;
-            SettingsChanged();
-        });
-    } else if(action->text() == "Span") {
-        connect(dialog, &ValueInput::ValueChanged, [=](double newval) {
-            auto old_center = (settings.f_start + settings.f_stop) / 2;
-            settings.f_start = old_center - newval / 2;
-            settings.f_stop = old_center + newval / 2;
-            SettingsChanged();
-        });
-    }
 }
 
 void VNA::SettingsChanged()

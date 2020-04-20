@@ -34,6 +34,7 @@ public:
 
 signals:
     void doubleClicked(QWidget *w);
+    void deleteRequest(Plot *p);
 
 public slots:
     virtual void dataChanged(){};
@@ -42,6 +43,7 @@ protected:
         if(selectedParameter.isEmpty()) {
             selectedParameter = allowedParameters()[0];
         }
+        contextmenu.addSection("Parameter");
         // Populate context menu
         auto group = new QActionGroup(this);
         for(auto p : allowedParameters()) {
@@ -56,6 +58,12 @@ protected:
             });
         }
         contextmenu.addActions(group->actions());
+        contextmenu.addSeparator();
+        auto close = new QAction("Close");
+        contextmenu.addAction(close);
+        connect(close, &QAction::triggered, [=]() {
+            emit deleteRequest(this);
+        });
     }
     SParamTable *data;
     QMenu contextmenu;

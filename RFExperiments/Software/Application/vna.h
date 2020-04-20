@@ -28,8 +28,6 @@ private:
     QGridLayout plotLayout;
     bool fsPlot;
     int fsRow, fsColumn, fsRowSpan, fsColumnSpan;
-private slots:
-    void ChangeValue(QAction *action);
 private:
     void SettingsChanged();
     SParamTable dataTable;

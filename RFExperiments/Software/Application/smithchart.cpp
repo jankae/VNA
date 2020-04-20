@@ -85,7 +85,7 @@ void SmithChart::paintEvent(QPaintEvent * /* the event */)
     painter.setBackground(QBrush(QColor(255, 255, 255)));
     painter.fillRect(0, 0, width(), height(), QBrush(QColor(255, 255, 255)));
 
-    int side = qMin(width(), height());
+    int side = qMin(width(), height()) * 0.8;
 
     painter.setViewport((width()-side)/2, (height()-side)/2, side, side);
     painter.setWindow(-512, -512, 1024, 1024);
