@@ -11,7 +11,7 @@ Menu::Menu(QStackedLayout &layout)
     m_layout = new QVBoxLayout;
     setLayout(m_layout);
     m_widgetCount = 0;
-    setMinimumSize(180, 600);
+    setFixedSize(180, 800);
     parent = nullptr;
     layout.addWidget(this);
 }

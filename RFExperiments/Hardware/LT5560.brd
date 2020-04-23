@@ -2876,7 +2876,7 @@ design rules under a new name.</description>
 <attribute name="NAME" x="25.665" y="23.735" size="0.8128" layer="25" font="vector"/>
 <attribute name="VALUE" x="28.465" y="21.895" size="1.27" layer="27"/>
 </element>
-<element name="C12" library="resistor" package="C0603" value="DNP" x="25.4" y="18" smashed="yes">
+<element name="C12" library="resistor" package="C0603" value="100n" x="25.4" y="18" smashed="yes">
 <attribute name="NAME" x="24.965" y="21.135" size="0.8128" layer="25" font="vector"/>
 <attribute name="VALUE" x="24.765" y="16.095" size="1.27" layer="27"/>
 </element>

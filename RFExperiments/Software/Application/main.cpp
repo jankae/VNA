@@ -12,7 +12,7 @@
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
     VNA vna;
-    vna.resize(1000, 700);
+    vna.resize(1280, 800);
     vna.show();
 
 //    QStackedLayout menuLayout;

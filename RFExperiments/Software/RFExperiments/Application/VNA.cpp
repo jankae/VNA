@@ -6,7 +6,7 @@
 #include "Sampling.hpp"
 #include "delay.hpp"
 
-#define LOG_LEVEL	LOG_LEVEL_WARN
+#define LOG_LEVEL	LOG_LEVEL_INFO
 #define LOG_MODULE	"VNA"
 #include "Log.h"
 
@@ -17,9 +17,9 @@ static Si5351C Si5351 = Si5351C(&hi2c1, 26000000);
 static MAX2871 Source = MAX2871(&hspi1, PLL1_CE_GPIO_Port, PLL1_CE_Pin,
 		PLL1_LE_GPIO_Port, PLL1_LE_Pin, PLL1_RF_GPIO_Port, PLL1_RF_Pin,
 		PLL1_LD_GPIO_Port, PLL1_LD_Pin);
-static MAX2871 LO1 = MAX2871(&hspi1, PLL1_CE_GPIO_Port, PLL1_CE_Pin,
-		PLL1_LE_GPIO_Port, PLL1_LE_Pin, PLL1_RF_GPIO_Port, PLL1_RF_Pin,
-		PLL1_LD_GPIO_Port, PLL1_LD_Pin);
+static MAX2871 LO1 = MAX2871(&hspi1, PLL2_CE_GPIO_Port, PLL2_CE_Pin,
+		PLL2_LE_GPIO_Port, PLL2_LE_Pin, PLL2_RF_GPIO_Port, PLL2_RF_Pin,
+		PLL2_LD_GPIO_Port, PLL2_LD_Pin);
 
 static constexpr uint32_t IF1 = 50000000;
 static constexpr uint32_t IF2 = 250000;
@@ -35,8 +35,8 @@ static void ExcitatePort2() {
 
 bool VNA::Init() {
 	Si5351.Init();
-	Source.Init();
-	LO1.Init();
+	Source.Init(100000000, false, 1, false);
+//	LO1.Init(100000000, false, 1, false);
 
 	// Use Si5351 to generate referene frequencies for other PLLs and ADC
 	Si5351.SetPLL(Si5351C::PLL::A, 900000000, Si5351C::PLLSource::XTAL);
@@ -55,11 +55,38 @@ bool VNA::Init() {
 	Si5351.SetCLK(4, IF1 - IF2, Si5351C::PLL::A);
 	Si5351.Enable(4);
 
-	// Configure the reference of both MAX2871
-	Source.SetReference(100000000, false, 1, false);
+	Si5351.Locked(Si5351C::PLL::A);
+
+	Source.SetFrequency(1000000000);
+	Source.ChipEnable(true);
 	Source.Update();
-	LO1.SetReference(100000000, false, 1, false);
-	LO1.Update();
+	Source.BuildVCOMap();
+	HAL_Delay(10);
+	if (!Source.Locked()) {
+		LOG_WARN("Source PLL not locked");
+	}
+	Source.RFEnable(true);
+
+	// Sweep test
+	constexpr uint64_t start = 100000000;
+	constexpr uint64_t stop = 3200000000;
+	constexpr uint16_t steps = 1001;
+	constexpr uint64_t step = (stop - start) / (steps - 1);
+	uint32_t starttime = HAL_GetTick();
+	uint32_t waittime = 0, calctime = 0, comtime = 0;
+	for (uint64_t f = start; f <= stop; f += step) {
+		uint32_t calcstart = HAL_GetTick();
+		Source.SetFrequency(f);
+		calctime += HAL_GetTick() - calcstart;
+		uint32_t comstart = HAL_GetTick();
+		Source.UpdateFrequency();
+		comtime += HAL_GetTick() - comstart;
+		uint32_t waitstart = HAL_GetTick();
+		while(!Source.Locked());
+		waittime += HAL_GetTick() - waitstart;
+	}
+	uint32_t duration = HAL_GetTick() - starttime;
+	LOG_INFO("Sweeped %u points in %lums, (calc/com/wait: %lu/%lu/%lu)", steps, duration, calctime, comtime, waittime);
 
 	LOG_INFO("Initialized");
 	return true;

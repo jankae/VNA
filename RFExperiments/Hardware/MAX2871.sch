@@ -7868,15 +7868,15 @@ Source: www.kingbright.com</description>
 <parts>
 <part name="IC2" library="rf" deviceset="MAX2871" device="" package3d_urn="urn:adsk.eagle:package:11260353/1"/>
 <part name="GND2" library="supply1" deviceset="GND" device=""/>
-<part name="R1" library="resistor" deviceset="R-EU_" device="R0603" value="1k"/>
-<part name="R2" library="resistor" deviceset="R-EU_" device="R0603" value="100"/>
-<part name="R3" library="resistor" deviceset="R-EU_" device="R0603" value="120"/>
+<part name="R1" library="resistor" deviceset="R-EU_" device="R0603" value="1k8"/>
+<part name="R2" library="resistor" deviceset="R-EU_" device="R0603" value="82"/>
+<part name="R3" library="resistor" deviceset="R-EU_" device="R0603" value="330"/>
 <part name="C1" library="rcl" deviceset="C-EU" device="C0603" value="1u"/>
 <part name="C2" library="rcl" deviceset="C-EU" device="C0603" value="1u"/>
 <part name="C3" library="rcl" deviceset="C-EU" device="C0603" value="1u"/>
-<part name="C4" library="rcl" deviceset="C-EU" device="C0603" value="2n"/>
-<part name="C5" library="rcl" deviceset="C-EU" device="C0603" value="180p"/>
-<part name="C6" library="rcl" deviceset="C-EU" device="C0603" value="33n"/>
+<part name="C4" library="rcl" deviceset="C-EU" device="C0603" value="180p"/>
+<part name="C5" library="rcl" deviceset="C-EU" device="C0603" value="18p"/>
+<part name="C6" library="rcl" deviceset="C-EU" device="C0603" value="3n3"/>
 <part name="GND3" library="supply1" deviceset="GND" device=""/>
 <part name="GND4" library="supply1" deviceset="GND" device=""/>
 <part name="GND5" library="supply1" deviceset="GND" device=""/>
@@ -7958,6 +7958,7 @@ Source: www.kingbright.com</description>
 current consumption</text>
 <text x="12.7" y="45.72" size="1.778" layer="97">All I/O using 3V3 levels</text>
 <text x="68.58" y="160.02" size="1.778" layer="97">3x 3V3</text>
+<text x="175.26" y="17.78" size="1.778" layer="97">Approx. 450kHz loop bandwidth</text>
 </plain>
 <instances>
 <instance part="IC2" gate="G$1" x="104.14" y="50.8" smashed="yes">

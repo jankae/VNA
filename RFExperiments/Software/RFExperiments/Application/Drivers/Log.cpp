@@ -125,7 +125,7 @@ void _log_write(const char *module, const char *level, const char *fmt, ...) {
 	}
 #endif
 #ifdef LOG_BLOCKING
-	log_flush();
+	while(USART_BASE->CR1 & USART_CR1_TCIE);
 #endif
 }
 

@@ -1,12 +1,17 @@
 #include "max2871.hpp"
+#include <string.h>
 
 #include "delay.hpp"
 #include <cmath>
-#define LOG_LEVEL	LOG_LEVEL_WARN
+#define LOG_LEVEL	LOG_LEVEL_INFO
 #define LOG_MODULE	"MAX2871"
 #include "Log.h"
 
 bool MAX2871::Init() {
+	return Init(10000000, true, 1, false);
+}
+
+bool MAX2871::Init(uint32_t f_ref, bool doubler, uint16_t r, bool div2) {
 	for (uint8_t i = 0; i < 6; i++) {
 		regs[i] = 0;
 	}
@@ -14,7 +19,7 @@ bool MAX2871::Init() {
 	ChipEnable(false);
 	RFEnable(false);
 
-	SetReference(10000000, true, 1, false);
+	SetReference(f_ref, doubler, r, div2);
 
 	// non-inverting loop filter
 	regs[2] |= (1UL << 6);
@@ -36,6 +41,22 @@ bool MAX2871::Init() {
 	// automatically switch to integer mode if F = 0
 	regs[5] |= (1UL << 24);
 
+	// Testing:
+	// Disable VAS and select VCO manually
+//	regs[3] |= (1UL << 25);
+//	regs[3] |= (25UL << 26);
+//	// force CP into source mode
+//	regs[1] |= (3UL << 27);
+//	// MUX set to r divider output
+//	regs[2] |= (3UL << 26);
+//	// MUX set to n divider output
+//	regs[2] |= (4UL << 26);
+//	// MUX to D_VDD
+//	regs[2] |= (1UL << 26);
+
+	// Enable cycle slip reduction
+//	regs[3] |= (1UL << 18);
+
 	SetPower(Power::n1dbm);
 	SetMode(Mode::LowSpur2);
 	// for all other CP modes the PLL reports unlock condition (output signal appears to be locked)
@@ -43,7 +64,21 @@ bool MAX2871::Init() {
 	SetCPCurrent(15);
 	SetFrequency(1000000000);
 
-	Update();
+	// initial register write according to datasheet timing
+	Write(5, regs[5]);
+	Delay::ms(20);
+	Write(4, regs[4]);
+	Write(3, regs[3]);
+	Write(2, regs[2]);
+	Write(1, regs[1]);
+	Write(0, regs[0]);
+	Write(5, regs[5]);
+	Delay::ms(20);
+	Write(4, regs[4]);
+	Write(3, regs[3]);
+	Write(2, regs[2]);
+	Write(1, regs[1]);
+	Write(0, regs[0]);
 
 	return true;
 }
@@ -59,6 +94,7 @@ void MAX2871::ChipEnable(bool on) {
 void MAX2871::RFEnable(bool on) {
 	if (on) {
 		RF_EN->BSRR = RF_ENpin;
+		Read();
 	} else {
 		RF_EN->BSRR = RF_ENpin << 16;
 	}
@@ -98,7 +134,7 @@ bool MAX2871::SetFrequency(uint64_t f) {
 		LOG_ERR("Frequency must be between 23.5MHz and 6GHz");
 		return false;
 	}
-	LOG_INFO("Setting frequency to %lu%06luHz...", (uint32_t ) (f / 1000000),
+	LOG_DEBUG("Setting frequency to %lu%06luHz...", (uint32_t ) (f / 1000000),
 			(uint32_t ) (f % 1000000));
 	// select divider
 	uint64_t f_vco = f;
@@ -127,6 +163,18 @@ bool MAX2871::SetFrequency(uint64_t f) {
 	}
 	LOG_DEBUG("F_VCO: %lu%06luHz",
 			(uint32_t ) (f_vco / 1000000), (uint32_t ) (f_vco % 1000000));
+	if (gotVCOMap) {
+		// manual VCO selection for lock time improvement
+		uint16_t compare = f_vco / 100000;
+		uint8_t vco = 0;
+		for (; vco < 64; vco++) {
+			if (VCOmax[vco] >= compare) {
+				break;
+			}
+		} LOG_DEBUG("Manually selected VCO %d", vco);
+		regs[3] &= ~0xFC000000;
+		regs[3] |= (uint32_t) vco << 26;
+	}
 	uint16_t N = f_vco / f_PFD;
 	if (N < 19 || N > 4091) {
 		LOG_ERR("Invalid N value, should be between 19 and 4091, got %lu", N);
@@ -138,9 +186,9 @@ bool MAX2871::SetFrequency(uint64_t f) {
 	uint32_t best_deviation = UINT32_MAX;
 	uint16_t best_M = 4095, best_F = 0;
 	for (uint16_t M = 4095; M >= 2; M--) {
-		uint16_t guess_F = rem_f * M / f_PFD;
+		uint16_t guess_F = (uint64_t) rem_f * M / f_PFD;
 		for (uint16_t F = guess_F; F <= guess_F + 1; F++) {
-			uint32_t f = (f_PFD * F) / M;
+			uint32_t f = ((uint64_t) f_PFD * F) / M;
 			uint32_t deviation = abs(f - rem_f);
 			if (deviation < best_deviation) {
 				best_deviation = deviation;
@@ -155,8 +203,10 @@ bool MAX2871::SetFrequency(uint64_t f) {
 			break;
 		}
 	}
-	LOG_DEBUG("Best match is F=%u/M=%u, deviation of %luHz",
-			best_F, best_M, best_deviation);
+	if (best_deviation > 0) {
+		LOG_WARN("Best match is F=%u/M=%u, deviation of %luHz",
+				best_F, best_M, best_deviation);
+	}
 	uint64_t f_set = (uint64_t) N * f_PFD + (f_PFD * best_F) / best_M;
 	f_set /= (1UL << div);
 
@@ -172,19 +222,6 @@ bool MAX2871::SetFrequency(uint64_t f) {
 			(uint32_t ) (f_set / 1000000), (uint32_t ) (f_set % 1000000));
 	outputFrequency = f_set;
 	return true;
-}
-
-void MAX2871::Write(uint8_t reg, uint32_t val) {
-	uint8_t data[4];
-	data[0] = (val >> 24) & 0xFF;
-	data[1] = (val >> 16) & 0xFF;
-	data[2] = (val >> 8) & 0xFF;
-	data[3] = ((val) & 0xF8) | (reg & 0x07);
-	Delay::us(1);
-	HAL_SPI_Transmit(hspi, data, 4, 20);
-	LE->BSRR = LEpin;
-	Delay::us(1);
-	LE->BSRR = LEpin << 16;
 }
 
 bool MAX2871::SetReference(uint32_t f_ref, bool doubler, uint16_t r,
@@ -219,6 +256,11 @@ bool MAX2871::SetReference(uint32_t f_ref, bool doubler, uint16_t r,
 				pfd);
 		return false;
 	}
+	if(pfd > 32000000) {
+		regs[2] |= (1UL << 31);
+	} else {
+		regs[2] &= ~(1UL << 31);
+	}
 	// input values are valid, adjust registers
 	regs[2] &= ~0x03FFC000;
 	if (doubler) {
@@ -246,13 +288,92 @@ bool MAX2871::SetReference(uint32_t f_ref, bool doubler, uint16_t r,
 }
 
 void MAX2871::Update() {
-	for(int8_t i=0;i<2;i++) {
-		Write(5, regs[5]);
-//		Delay::ms(2);
-		Write(4, regs[4]);
-		Write(3, regs[3]);
-		Write(2, regs[2]);
-		Write(1, regs[1]);
-		Write(0, regs[0]);
+	Write(5, regs[5]);
+	Write(4, regs[4]);
+	Write(3, regs[3]);
+	Write(2, regs[2]);
+	Write(1, regs[1]);
+	Write(0, regs[0]);
+}
+
+void MAX2871::UpdateFrequency() {
+	Write(4, regs[4]);
+	Write(3, regs[3]);
+	Write(1, regs[1]);
+	Write(0, regs[0]);
+}
+
+void MAX2871::Write(uint8_t reg, uint32_t val) {
+	uint8_t data[4];
+	data[0] = (val >> 24) & 0xFF;
+	data[1] = (val >> 16) & 0xFF;
+	data[2] = (val >> 8) & 0xFF;
+	data[3] = ((val) & 0xF8) | (reg & 0x07);
+	//Delay::us(1);
+	HAL_SPI_Transmit(hspi, data, 4, 20);
+	LE->BSRR = LEpin;
+	//Delay::us(1);
+	LE->BSRR = LEpin << 16;
+}
+
+// Assumes that the MUX pin is already configured as "Read register 6" and connected to MISO
+uint32_t MAX2871::Read() {
+	uint8_t transmit[4] = {0x00, 0x00, 0x00, 0x06};
+	HAL_SPI_Transmit(hspi, transmit, 4, 20);
+	LE->BSRR = LEpin;
+	memset(transmit, 0, sizeof(transmit));
+	uint8_t recv[4];
+	HAL_SPI_TransmitReceive(hspi, transmit, recv, 4, 20);
+	LE->BSRR = LEpin << 16;
+	uint32_t result = (uint32_t) recv[0] << 24 | (uint32_t) recv[1] << 16 | (uint32_t) recv[2] << 8 | (uint32_t) recv[3];
+	result <<= 2;
+	LOG_DEBUG("Readback: 0x%08x", result);
+	return result;
+}
+
+bool MAX2871::BuildVCOMap() {
+	// Mux pin SPI read
+	regs[2] |= (4UL << 26);
+	regs[5] |= (1UL << 18);
+	Update();
+	memset(VCOmax, 0, sizeof(VCOmax));
+	// save output frequency
+	uint64_t oldFreq = outputFrequency;
+	constexpr uint32_t step = 10000000;
+	for (uint64_t freq = 3000000000; freq <= 6000000000; freq += step) {
+		SetFrequency(freq);
+		UpdateFrequency();
+		uint32_t start = HAL_GetTick();
+		while (!Locked()) {
+			if (HAL_GetTick() - start > 100) {
+				LOG_ERR(
+						"Failed to lock during VCO map build process, aborting");
+				gotVCOMap = false;
+				// revert back to previous frequency
+				SetFrequency(oldFreq);
+				LE->BSRR = LEpin << 16;
+				// Mux pin back to high impedance
+				regs[2] &= ~(4UL << 26);
+				regs[5] &= ~(1UL << 18);
+				Update();
+				return false;
+			}
+		}
+		auto readback = Read();
+		uint8_t vco = (readback & 0x01F8) >> 3;
+		VCOmax[vco] = freq / 100000;
+		LOG_INFO("VCO map: %lu%06luHz uses VCO %d",
+			(uint32_t ) (freq / 1000000), (uint32_t ) (freq % 1000000), vco);
 	}
+	gotVCOMap = true;
+	// revert back to previous frequency
+	SetFrequency(oldFreq);
+	// Mux pin back to high impedance
+	regs[2] &= ~(4UL << 26);
+	regs[5] &= ~(1UL << 18);
+
+	// Turn off VAS, select VCO manually from now on
+	regs[3] |= (1UL << 25);
+	Update();
+	return true;
 }

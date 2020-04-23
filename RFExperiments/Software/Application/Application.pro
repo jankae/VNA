@@ -11,6 +11,7 @@ HEADERS += \
     smithchart.h \
     sparam.h \
     sparamtable.h \
+    unit.h \
     valueinput.h \
     vna.h
 
@@ -26,6 +27,7 @@ SOURCES += \
     main.cpp \
     smithchart.cpp \
     sparamtable.cpp \
+    unit.cpp \
     valueinput.cpp \
     vna.cpp
 

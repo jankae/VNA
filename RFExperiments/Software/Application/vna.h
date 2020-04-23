@@ -18,7 +18,7 @@ private:
         .f_start = 1000000,
         .f_stop = 6000000000,
         .points = 101,
-        .averaging = 1024,
+        .if_bandwidth = 1000,
         .mdbm_excitation = 0,
     };
     void NewDatapoint(Protocol::Datapoint d);

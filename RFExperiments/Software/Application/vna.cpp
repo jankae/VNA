@@ -81,18 +81,19 @@ VNA::VNA(QWidget *parent)
 
     auto menuLayout = new QStackedLayout;
     auto mMain = new Menu(*menuLayout);
-    auto mFrequency = new Menu(*menuLayout);
-    auto mCenter = new MenuValue("Center Frequency", (settings.f_start + settings.f_stop)/2, "Hz");
 
+    auto mFrequency = new Menu(*menuLayout);
+    auto mCenter = new MenuValue("Center Frequency", (settings.f_start + settings.f_stop)/2, "Hz", " kMG", 6);
     mFrequency->addItem(mCenter);
-    auto mStart = new MenuValue("Start Frequency", settings.f_start, "Hz");
+    auto mStart = new MenuValue("Start Frequency", settings.f_start, "Hz", " kMG", 6);
     mFrequency->addItem(mStart);
-    auto mStop = new MenuValue("Stop Frequency", settings.f_stop, "Hz");
+    auto mStop = new MenuValue("Stop Frequency", settings.f_stop, "Hz", " kMG", 6);
     mFrequency->addItem(mStop);
     mFrequency->finalize();
     mMain->addMenu(mFrequency, "Frequency");
+
     auto mSpan = new Menu(*menuLayout);
-    auto mSpanWidth = new MenuValue("Span", settings.f_stop - settings.f_start, "Hz");
+    auto mSpanWidth = new MenuValue("Span", settings.f_stop - settings.f_start, "Hz", " kMG", 6);
     mSpan->addItem(mSpanWidth);
     auto mSpanZoomIn = new MenuAction("Zoom in");
     mSpan->addItem(mSpanZoomIn);
@@ -102,6 +103,15 @@ VNA::VNA(QWidget *parent)
     mSpan->addItem(mSpanFull);
     mSpan->finalize();
     mMain->addMenu(mSpan, "Span");
+
+    auto mAcquisition = new Menu(*menuLayout);
+    auto mPoints = new MenuValue("Points", settings.points, "", " ");
+    mAcquisition->addItem(mPoints);
+    auto mBandwidth = new MenuValue("IF Bandwidth", settings.if_bandwidth, "Hz", " k", 2);
+    mAcquisition->addItem(mBandwidth);
+    mAcquisition->finalize();
+    mMain->addMenu(mAcquisition, "Acquisition");
+
     mMain->finalize();
 
     auto updateMenuValues = [=]() {
@@ -164,13 +174,26 @@ VNA::VNA(QWidget *parent)
         updateMenuValues();
         SettingsChanged();
     });
+    connect(mPoints, &MenuValue::valueChanged, [=](double newval){
+       settings.points = newval;
+       SettingsChanged();
+    });
+    connect(mBandwidth, &MenuValue::valueChanged, [=](double newval){
+       settings.if_bandwidth = newval;
+       SettingsChanged();
+    });
 
-    auto central = new QWidget;
+    auto mainWidget = new QWidget;
+    auto plotWidget = new QWidget;
     auto mainLayout = new QHBoxLayout;
-    central->setLayout(mainLayout);
-    mainLayout->addLayout(&plotLayout);
-    mainLayout->addLayout(menuLayout);
-    setCentralWidget(central);
+    mainWidget->setLayout(mainLayout);
+    plotWidget->setLayout(&plotLayout);
+    mainLayout->addWidget(plotWidget);
+    auto menuWidget = new QWidget;
+    menuWidget->setLayout(menuLayout);
+    menuWidget->setFixedWidth(180);
+    mainLayout->addWidget(menuWidget);
+    setCentralWidget(mainWidget);
     //setLayout(mainLayout);
     device.SetCallback(callback);
     SettingsChanged();

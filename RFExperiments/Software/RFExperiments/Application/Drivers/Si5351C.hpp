@@ -32,9 +32,12 @@ public:
 	bool Init(uint32_t clkin_freq = 0);
 	bool SetPLL(PLL pll, uint32_t frequency, PLLSource src);
 	bool SetCLK(uint8_t clknum, uint32_t frequency, PLL source);
+	bool SetCLKtoXTAL(uint8_t clknum);
+	bool SetCLKToCLKIN(uint8_t clknum);
 	bool Enable(uint8_t clknum);
 	bool Disable(uint8_t clknum);
 	bool Locked(PLL pll);
+	bool ResetPLLs();
 private:
 	enum class Reg : uint8_t {
 		DeviceStatus = 0,

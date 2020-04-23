@@ -9,9 +9,12 @@
 
 using namespace std;
 
-MenuValue::MenuValue(QString name, double defaultValue, QString unit)
-    : unit(unit), name(name)
+MenuValue::MenuValue(QString name, double defaultValue, QString unit, QString prefixes, int precision)
+    : unit(unit), name(name), prefixes(prefixes), precision(precision)
 {
+    if(prefixes.indexOf(' ') < 0) {
+        throw runtime_error("Prefix string must contain space");
+    }
     auto layout = new QVBoxLayout;
     auto label = new QLabel(name, this);
     label->setAlignment(Qt::AlignCenter);
@@ -35,23 +38,20 @@ void MenuValue::setValueQuiet(double value)
     } else if(value == 0.0) {
         sValue.append('0');
     } else {
-        constexpr char prefixes[] = {
-            'f', 'p', 'n', 'u', 'm', ' ', 'k', 'M', 'G', 'T', 'P'
-        };
         int preDotDigits = log10(value) + 1;
-        int prefixIndex = 5;
-        while(preDotDigits > 3) {
+        int prefixIndex = prefixes.indexOf(' ');
+        while(preDotDigits > 3 && prefixIndex < prefixes.length() - 1) {
             value /= 1000.0;
             preDotDigits -= 3;
             prefixIndex++;
         }
-        while(preDotDigits<=0) {
+        while(preDotDigits<=0 && prefixIndex > 0) {
             value *= 1000.0;
             preDotDigits += 3;
             prefixIndex--;
         }
         stringstream ss;
-        ss << std::fixed << std::setprecision(6) << value;
+        ss << std::fixed << std::setprecision(precision) << value;
         sValue.append(QString::fromStdString(ss.str()));
         sValue.append(prefixes[prefixIndex]);
     }
@@ -89,7 +89,13 @@ void MenuValue::keyPressEvent(QKeyEvent *event)
 void MenuValue::startInputDialog(QString initialInput)
 {
     vector<ValueInput::Unit> v;
-    v.push_back(ValueInput::Unit("GHz", 1000000000.0));
+    int unityIndex = prefixes.indexOf(' ');
+    for(int i=0;i<prefixes.length();i++) {
+        QString unitname = prefixes[i];
+        unitname.append(unit);
+        double factor = pow(1000.0, i - unityIndex);
+        v.push_back(ValueInput::Unit(unitname, factor));
+    }
     auto input = new ValueInput(v, name, initialInput);
     connect(input, &ValueInput::ValueChanged, this, &MenuValue::setValue);
 }

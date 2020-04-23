@@ -1,6 +1,6 @@
 #include "Si5351C.hpp"
 
-#define LOG_LEVEL	LOG_LEVEL_WARN
+#define LOG_LEVEL	LOG_LEVEL_DEBUG
 #define LOG_MODULE	"SI5351"
 #include "Log.h"
 
@@ -29,6 +29,9 @@ bool Si5351C::Init(uint32_t clkin_freq) {
 	// Disable all outputs
 	success &= WriteRegister(Reg::OutputEnableControl, 0xFF);
 
+	// Enable fanouts
+	success &= WriteRegister(Reg::FanoutEnable, 0xD0);
+
 	if(success) {
 		LOG_INFO("Initialized");
 	} else {
@@ -48,18 +51,18 @@ bool Si5351C::SetPLL(PLL pll, uint32_t frequency, PLLSource src) {
 
 	uint32_t srcFreq = src == PLLSource::XTAL ? FreqXTAL : FreqCLKINDiv;
 	// see https://www.silabs.com/documents/public/application-notes/AN619.pdf (page 3)
-	uint32_t div20 = (uint64_t) frequency * (1UL << 20) / srcFreq;
+	uint64_t div27 = (uint64_t) frequency * (1UL << 27) / srcFreq;
 	// Check for valid range
-	if (div20 < 15 * (1UL << 20) || div20 > 90 * (1UL << 20)) {
+	if (div27 < 15 * (1ULL << 27) || div27 > 90 * (1ULL << 27)) {
 		LOG_ERR("Calculated divider out of range (15-90)");
 		return false;
 	}
 	// Always use highest available c
 	c.P3 = 0xFFFFF;
-	// highest 18 bits of divider with offset
-	c.P1 = ((div20 >> 14) & 0x3FFFF) - 512;
-	// lower 14 bit left shifted to 20bit border
-	c.P2 = (div20 & 0x3FFF) << 6;
+	// upper 18 bits
+	c.P1 = ((div27 >> 20) & 0x3FFFF) - 512;
+	// lower 20 bits
+	c.P2 = div27 & 0xFFFFF;
 
 	FreqPLL[(int) pll] = frequency;
 	LOG_INFO("Setting PLL %c to %luHz", pll==PLL::A ? 'A' : 'B', frequency);
@@ -74,7 +77,7 @@ bool Si5351C::SetCLK(uint8_t clknum, uint32_t frequency, PLL source) {
 	c.PoweredDown = false;
 	c.RDiv = 1;
 	c.source = source;
-	c.strength = DriveStrength::mA8;
+	c.strength = DriveStrength::mA2;
 
 	uint32_t pllFreq = FreqPLL[(int) source];
 	if (clknum > 5) {
@@ -86,7 +89,6 @@ bool Si5351C::SetCLK(uint8_t clknum, uint32_t frequency, PLL source) {
 		}
 		c.P1 = div;
 	} else {
-		ClkConfig c;
 		while (pllFreq / (frequency * c.RDiv) >= 2048
 				|| (frequency * c.RDiv) < 500000) {
 			if (c.RDiv < 128) {
@@ -97,16 +99,27 @@ bool Si5351C::SetCLK(uint8_t clknum, uint32_t frequency, PLL source) {
 			}
 		}
 		// see https://www.silabs.com/documents/public/application-notes/AN619.pdf (page 6)
-		uint32_t div20 = pllFreq * (1UL << 20) / (frequency * c.RDiv);
+		uint64_t div27 = pllFreq * (1ULL << 27) / (frequency * c.RDiv);
 		// Always use highest available c
 		c.P3 = 0xFFFFF;
-		// highest 18 bits of divider with offset
-		c.P1 = ((div20 >> 14) & 0x3FFFF) - 512;
-		// lower 14 bit left shifted to 20bit border
-		c.P2 = (div20 & 0x3FFF) << 6;
+		// upper 18 bits
+		c.P1 = ((div27 >> 20) & 0x3FFFF) - 512;
+		// lower 20 bits
+		c.P2 = div27 & 0xFFFFF;
 	}
 	LOG_INFO("Setting CLK%d to %luHz", clknum, frequency);
 	return WriteClkConfig(c, clknum);
+}
+
+bool Si5351C::SetCLKtoXTAL(uint8_t clknum) {
+	Reg reg = (Reg) ((int) Reg::CLK0Control + clknum);
+	LOG_INFO("Connecting CLK%d to XTAL", clknum);
+	return ClearBits(reg, 0x0C);
+}
+bool Si5351C::SetCLKToCLKIN(uint8_t clknum) {
+	Reg reg = (Reg) ((int) Reg::CLK0Control + clknum);
+	LOG_INFO("Connecting CLK%d to CLK in", clknum);
+	return ClearBits(reg, 0x08) && SetBits(reg, 0x04);
 }
 
 bool Si5351C::Enable(uint8_t clknum) {
@@ -123,6 +136,7 @@ bool Si5351C::Locked(PLL pll) {
 	uint8_t mask = pll == PLL::A ? 0x20 : 0x40;
 	uint8_t value;
 	ReadRegister(Reg::DeviceStatus, &value);
+	LOG_DEBUG("Device status: 0x%02x", value);
 	if (value & mask) {
 		return false;
 	} else {
@@ -150,7 +164,7 @@ bool Si5351C::WritePLLConfig(PLLConfig config, PLL pll) {
 	} else {
 		success &=ClearBits(reg, 0x40);
 	}
-	uint8_t mask = pll == PLL::A ? 0x40 : 0x80;
+	uint8_t mask = pll == PLL::A ? 0x04 : 0x08;
 	if (config.source == PLLSource::XTAL) {
 		success &=ClearBits(Reg::PLLInputSource, mask);
 	} else {
@@ -159,7 +173,13 @@ bool Si5351C::WritePLLConfig(PLLConfig config, PLL pll) {
 
 	// Reset the PLL
 	mask = pll == PLL::A ? 0x20 : 0x80;
-	success &=SetBits(Reg::PLLReset, mask);
+	//success &=SetBits(Reg::PLLReset, mask);
+	reg = pll == PLL::A ? Reg::MSNA_CONFIG : Reg::MSNB_CONFIG;
+	for(uint8_t i=0;i<8;i++) {
+		uint8_t readback;
+		ReadRegister((Reg)((int)reg + i), &readback);
+		LOG_DEBUG("PLL readback %d: 0x%02x", i, readback);
+	}
 
 	return success;
 }
@@ -256,4 +276,8 @@ bool Si5351C::ClearBits(Reg reg, uint8_t bits) {
 bool Si5351C::WriteRegisterRange(Reg start, uint8_t *data, uint8_t len) {
 	return HAL_I2C_Mem_Write(i2c, address, (int) start,
 	I2C_MEMADD_SIZE_8BIT, data, len, 100) == HAL_OK;
+}
+
+bool Si5351C::ResetPLLs() {
+	return SetBits(Reg::PLLReset, 0xA0);
 }

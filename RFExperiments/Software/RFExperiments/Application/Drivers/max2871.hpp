@@ -15,10 +15,13 @@ public:
 		MUX(MUX), MUXpin(MUXpin),
 		RF_EN(RF_EN), RF_ENpin(RF_ENpin),
 		LD(LD), LDpin(LDpin),
-		outputFrequency(0)
+		outputFrequency(0),
+		VCOmax(),
+		gotVCOMap(false)
 		{};
 
 	bool Init();
+	bool Init(uint32_t f_ref, bool doubler, uint16_t r, bool div2);
 	bool SetReference(uint32_t f_ref, bool doubler, uint16_t r, bool div2);
 	void ChipEnable(bool on);
 	void RFEnable(bool on);
@@ -46,7 +49,10 @@ public:
 	void SetCPCurrent(uint8_t mA);
 	bool SetFrequency(uint64_t f);
 	void Update();
+	void UpdateFrequency();
+	bool BuildVCOMap();
 private:
+	uint32_t Read();
 	void Write(uint8_t reg, uint32_t val);
 	uint32_t regs[6];
 	uint32_t f_PFD;
@@ -62,4 +68,6 @@ private:
 	GPIO_TypeDef *LD;
 	uint16_t LDpin;
 	uint64_t outputFrequency;
+	uint16_t VCOmax[64];
+	bool gotVCOMap;
 };

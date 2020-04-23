@@ -8,7 +8,7 @@ class MenuValue : public MenuItem
 {
     Q_OBJECT
 public:
-    MenuValue(QString name, double defaultValue = 0.0, QString unit = QString());
+    MenuValue(QString name, double defaultValue = 0.0, QString unit = QString(), QString prefixes = " ", int precision = 0);
 
 signals:
     void valueChanged(double value);
@@ -25,7 +25,8 @@ private:
     double value;
     double increment;
     QLabel *lvalue;
-    const QString unit, name;
+    const QString unit, name, prefixes;
+    const int precision;
 };
 
 #endif // MENUVALUE_H

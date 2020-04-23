@@ -3069,15 +3069,15 @@ design rules under a new name.</description>
 <attribute name="NAME" x="22.565" y="27.865" size="0.8128" layer="25" font="vector" rot="R90"/>
 <attribute name="VALUE" x="24.405" y="29.965" size="1.27" layer="27" rot="R90"/>
 </element>
-<element name="C4" library="rcl" package="C0603" value="2n" x="27.1" y="18" smashed="yes">
+<element name="C4" library="rcl" package="C0603" value="180p" x="27.1" y="18" smashed="yes">
 <attribute name="NAME" x="24.365" y="17.735" size="0.8128" layer="25" font="vector"/>
 <attribute name="VALUE" x="26.465" y="16.095" size="1.27" layer="27"/>
 </element>
-<element name="C5" library="rcl" package="C0603" value="180p" x="30" y="19.4" smashed="yes" rot="R270">
+<element name="C5" library="rcl" package="C0603" value="18p" x="30" y="19.4" smashed="yes" rot="R270">
 <attribute name="NAME" x="28.465" y="20.935" size="0.8128" layer="25" font="vector"/>
 <attribute name="VALUE" x="28.095" y="20.035" size="1.27" layer="27" rot="R270"/>
 </element>
-<element name="C6" library="rcl" package="C0603" value="33n" x="27.1" y="15.8" smashed="yes">
+<element name="C6" library="rcl" package="C0603" value="3n3" x="27.1" y="15.8" smashed="yes">
 <attribute name="NAME" x="24.365" y="15.435" size="0.8128" layer="25" font="vector"/>
 <attribute name="VALUE" x="26.465" y="13.895" size="1.27" layer="27"/>
 </element>
@@ -3133,7 +3133,7 @@ design rules under a new name.</description>
 <attribute name="SPICETYPE" value="diode" x="72.09" y="113.65" size="1.778" layer="27" rot="R90" display="off"/>
 <attribute name="VALUE" x="14.4" y="30.1" size="1.27" layer="27" rot="R90"/>
 </element>
-<element name="R1" library="resistor" package="R0603" value="1k" x="30" y="15.8" smashed="yes" rot="R90">
+<element name="R1" library="resistor" package="R0603" value="1k8" x="30" y="15.8" smashed="yes" rot="R90">
 <attribute name="NAME" x="29.965" y="12.965" size="0.8128" layer="25" font="vector" rot="R90"/>
 <attribute name="VALUE" x="31.905" y="15.165" size="1.27" layer="27" rot="R90"/>
 </element>
@@ -3149,11 +3149,11 @@ design rules under a new name.</description>
 <attribute name="NAME" x="19.765" y="16.735" size="0.8128" layer="25" font="vector"/>
 <attribute name="VALUE" x="19.965" y="16.595" size="1.27" layer="27"/>
 </element>
-<element name="R2" library="resistor" package="R0603" value="100" x="27.1" y="13.6" smashed="yes" rot="R180">
+<element name="R2" library="resistor" package="R0603" value="82" x="27.1" y="13.6" smashed="yes" rot="R180">
 <attribute name="NAME" x="25.435" y="14.465" size="0.8128" layer="25" font="vector" rot="R180"/>
 <attribute name="VALUE" x="27.735" y="15.505" size="1.27" layer="27" rot="R180"/>
 </element>
-<element name="R3" library="resistor" package="R0603" value="120" x="27.1" y="11.4" smashed="yes">
+<element name="R3" library="resistor" package="R0603" value="330" x="27.1" y="11.4" smashed="yes">
 <attribute name="NAME" x="24.265" y="11.035" size="0.8128" layer="25" font="vector"/>
 <attribute name="VALUE" x="26.465" y="9.495" size="1.27" layer="27"/>
 </element>

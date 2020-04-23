@@ -35,7 +35,10 @@ void App_Start() {
 		LOG_INFO("Setting up for point %u/%u: %lu%06luHz", pointCnt + 1,
 				settings.points, (uint32_t ) (freq / 1000000),
 				(uint32_t ) (freq % 1000000));
-		VNA::Measure(freq, VNACallback, settings.averaging);
+		uint16_t averages = 1000000 / settings.if_bandwidth;
+		// round up to next multiple of 4
+		averages = (averages + 3) & ~0x03;
+		VNA::Measure(freq, VNACallback, averages);
 		while (!done && !newSettings) {
 		}
 		if (done) {
