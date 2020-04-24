@@ -5,10 +5,10 @@
 namespace Protocol {
 
 using Datapoint = struct _datapoint {
-	float S11Mag, S11Phase;
-	float S21Mag, S21Phase;
-	float S12Mag, S12Phase;
-	float S22Mag, S22Phase;
+	float real_S11, imag_S11;
+	float real_S21, imag_S21;
+	float real_S12, imag_S12;
+	float real_S22, imag_S22;
 	uint64_t frequency;
 	uint16_t pointNum;
 } __attribute__((packed));

@@ -17,7 +17,7 @@ public:
         constexpr auto cpl_one = std::complex<double>(1.0, 0.0);
         auto cpl = toComplex();
         // convert from db to factor
-        cpl *= pow(10.0, db/10.0);
+        cpl *= pow(10.0, db/10.0)/db;
         // convert from ratio to load impedance
         return (cpl_one + cpl) / (cpl_one - cpl) * 50.0;
     }

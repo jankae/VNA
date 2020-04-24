@@ -7,6 +7,7 @@
 #include "device.h"
 #include "plot.h"
 #include "sparamtable.h"
+#include "calibration.h"
 
 class VNA : public QMainWindow
 {
@@ -15,10 +16,10 @@ public:
     VNA(QWidget *parent = nullptr);
 private:
     static constexpr Protocol::SweepSettings defaultSweep = {
-        .f_start = 1000000,
-        .f_stop = 6000000000,
+        .f_start = 25000000,
+        .f_stop = 3000000000,
         .points = 101,
-        .if_bandwidth = 1000,
+        .if_bandwidth = 50,
         .mdbm_excitation = 0,
     };
     void NewDatapoint(Protocol::Datapoint d);
@@ -31,6 +32,10 @@ private:
 private:
     void SettingsChanged();
     SParamTable dataTable;
+    Calibration cal;
+    bool calValid;
+    Calibration::Measurement calMeasurement;
+    bool calMeasuring;
 signals:
     void dataChanged();
 };

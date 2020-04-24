@@ -32,7 +32,8 @@ public:
 		p2dbm = 0x02,
 		p5dbm = 0x03,
 	};
-	void SetPower(Power p);
+	void SetPowerOutA(Power p, bool enabled = true);
+	void SetPowerOutB(Power p, bool enabled = true);
 	enum class Mode : uint8_t {
 		LowNoise = 0x00,
 		LowSpur1 = 0x02,

@@ -21,11 +21,15 @@ public:
         Isolation,
         Through,
     };
+    void clearMeasurements();
     void addMeasurement(Measurement type, Protocol::Datapoint d);
-    void constructErrorTerms();
+    void construct12TermPoints();
+    void constructPort1OSL();
+    void constructPort2OSL();
     void correctMeasurement(Protocol::Datapoint &d);
 
 private:
+    bool SanityCheckSamples(std::vector<Measurement> &requiredMeasurements);
     class Point
     {
     public:

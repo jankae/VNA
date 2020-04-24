@@ -4,7 +4,7 @@
 #include "delay.hpp"
 #include "Communication.h"
 
-#define LOG_LEVEL	LOG_LEVEL_DEBUG
+#define LOG_LEVEL	LOG_LEVEL_INFO
 #define LOG_MODULE	"App"
 #include "Log.h"
 
@@ -45,14 +45,14 @@ void App_Start() {
 			LOG_DEBUG("Measurement done");
 			Protocol::PacketInfo packet;
 			packet.type = Protocol::PacketType::Datapoint;
-			packet.datapoint.S11Mag = result.S11Mag;
-			packet.datapoint.S11Phase = result.S11Phase;
-			packet.datapoint.S12Mag = result.S12Mag;
-			packet.datapoint.S12Phase = result.S12Phase;
-			packet.datapoint.S21Mag = result.S21Mag;
-			packet.datapoint.S21Phase = result.S21Phase;
-			packet.datapoint.S22Mag = result.S22Mag;
-			packet.datapoint.S22Phase = result.S22Phase;
+			packet.datapoint.real_S11 = real(result.S11);
+			packet.datapoint.imag_S11 = imag(result.S11);
+			packet.datapoint.real_S21 = real(result.S21);
+			packet.datapoint.imag_S21 = imag(result.S21);
+			packet.datapoint.real_S12 = real(result.S12);
+			packet.datapoint.imag_S12 = imag(result.S12);
+			packet.datapoint.real_S22 = real(result.S22);
+			packet.datapoint.imag_S22 = imag(result.S22);
 			packet.datapoint.frequency = freq;
 			packet.datapoint.pointNum = pointCnt;
 			Communication::Send(packet);

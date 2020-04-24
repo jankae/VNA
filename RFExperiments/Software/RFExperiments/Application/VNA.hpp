@@ -1,14 +1,15 @@
 #pragma once
 
 #include <cstdint>
+#include <complex>
 
 namespace VNA {
 
 using Result = struct _result {
-	float S11Mag, S11Phase;
-	float S21Mag, S21Phase;
-	float S12Mag, S12Phase;
-	float S22Mag, S22Phase;
+	std::complex<float> S11;
+	std::complex<float> S21;
+	std::complex<float> S12;
+	std::complex<float> S22;
 };
 
 using Callback = void(*)(Result);

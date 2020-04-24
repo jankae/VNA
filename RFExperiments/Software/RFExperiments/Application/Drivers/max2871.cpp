@@ -3,7 +3,7 @@
 
 #include "delay.hpp"
 #include <cmath>
-#define LOG_LEVEL	LOG_LEVEL_INFO
+#define LOG_LEVEL	LOG_LEVEL_ERROR
 #define LOG_MODULE	"MAX2871"
 #include "Log.h"
 
@@ -26,9 +26,6 @@ bool MAX2871::Init(uint32_t f_ref, bool doubler, uint16_t r, bool div2) {
 	// select digital lock detect
 	regs[5] |= (0x1UL << 22);
 
-	// enable output A and B (still controlled via RF_EN pin)
-	regs[4] |= (1UL << 5) | (1UL << 8);
-
 	// fundamental VCO feedback
 	regs[4] |= (1UL << 23);
 
@@ -41,23 +38,6 @@ bool MAX2871::Init(uint32_t f_ref, bool doubler, uint16_t r, bool div2) {
 	// automatically switch to integer mode if F = 0
 	regs[5] |= (1UL << 24);
 
-	// Testing:
-	// Disable VAS and select VCO manually
-//	regs[3] |= (1UL << 25);
-//	regs[3] |= (25UL << 26);
-//	// force CP into source mode
-//	regs[1] |= (3UL << 27);
-//	// MUX set to r divider output
-//	regs[2] |= (3UL << 26);
-//	// MUX set to n divider output
-//	regs[2] |= (4UL << 26);
-//	// MUX to D_VDD
-//	regs[2] |= (1UL << 26);
-
-	// Enable cycle slip reduction
-//	regs[3] |= (1UL << 18);
-
-	SetPower(Power::n1dbm);
 	SetMode(Mode::LowSpur2);
 	// for all other CP modes the PLL reports unlock condition (output signal appears to be locked)
 	SetCPMode(CPMode::CP20);
@@ -65,6 +45,7 @@ bool MAX2871::Init(uint32_t f_ref, bool doubler, uint16_t r, bool div2) {
 	SetFrequency(1000000000);
 
 	// initial register write according to datasheet timing
+	ChipEnable(true);
 	Write(5, regs[5]);
 	Delay::ms(20);
 	Write(4, regs[4]);
@@ -104,10 +85,22 @@ bool MAX2871::Locked() {
 	return LD->IDR & LDpin;
 }
 
-void MAX2871::SetPower(Power p) {
-	// only set power of port A (B not used)
-	regs[4] &= ~0x18;
+void MAX2871::SetPowerOutA(Power p, bool enabled) {
+	// only set power of port A
+	regs[4] &= ~0x38;
 	regs[4] |= ((uint16_t) p << 3);
+	if (enabled) {
+		regs[4] |= 0x20;
+	}
+}
+
+void MAX2871::SetPowerOutB(Power p, bool enabled) {
+	// only set power of port B
+	regs[4] &= ~0x1C0;
+	regs[4] |= ((uint16_t) p << 6);
+	if (enabled) {
+		regs[4] |= 0x100;
+	}
 }
 
 void MAX2871::SetMode(Mode m) {

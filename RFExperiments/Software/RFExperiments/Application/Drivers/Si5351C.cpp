@@ -87,6 +87,9 @@ bool Si5351C::SetCLK(uint8_t clknum, uint32_t frequency, PLL source) {
 			LOG_ERR("Divider on CLK6/7 out of range (6-254), would need %lu", div);
 			return false;
 		}
+		if(div & 0x01) {
+			LOG_ERR("Divider on CLK6/7 must be even, clock frequency will not match exactly");
+		}
 		c.P1 = div;
 	} else {
 		while (pllFreq / (frequency * c.RDiv) >= 2048

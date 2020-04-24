@@ -5,7 +5,7 @@
 
 namespace Sampling {
 
-static constexpr uint16_t MaxSamples = 32768;
+static constexpr uint16_t MaxSamples = 50000;
 
 using Result = struct _result {
 	std::complex<float> Ref;

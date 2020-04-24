@@ -1,6 +1,9 @@
 #include "sparamtable.h"
 #include <math.h>
 #include <sparam.h>
+#include <complex>
+
+using namespace std;
 
 SParamTable::SParamTable(int maxPoints)
     : maxPoints(maxPoints)
@@ -16,21 +19,21 @@ void SParamTable::addVNAResult(Protocol::Datapoint d)
     if(d.pointNum >= maxPoints) {
         return;
     }
-    auto S11 = SParam(10.0 * log10(d.S11Mag), d.S11Phase * 180.0 / M_PI);
-    auto S12 = SParam(10.0 * log10(d.S12Mag), d.S12Phase * 180.0 / M_PI);
-    auto S21 = SParam(10.0 * log10(d.S21Mag), d.S21Phase * 180.0 / M_PI);
-    auto S22 = SParam(10.0 * log10(d.S22Mag), d.S22Phase * 180.0 / M_PI);
+    auto S11 = complex<double>(d.real_S11, d.imag_S11);
+    auto S12 = complex<double>(d.real_S12, d.imag_S12);
+    auto S21 = complex<double>(d.real_S21, d.imag_S21);
+    auto S22 = complex<double>(d.real_S22, d.imag_S22);
     params[Frequency][d.pointNum] = d.frequency;
-    params[S11_db][d.pointNum] = S11.db;
-    params[S11_phase][d.pointNum] = S11.phase;
-    params[S12_db][d.pointNum] = S12.db;
-    params[S12_phase][d.pointNum] = S12.phase;
-    params[S21_db][d.pointNum] = S21.db;
-    params[S21_phase][d.pointNum] = S21.phase;
-    params[S22_db][d.pointNum] = S22.db;
-    params[S22_phase][d.pointNum] = S22.phase;
-    auto ImpedanceS11 = S11.ReflectionToImpedance();
-    auto ImpedanceS22 = S22.ReflectionToImpedance();
+    params[S11_db][d.pointNum] =  10 * log10(abs(S11));
+    params[S11_phase][d.pointNum] = arg(S11) * 180 / M_PI;
+    params[S12_db][d.pointNum] = 10 * log10(abs(S12));
+    params[S12_phase][d.pointNum] = arg(S12) * 180 / M_PI;
+    params[S21_db][d.pointNum] = 10 * log10(abs(S21));
+    params[S21_phase][d.pointNum] = arg(S21) * 180 / M_PI;
+    params[S22_db][d.pointNum] = 10 * log10(abs(S22));
+    params[S22_phase][d.pointNum] = arg(S22) * 180 / M_PI;
+    auto ImpedanceS11 = (1.0 + S11) / (1.0 - S11) * 50.0;
+    auto ImpedanceS22 = (1.0 + S22) / (1.0 - S22) * 50.0;
     params[S11_ImpedanceReal][d.pointNum] = ImpedanceS11.real();
     params[S11_ImpedanceImag][d.pointNum] = ImpedanceS11.imag();
     params[S22_ImpedanceReal][d.pointNum] = ImpedanceS22.real();

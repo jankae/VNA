@@ -15,6 +15,7 @@
 #include "Menu/menu.h"
 #include "Menu/menuaction.h"
 #include "Menu/menuvalue.h"
+#include <QMessageBox>
 
 
 constexpr Protocol::SweepSettings VNA::defaultSweep;
@@ -24,6 +25,8 @@ VNA::VNA(QWidget *parent)
       dataTable(10001)
 {
     settings = defaultSweep;
+    calValid = false;
+    calMeasuring = false;
     device.Configure(settings);
     std::function<void(Protocol::Datapoint)> callback = [=](Protocol::Datapoint d) {
         this->NewDatapoint(d);
@@ -112,6 +115,38 @@ VNA::VNA(QWidget *parent)
     mAcquisition->finalize();
     mMain->addMenu(mAcquisition, "Acquisition");
 
+    auto mCalibration = new Menu(*menuLayout);
+    auto mCalPort1 = new Menu(*menuLayout);
+    auto mCalPort1Open = new MenuAction("Port 1 Open");
+    auto mCalPort1Short = new MenuAction("Port 1 Short");
+    auto mCalPort1Load = new MenuAction("Port 1 Load");
+    mCalPort1->addItem(mCalPort1Open);
+    mCalPort1->addItem(mCalPort1Short);
+    mCalPort1->addItem(mCalPort1Load);
+    mCalPort1->finalize();
+    mCalibration->addMenu(mCalPort1, "Port 1");
+    auto mCalPort2 = new Menu(*menuLayout);
+    auto mCalPort2Open = new MenuAction("Port 2 Open");
+    auto mCalPort2Short = new MenuAction("Port 2 Short");
+    auto mCalPort2Load = new MenuAction("Port 2 Load");
+    mCalPort2->addItem(mCalPort2Open);
+    mCalPort2->addItem(mCalPort2Short);
+    mCalPort2->addItem(mCalPort2Load);
+    mCalPort2->finalize();
+    mCalibration->addMenu(mCalPort2, "Port 2");
+    auto mCalThrough = new MenuAction("Through");
+    auto mCalIsolation = new MenuAction("Isolation");
+    mCalibration->addItem(mCalThrough);
+    mCalibration->addItem(mCalIsolation);
+
+    auto mCalOSL1 = new MenuAction("Apply Port 1 OSL");
+    mCalibration->addItem(mCalOSL1);
+
+    mCalibration->finalize();
+    mMain->addMenu(mCalibration, "Calibration");
+
+
+
     mMain->finalize();
 
     auto updateMenuValues = [=]() {
@@ -183,6 +218,27 @@ VNA::VNA(QWidget *parent)
        SettingsChanged();
     });
 
+    // Calibration connections
+    connect(mCalPort1Open, &MenuAction::triggered, [=](){
+       SettingsChanged();
+       calMeasurement = Calibration::Measurement::Port1Open;
+       calMeasuring = true;
+    });
+    connect(mCalPort1Short, &MenuAction::triggered, [=](){
+       SettingsChanged();
+       calMeasurement = Calibration::Measurement::Port1Short;
+       calMeasuring = true;
+    });
+    connect(mCalPort1Load, &MenuAction::triggered, [=](){
+       SettingsChanged();
+       calMeasurement = Calibration::Measurement::Port1Load;
+       calMeasuring = true;
+    });
+    connect(mCalOSL1, &MenuAction::triggered, [=](){
+        cal.constructPort1OSL();
+        calValid = true;
+    });
+
     auto mainWidget = new QWidget;
     auto plotWidget = new QWidget;
     auto mainLayout = new QHBoxLayout;
@@ -201,6 +257,17 @@ VNA::VNA(QWidget *parent)
 
 void VNA::NewDatapoint(Protocol::Datapoint d)
 {
+    if(calMeasuring) {
+        cal.addMeasurement(calMeasurement, d);
+        if(d.pointNum == settings.points - 1) {
+            calMeasuring = false;
+            auto message = new QMessageBox(QMessageBox::NoIcon, "Calibration measurement done", "Dummy text", QMessageBox::Ok);
+            message->exec();
+        }
+    }
+    if(calValid) {
+        cal.correctMeasurement(d);
+    }
     dataTable.addVNAResult(d);
     emit dataChanged();
 }

@@ -3,7 +3,9 @@
 #include "stm.hpp"
 
 void Delay::ms(uint32_t t) {
-	HAL_Delay(t);
+	while(t--) {
+		us(1000);
+	}
 }
 void Delay::us(uint32_t t) {
 	TIM1->CNT = 0;
