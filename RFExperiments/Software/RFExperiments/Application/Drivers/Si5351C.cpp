@@ -1,5 +1,7 @@
 #include "Si5351C.hpp"
 
+#include <cmath>
+
 #define LOG_LEVEL	LOG_LEVEL_DEBUG
 #define LOG_MODULE	"SI5351"
 #include "Log.h"
@@ -57,12 +59,7 @@ bool Si5351C::SetPLL(PLL pll, uint32_t frequency, PLLSource src) {
 		LOG_ERR("Calculated divider out of range (15-90)");
 		return false;
 	}
-	// Always use highest available c
-	c.P3 = 0xFFFFF;
-	// upper 18 bits
-	c.P1 = ((div27 >> 20) & 0x3FFFF) - 512;
-	// lower 20 bits
-	c.P2 = div27 & 0xFFFFF;
+	FindOptimalDivider(frequency, srcFreq, c.P1, c.P2, c.P3);
 
 	FreqPLL[(int) pll] = frequency;
 	LOG_INFO("Setting PLL %c to %luHz", pll==PLL::A ? 'A' : 'B', frequency);
@@ -101,14 +98,7 @@ bool Si5351C::SetCLK(uint8_t clknum, uint32_t frequency, PLL source, DriveStreng
 				return false;
 			}
 		}
-		// see https://www.silabs.com/documents/public/application-notes/AN619.pdf (page 6)
-		uint64_t div27 = pllFreq * (1ULL << 27) / (frequency * c.RDiv);
-		// Always use highest available c
-		c.P3 = 0xFFFFF;
-		// upper 18 bits
-		c.P1 = ((div27 >> 20) & 0x3FFFF) - 512;
-		// lower 20 bits
-		c.P2 = div27 & 0xFFFFF;
+		FindOptimalDivider(pllFreq, frequency * c.RDiv, c.P1, c.P2, c.P3);
 	}
 	LOG_INFO("Setting CLK%d to %luHz", clknum, frequency);
 	return WriteClkConfig(c, clknum);
@@ -283,4 +273,40 @@ bool Si5351C::WriteRegisterRange(Reg start, uint8_t *data, uint8_t len) {
 
 bool Si5351C::ResetPLLs() {
 	return SetBits(Reg::PLLReset, 0xA0);
+}
+
+void Si5351C::FindOptimalDivider(uint32_t f_pll, uint32_t f, uint32_t &P1,
+		uint32_t &P2, uint32_t &P3) {
+	// see https://www.silabs.com/documents/public/application-notes/AN619.pdf (page 3/6)
+	uint32_t a = f_pll / f;
+	int32_t f_rem = f_pll - f * a;
+	uint32_t best_b, best_c;
+	uint32_t best_deviation = UINT32_MAX;
+	for (uint32_t c = (1UL << 20) - 1; c >= (1UL << 19); c--) {
+		uint32_t guess_b = (uint64_t) f_rem * c / f;
+		for (uint32_t b = guess_b; b <= guess_b + 1; b++) {
+			int32_t f_div = (uint64_t) f * b / c;
+			uint32_t deviation = abs(f_rem - f_div);
+			if (deviation < best_deviation) {
+				best_b = b;
+				best_c = c;
+				best_deviation = deviation;
+				if (deviation == 0) {
+					break;
+				}
+			}
+		}
+		if (best_deviation == 0) {
+			break;
+		}
+	}
+	LOG_DEBUG(
+			"Optimal divider for %luHz/%luHz is: a=%lu, b=%lu, c=%lu (%luHz deviation)",
+			f_pll, f, a, best_b, best_c, best_deviation);
+	// convert to Si5351C parameters
+	uint32_t floor = 128 * best_b / best_c;
+	P1 = 128 * a + floor - 512;
+	P2 = 128 * best_b - best_c * floor;
+	P3 = best_c;
+	LOG_DEBUG("P1=%lu, P2=%lu, P3=%lu", P1, P2, P3);
 }

@@ -39,6 +39,7 @@ public:
 	bool Locked(PLL pll);
 	bool ResetPLLs();
 private:
+	void FindOptimalDivider(uint32_t f_pll, uint32_t f, uint32_t &P1, uint32_t &P2, uint32_t &P3);
 	enum class Reg : uint8_t {
 		DeviceStatus = 0,
 		InterruptStatusSticky = 1,
