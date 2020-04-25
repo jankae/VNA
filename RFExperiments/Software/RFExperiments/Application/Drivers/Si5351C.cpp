@@ -69,7 +69,7 @@ bool Si5351C::SetPLL(PLL pll, uint32_t frequency, PLLSource src) {
 	return WritePLLConfig(c, pll);
 }
 
-bool Si5351C::SetCLK(uint8_t clknum, uint32_t frequency, PLL source) {
+bool Si5351C::SetCLK(uint8_t clknum, uint32_t frequency, PLL source, DriveStrength strength) {
 	ClkConfig c;
 	c.DivideBy4 = false;
 	c.IntegerMode = false;
@@ -77,7 +77,7 @@ bool Si5351C::SetCLK(uint8_t clknum, uint32_t frequency, PLL source) {
 	c.PoweredDown = false;
 	c.RDiv = 1;
 	c.source = source;
-	c.strength = DriveStrength::mA2;
+	c.strength = strength;
 
 	uint32_t pllFreq = FreqPLL[(int) source];
 	if (clknum > 5) {

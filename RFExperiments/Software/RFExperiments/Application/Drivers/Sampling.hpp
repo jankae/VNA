@@ -5,7 +5,7 @@
 
 namespace Sampling {
 
-static constexpr uint16_t MaxSamples = 50000;
+static constexpr uint16_t Buffer = 1000;
 
 using Result = struct _result {
 	std::complex<float> Ref;
@@ -15,6 +15,7 @@ using Result = struct _result {
 
 using Callback = void(*)(Result res);
 
+bool Init();
 bool Start(Callback cb, uint16_t samples);
 
 }

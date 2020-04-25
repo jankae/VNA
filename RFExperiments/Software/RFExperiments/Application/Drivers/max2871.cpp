@@ -3,7 +3,7 @@
 
 #include "delay.hpp"
 #include <cmath>
-#define LOG_LEVEL	LOG_LEVEL_ERROR
+#define LOG_LEVEL	LOG_LEVEL_WARN
 #define LOG_MODULE	"MAX2871"
 #include "Log.h"
 

@@ -26,6 +26,10 @@ void App_Start() {
 	// Wait for initial settings before starting sweep
 	while (!newSettings);
 	LOG_INFO("New settings received");
+//	settings.f_start = 1000000000;
+//	settings.f_stop = 1000000000;
+//	settings.if_bandwidth = 10000;
+//	settings.points = 101;
 	pointCnt = 0;
 	newSettings = false;
 	while (1) {

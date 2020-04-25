@@ -48,6 +48,9 @@ bool VNA::Init() {
 	// 4 MHz clock for ADC
 	Si5351.SetCLK(7, 4000000, Si5351C::PLL::A);
 	Si5351.Enable(7);
+	// 10 MHz reference clock
+	Si5351.SetCLK(6, 10000000, Si5351C::PLL::A, Si5351C::DriveStrength::mA8);
+	Si5351.Enable(6);
 
 	// Generate second LO with Si5351
 	Si5351.SetCLK(2, IF1 - IF2, Si5351C::PLL::A);
@@ -102,6 +105,8 @@ bool VNA::Init() {
 //		LOG_INFO("Sweeped %u points in %lums, (calc/com/wait: %lu/%lu/%lu)",
 //				steps, duration, calctime, comtime, waittime);
 //	}
+
+	Sampling::Init();
 
 	LOG_INFO("Initialized");
 	return true;
