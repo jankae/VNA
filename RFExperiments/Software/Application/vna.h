@@ -16,8 +16,8 @@ public:
     VNA(QWidget *parent = nullptr);
 private:
     static constexpr Protocol::SweepSettings defaultSweep = {
-        .f_start = 25000000,
-        .f_stop = 3000000000,
+        .f_start = 999999950,
+        .f_stop = 1000000050,
         .points = 101,
         .if_bandwidth = 50,
         .mdbm_excitation = 0,

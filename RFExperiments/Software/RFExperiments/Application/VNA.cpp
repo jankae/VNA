@@ -26,11 +26,11 @@ static constexpr uint32_t IF2 = 250000;
 
 static void ExcitatePort1() {
 	LOG_DEBUG("Exciting port1");
-	// TODO
+	TX_SWITCH_GPIO_Port->BSRR = TX_SWITCH_Pin;
 }
 static void ExcitatePort2() {
 	LOG_DEBUG("Exciting port2");
-	// TODO
+	TX_SWITCH_GPIO_Port->BSRR = TX_SWITCH_Pin << 16;
 }
 
 bool VNA::Init() {
@@ -45,8 +45,8 @@ bool VNA::Init() {
 	Si5351.Enable(0);
 	Si5351.SetCLK(1, 100000000, Si5351C::PLL::A);
 	Si5351.Enable(1);
-	// 4 MHz clock for ADC
-	Si5351.SetCLK(7, 4000000, Si5351C::PLL::A);
+	// Clock for ADC timing
+	Si5351.SetCLK(7, Sampling::ADCClock, Si5351C::PLL::A);
 	Si5351.Enable(7);
 	// 10 MHz reference clock
 	Si5351.SetCLK(6, 10000000, Si5351C::PLL::A, Si5351C::DriveStrength::mA8);
@@ -57,6 +57,8 @@ bool VNA::Init() {
 	Si5351.Enable(2);
 	Si5351.SetCLK(3, IF1 - IF2, Si5351C::PLL::A);
 	Si5351.Enable(3);
+	Si5351.SetCLK(4, IF1 - IF2, Si5351C::PLL::A);
+	Si5351.Enable(4);
 
 	Si5351.Locked(Si5351C::PLL::A);
 
@@ -69,10 +71,11 @@ bool VNA::Init() {
 
 	Source.SetFrequency(1000000000);
 	Source.SetPowerOutB(MAX2871::Power::p5dbm);
+	Source.SetPowerOutA(MAX2871::Power::p2dbm);
 	Source.UpdateFrequency();
 	LO1.SetFrequency(1000000000 + IF1);
 	LO1.SetPowerOutA(MAX2871::Power::p2dbm);
-//	LO1.SetPowerOutB(MAX2871::Power::p2dbm);
+	LO1.SetPowerOutB(MAX2871::Power::p2dbm);
 	LO1.UpdateFrequency();
 
 

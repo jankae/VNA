@@ -5,7 +5,8 @@
 
 namespace Sampling {
 
-static constexpr uint16_t Buffer = 1000;
+static constexpr double ADCClock = (800000000.0/60.0);//4000000.0f;
+static constexpr double ADCDivider = 7.0;
 
 using Result = struct _result {
 	std::complex<float> Ref;

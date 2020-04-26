@@ -157,6 +157,8 @@
                                 								
                                 <option id="fr.ac6.managedbuild.gnu.cpp.compiler.option.misc.other.517884776" name="Other flags" superClass="fr.ac6.managedbuild.gnu.cpp.compiler.option.misc.other" useByScannerDiscovery="false" value="-fmessage-length=0" valueType="string" />
                                 								
+                                <option id="gnu.cpp.compiler.option.dialect.std.1814562060" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.c++1y" valueType="enumerated" />
+                                								
                                 <inputType id="fr.ac6.managedbuild.tool.gnu.cross.cpp.compiler.input.cpp.732229219" superClass="fr.ac6.managedbuild.tool.gnu.cross.cpp.compiler.input.cpp" />
                                 								
                                 <inputType id="fr.ac6.managedbuild.tool.gnu.cross.cpp.compiler.input.s.1407714436" superClass="fr.ac6.managedbuild.tool.gnu.cross.cpp.compiler.input.s" />
@@ -620,5 +622,7 @@
     </storageModule>
     	
     <storageModule moduleId="org.eclipse.cdt.make.core.buildtargets" />
+    	
+    <storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings" />
     
 </cproject>

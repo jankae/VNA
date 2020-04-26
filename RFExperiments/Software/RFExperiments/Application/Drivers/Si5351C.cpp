@@ -87,6 +87,10 @@ bool Si5351C::SetCLK(uint8_t clknum, uint32_t frequency, PLL source, DriveStreng
 		if(div & 0x01) {
 			LOG_ERR("Divider on CLK6/7 must be even, clock frequency will not match exactly");
 		}
+		div &= 0xFE;
+		uint32_t actualFreq = pllFreq / div;
+		LOG_DEBUG("Optimal divider for %luHz/%luHz is: %u (%luHz deviation)",
+				pllFreq, frequency, div, abs(frequency - actualFreq));
 		c.P1 = div;
 	} else {
 		while (pllFreq / (frequency * c.RDiv) >= 2048

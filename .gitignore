@@ -1,3 +1,7 @@
 *.s#*
 *.b#*
+*.log
+*.net
+*.op.raw
+*.raw
 

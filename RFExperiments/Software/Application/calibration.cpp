@@ -178,8 +178,6 @@ void Calibration::correctMeasurement(Protocol::Datapoint &d)
             - p->re11 * (S21m - p->fe30) / p->fe10e32 * (S12m - p->re03) / p->re23e01) / denom;
     auto S12 = ((S12m - p->re03) / p->re23e01 * (1.0 + (S11m - p->fe00) / p->fe10e01 * (p->fe11 - p->re11))) / denom;
 
-    S22 = (S11m - p->fe00) / (S11m * p->fe11 - (p->fe00 * p->fe11 - p->fe10e01));
-
     d.real_S11 = S11.real();
     d.imag_S11 = S11.imag();
     d.real_S12 = S12.real();
