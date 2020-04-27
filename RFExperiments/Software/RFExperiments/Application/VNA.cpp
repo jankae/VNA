@@ -21,7 +21,7 @@ static MAX2871 LO1 = MAX2871(&hspi3, PLL2_CE_GPIO_Port, PLL2_CE_Pin,
 		PLL2_LE_GPIO_Port, PLL2_LE_Pin, PLL2_RF_GPIO_Port, PLL2_RF_Pin,
 		PLL2_LD_GPIO_Port, PLL2_LD_Pin);
 
-static constexpr uint32_t IF1 = 50000000;
+static constexpr uint32_t IF1 = 60000000;
 static constexpr uint32_t IF2 = 250000;
 
 static void ExcitatePort1() {
