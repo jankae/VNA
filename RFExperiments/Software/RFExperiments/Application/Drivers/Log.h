@@ -4,7 +4,7 @@
 extern "C" {
 #endif
 
-#define LOG_BLOCKING
+//#define LOG_BLOCKING
 
 #define LOG_USART			3
 #define LOG_SENDBUF_LENGTH	1024

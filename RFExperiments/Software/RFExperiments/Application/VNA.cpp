@@ -118,14 +118,14 @@ bool VNA::Init() {
 static VNA::Callback callback;
 static VNA::Result result;
 static uint8_t activePort;
-static uint16_t samples;
+static uint32_t samples;
 
 static void SamplingCallback(Sampling::Result res) {
 	// Calculate magnitude and phase relative to reference
 	if (activePort == 1) {
 		activePort = 2;
 		ExcitatePort2();
-		Delay::ms(1);
+//		Delay::ms(1);
 		Sampling::Start(SamplingCallback, samples);
 		result.S11 = res.Port1 / res.Ref;
 		result.S21 = res.Port2 / res.Ref;
@@ -143,7 +143,7 @@ static void SamplingCallback(Sampling::Result res) {
 	}
 }
 
-bool VNA::Measure(uint64_t f, Callback cb, uint16_t nsamples) {
+bool VNA::Measure(uint64_t f, Callback cb, uint32_t nsamples) {
 	LOG_INFO("Starting measurement at f=%lu%06luHz", (uint32_t ) (f / 1000000),
 			(uint32_t ) (f % 1000000));
 	callback = cb;
@@ -154,7 +154,7 @@ bool VNA::Measure(uint64_t f, Callback cb, uint16_t nsamples) {
 	ExcitatePort1();
 	activePort = 1;
 	while(!LO1.Locked() || !Source.Locked());
-	Delay::ms(1);
+//	Delay::ms(1);
 	samples = nsamples;
 	Sampling::Start(SamplingCallback, samples);
 	return true;

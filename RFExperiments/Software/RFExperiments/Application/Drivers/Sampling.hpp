@@ -17,6 +17,6 @@ using Result = struct _result {
 using Callback = void(*)(Result res);
 
 bool Init();
-bool Start(Callback cb, uint16_t samples);
+bool Start(Callback cb, uint32_t samples);
 
 }

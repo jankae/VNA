@@ -3,16 +3,18 @@
 #include "VNA.hpp"
 #include "delay.hpp"
 #include "Communication.h"
+#include "Sampling.hpp"
+#include "main.h"
 
 #define LOG_LEVEL	LOG_LEVEL_INFO
 #define LOG_MODULE	"App"
 #include "Log.h"
 
-static bool newSettings = false;
+static volatile bool newSettings = false;
 static Protocol::SweepSettings settings;
 uint16_t pointCnt = 0;
 
-static bool done;
+static volatile bool done;
 static VNA::Result result;
 void VNACallback(VNA::Result res) {
 	result = res;
@@ -36,12 +38,16 @@ void App_Start() {
 		uint64_t freq = settings.f_start
 				+ (settings.f_stop - settings.f_start) * pointCnt
 						/ (settings.points - 1);
+		TRACE_GPIO_Port->BSRR = TRACE_Pin;
 		LOG_INFO("Setting up for point %u/%u: %lu%06luHz", pointCnt + 1,
 				settings.points, (uint32_t ) (freq / 1000000),
 				(uint32_t ) (freq % 1000000));
-		uint16_t averages = 1000000 / settings.if_bandwidth;
+		TRACE_GPIO_Port->BSRR = TRACE_Pin << 16;
+		uint32_t averages = (Sampling::ADCClock / Sampling::ADCDivider)
+				/ settings.if_bandwidth;
 		// round up to next multiple of 4
 		averages = (averages + 3) & ~0x03;
+		done = false;
 		VNA::Measure(freq, VNACallback, averages);
 		while (!done && !newSettings) {
 		}

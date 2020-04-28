@@ -27,8 +27,8 @@ static constexpr uint16_t PeriodicBufferSize = CalcPeriodic();
 
 constexpr uint16_t CalcBufferSize() {
 	constexpr double SampleRate = Sampling::ADCClock / Sampling::ADCDivider;
-	// At least 1ms between ADC DMA interrupts
-	uint16_t MinSamples = SampleRate / 1000;
+	// At least 0.1ms between ADC DMA interrupts
+	uint16_t MinSamples = SampleRate / 15000;
 	// Buffer also has to fit an integer number of periods
 	if (MinSamples % PeriodicBufferSize) {
 		MinSamples += PeriodicBufferSize - MinSamples % PeriodicBufferSize;
@@ -68,8 +68,8 @@ static float port1Q = 0;
 static float port2I = 0;
 static float port2Q = 0;
 static uint32_t samples_cnt;
-static bool active;
-static bool firstISR;
+static volatile bool active;
+static uint8_t ignoreCnt;
 
 bool Sampling::Init() {
 	LOG_INFO("ADC Clock: %f, ADC Divider: %f -> Buffersize = %u", (float) Sampling::ADCClock, (float) Sampling::ADCDivider, BufferSize);
@@ -84,7 +84,7 @@ bool Sampling::Init() {
 	return true;
 }
 
-bool Sampling::Start(Callback cb, uint16_t samples) {
+bool Sampling::Start(Callback cb, uint32_t samples) {
 	LOG_DEBUG("Started");
 	starttime = HAL_GetTick();
 	NVIC_DisableIRQ(DMA2_Stream0_IRQn);
@@ -97,7 +97,7 @@ bool Sampling::Start(Callback cb, uint16_t samples) {
 	port1Q = 0;
 	port2I = 0;
 	port2Q = 0;
-	firstISR = true;
+	ignoreCnt = 2;
 	active = true;
 	NVIC_EnableIRQ(DMA2_Stream0_IRQn);
 	return true;
@@ -108,15 +108,15 @@ static void ComputeComplex(uint16_t *bufStart) {
 	if(!active) {
 		return;
 	}
-	if(firstISR) {
-		// ignore first batch of samples
-		firstISR = false;
+	if(ignoreCnt) {
+		ignoreCnt--;
+		// ignore first batches of samples
 		return;
 	}
 	/*
 	 * When running at 144MHz, the CPU spends 80% of the time in the DMA interrupt
 	 */
-	TRACE_GPIO_Port->BSRR = TRACE_Pin;
+	TRACE2_GPIO_Port->BSRR = TRACE2_Pin;
 	for (uint32_t i = 0; i < BufferSize; i += PeriodicBufferSize) {
 		for (uint16_t j = 0; j < PeriodicBufferSize; j++) {
 			refI += bufStart[(i + j) * 3] * fftCoefficients.I[j];
@@ -141,14 +141,14 @@ static void ComputeComplex(uint16_t *bufStart) {
 					imag(res.Ref), real(res.Port1), imag(res.Port1), real(res.Port2),
 					imag(res.Port2));
 			active = false;
-			TRACE_GPIO_Port->BSRR = TRACE_Pin << 16;
+			TRACE2_GPIO_Port->BSRR = TRACE2_Pin << 16;
 			if (callback) {
 				callback(res);
 			}
-			break;
+			return;
 		}
 	}
-	TRACE_GPIO_Port->BSRR = TRACE_Pin << 16;
+	TRACE2_GPIO_Port->BSRR = TRACE2_Pin << 16;
 }
 
 extern "C" {

@@ -33,6 +33,52 @@ void Calibration::addMeasurement(Calibration::Measurement type, Protocol::Datapo
     measurements[type].push_back(d);
 }
 
+bool Calibration::calculationPossible(Calibration::Type type)
+{
+    std::vector<Measurement> requiredMeasurements;
+    switch(type) {
+    case Type::Port1OSL:
+        requiredMeasurements.push_back(Measurement::Port1Open);
+        requiredMeasurements.push_back(Measurement::Port1Short);
+        requiredMeasurements.push_back(Measurement::Port1Load);
+        break;
+    case Type::Port2OSL:
+        requiredMeasurements.push_back(Measurement::Port2Open);
+        requiredMeasurements.push_back(Measurement::Port2Short);
+        requiredMeasurements.push_back(Measurement::Port2Load);
+        break;
+    case Type::FullOSLT:
+        requiredMeasurements.push_back(Measurement::Port1Open);
+        requiredMeasurements.push_back(Measurement::Port1Short);
+        requiredMeasurements.push_back(Measurement::Port1Load);
+        requiredMeasurements.push_back(Measurement::Port2Open);
+        requiredMeasurements.push_back(Measurement::Port2Short);
+        requiredMeasurements.push_back(Measurement::Port2Load);
+        requiredMeasurements.push_back(Measurement::Through);
+        break;
+    }
+    return SanityCheckSamples(requiredMeasurements);
+}
+
+bool Calibration::constructErrorTerms(Calibration::Type type)
+{
+    if(!calculationPossible(type)) {
+        return false;
+    }
+    switch(type) {
+    case Type::Port1OSL:
+        constructPort1OSL();
+        break;
+    case Type::Port2OSL:
+        constructPort2OSL();
+        break;
+    case Type::FullOSLT:
+        construct12TermPoints();
+        break;
+    }
+    return true;
+}
+
 void Calibration::construct12TermPoints()
 {
     std::vector<Measurement> requiredMeasurements;
@@ -207,7 +253,33 @@ Calibration::InterpolationType Calibration::getInterpolation(Protocol::SweepSett
         }
     }
     // if we get here all frequency points were matched
-    return InterpolationType::Exact;
+    if(points.front().frequency == settings.f_start && points.back().frequency == settings.f_stop) {
+        return InterpolationType::Unchanged;
+    } else {
+        return InterpolationType::Exact;
+    }
+}
+
+QString Calibration::MeasurementToString(Calibration::Measurement m)
+{
+    switch(m) {
+    case Measurement::Port1Open:
+        return "Port 1 Open";
+    case Measurement::Port1Short:
+        return "Port 1 Short";
+    case Measurement::Port1Load:
+        return "Port 1 Load";
+    case Measurement::Port2Open:
+        return "Port 2 Open";
+    case Measurement::Port2Short:
+        return "Port 2 Short";
+    case Measurement::Port2Load:
+        return "Port 2 Load";
+    case Measurement::Through:
+        return "Through";
+    case Measurement::Isolation:
+        return "Isolation";
+    }
 }
 
 bool Calibration::SanityCheckSamples(std::vector<Calibration::Measurement> &requiredMeasurements)
@@ -216,6 +288,10 @@ bool Calibration::SanityCheckSamples(std::vector<Calibration::Measurement> &requ
     vector<uint64_t> freqs;
     for(auto type : requiredMeasurements) {
         auto m = measurements[type];
+        if(m.size() == 0) {
+            // empty required measurement
+            return false;
+        }
         if(freqs.size() == 0) {
             // this is the first measurement, create frequency vector
             for(auto p : m) {

@@ -15,6 +15,6 @@ using Result = struct _result {
 using Callback = void(*)(Result);
 
 bool Init();
-bool Measure(uint64_t f, Callback cb, uint16_t nsamples);
+bool Measure(uint64_t f, Callback cb, uint32_t nsamples);
 
 }

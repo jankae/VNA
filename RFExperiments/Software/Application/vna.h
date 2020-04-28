@@ -9,6 +9,7 @@
 #include "sparamtable.h"
 #include "calibration.h"
 #include <QProgressDialog>
+#include "Menu/menuaction.h"
 
 class VNA : public QMainWindow
 {
@@ -17,10 +18,10 @@ public:
     VNA(QWidget *parent = nullptr);
 private:
     static constexpr Protocol::SweepSettings defaultSweep = {
-        .f_start = 999999950,
-        .f_stop = 1000000050,
-        .points = 101,
-        .if_bandwidth = 50,
+        .f_start = 100000000,
+        .f_stop = 2000000000,
+        .points = 501,
+        .if_bandwidth = 10000,
         .mdbm_excitation = 0,
     };
 private slots:
@@ -41,7 +42,10 @@ private:
     Calibration::Measurement calMeasurement;
     bool calMeasuring;
     bool calWaitFirst;
-    QProgressDialog *calDialog;
+    QProgressDialog calDialog;
+
+    // Calibration menu
+    MenuAction *mCalOSL1, *mCalOSL2, *mCalFullOSLT;
 signals:
     void dataChanged();
 };

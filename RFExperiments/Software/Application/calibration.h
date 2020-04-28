@@ -24,21 +24,34 @@ public:
     void clearMeasurements();
     void clearMeasurement(Measurement type);
     void addMeasurement(Measurement type, Protocol::Datapoint &d);
-    void construct12TermPoints();
-    void constructPort1OSL();
-    void constructPort2OSL();
+
+    enum class Type {
+        Port1OSL,
+        Port2OSL,
+        FullOSLT,
+    };
+
+    bool calculationPossible(Type type);
+    bool constructErrorTerms(Type type);
+
     void correctMeasurement(Protocol::Datapoint &d);
 
     enum class InterpolationType {
-        Exact,
-        Interpolate,
-        Extrapolate,
-        NoCalibration,
+        Unchanged, // Nothing has changed, settings and calibration points match
+        Exact, // Every frequency point in settings has an exact calibration point (but there are more calibration points outside of the sweep)
+        Interpolate, // Every point in the sweep can be interpolated between two calibration points
+        Extrapolate, // At least one point in sweep is outside of the calibration and has to be extrapolated
+        NoCalibration, // No calibration available
     };
 
     InterpolationType getInterpolation(Protocol::SweepSettings settings);
 
+    static QString MeasurementToString(Measurement m);
+
 private:
+    void construct12TermPoints();
+    void constructPort1OSL();
+    void constructPort2OSL();
     bool SanityCheckSamples(std::vector<Measurement> &requiredMeasurements);
     class Point
     {

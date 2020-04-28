@@ -139,13 +139,20 @@ VNA::VNA(QWidget *parent)
     mCalibration->addItem(mCalThrough);
     mCalibration->addItem(mCalIsolation);
 
-    auto mCalOSL1 = new MenuAction("Apply Port 1 OSL");
+    mCalOSL1 = new MenuAction("Apply Port 1 OSL");
     mCalibration->addItem(mCalOSL1);
+    mCalOSL1->setDisabled(true);
+
+    mCalOSL2 = new MenuAction("Apply Port 2 OSL");
+    mCalibration->addItem(mCalOSL2);
+    mCalOSL2->setDisabled(true);
+
+    mCalFullOSLT = new MenuAction("Apply full OSLT");
+    mCalibration->addItem(mCalFullOSLT);
+    mCalFullOSLT->setDisabled(true);
 
     mCalibration->finalize();
     mMain->addMenu(mCalibration, "Calibration");
-
-
 
     mMain->finalize();
 
@@ -227,16 +234,22 @@ VNA::VNA(QWidget *parent)
         cal.clearMeasurement(m);
         calWaitFirst = true;
         calMeasuring = true;
-        calDialog = new QProgressDialog("Performing calibration measurement...", "Abort", 0, settings.points);
-        calDialog->setValue(0);
-        calDialog->setWindowModality(Qt::WindowModal);
+        QString text = "Measuring \"";
+        text.append(Calibration::MeasurementToString(m));
+        text.append("\" parameters.");
+//        calDialog = new QProgressDialog(text, "Abort", 0, settings.points);
+        calDialog.setRange(0, settings.points);
+        calDialog.setLabelText(text);
+        calDialog.setCancelButtonText("Abort");
+        calDialog.setWindowTitle("Taking calibration measurement...");
+        calDialog.setValue(0);
+        calDialog.setWindowModality(Qt::ApplicationModal);
         // always show the dialog
-        calDialog->setMinimumDuration(0);
-        connect(calDialog, &QProgressDialog::canceled, [=]() {
+        calDialog.setMinimumDuration(0);
+        connect(&calDialog, &QProgressDialog::canceled, [=]() {
             // the user aborted the calibration measurement
             calMeasuring = false;
             cal.clearMeasurement(calMeasurement);
-            delete calDialog;
         });
     };
     connect(mCalPort1Open, &MenuAction::triggered, [=](){
@@ -264,7 +277,15 @@ VNA::VNA(QWidget *parent)
        startCalibration(Calibration::Measurement::Isolation);
     });
     connect(mCalOSL1, &MenuAction::triggered, [=](){
-        cal.constructPort1OSL();
+        cal.constructErrorTerms(Calibration::Type::Port1OSL);
+        calValid = true;
+    });
+    connect(mCalOSL2, &MenuAction::triggered, [=](){
+        cal.constructErrorTerms(Calibration::Type::Port2OSL);
+        calValid = true;
+    });
+    connect(mCalFullOSLT, &MenuAction::triggered, [=](){
+        cal.constructErrorTerms(Calibration::Type::FullOSLT);
         calValid = true;
     });
 
@@ -292,10 +313,19 @@ void VNA::NewDatapoint(Protocol::Datapoint d)
         if(!calWaitFirst || d.pointNum == 0) {
             calWaitFirst = false;
             cal.addMeasurement(calMeasurement, d);
-            calDialog->setValue(d.pointNum);
+            calDialog.setValue(d.pointNum + 1);
             if(d.pointNum == settings.points - 1) {
                 calMeasuring = false;
-                delete calDialog;
+                // Check is applying calibration is available
+                if(cal.calculationPossible(Calibration::Type::Port1OSL)) {
+                    mCalOSL1->setEnabled(true);
+                }
+                if(cal.calculationPossible(Calibration::Type::Port2OSL)) {
+                    mCalOSL2->setEnabled(true);
+                }
+                if(cal.calculationPossible(Calibration::Type::FullOSLT)) {
+                    mCalFullOSLT->setEnabled(true);
+                }
             }
         }
     }
