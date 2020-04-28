@@ -5,14 +5,19 @@
 #include <functional>
 #include <libusb-1.0/libusb.h>
 #include <thread>
+#include <QObject>
 
-class Device
+Q_DECLARE_METATYPE(Protocol::Datapoint);
+
+class Device : public QObject
 {
+    Q_OBJECT
 public:
     Device();
     ~Device();
     bool Configure(Protocol::SweepSettings settings);
-    void SetCallback(std::function<void(Protocol::Datapoint)> callback);
+signals:
+    void DatapointReceived(Protocol::Datapoint);
 private:
     static constexpr int VID = 1155;
     static constexpr int PID = 22336;
@@ -24,7 +29,6 @@ private:
         dev->ReceiveThread();
     }
 
-    std::function<void(Protocol::Datapoint)> m_callback;
     libusb_device_handle *m_handle;
     libusb_context *m_context;
     bool m_connected;

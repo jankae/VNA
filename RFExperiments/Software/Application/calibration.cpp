@@ -23,7 +23,12 @@ void Calibration::clearMeasurements()
     }
 }
 
-void Calibration::addMeasurement(Calibration::Measurement type, Protocol::Datapoint d)
+void Calibration::clearMeasurement(Calibration::Measurement type)
+{
+    measurements[type].clear();
+}
+
+void Calibration::addMeasurement(Calibration::Measurement type, Protocol::Datapoint &d)
 {
     measurements[type].push_back(d);
 }
@@ -162,21 +167,17 @@ void Calibration::correctMeasurement(Protocol::Datapoint &d)
     auto S12m = complex<double>(d.real_S12, d.imag_S12);
 
     // find correct entry
-    auto p = lower_bound(points.begin(), points.end(), d.frequency, [](Point p, uint64_t freq) -> bool {
-        return p.frequency < freq;
-    });
-    if(p->frequency != d.frequency) {
-        throw runtime_error("No calibration point for current frequency");
-    }
+    auto p = getCalibrationPoint(d);
+
     // equations from page 20 of http://www2.electron.frba.utn.edu.ar/~jcecconi/Bibliografia/04%20-%20Param_S_y_VNA/Network_Analyzer_Error_Models_and_Calibration_Methods.pdf
-    auto denom = (1.0 + (S11m - p->fe00) / p->fe10e01 * p->fe11) * (1.0 + (S22m - p->re33) / p->re23e32 * p->re22)
-            - (S21m - p->fe30) / p->fe10e32 * (S12m - p->re03) / p->re23e01 * p->fe22 * p->re11;
-    auto S11 = ((S11m - p->fe00) / p->fe10e01 * (1.0 + (S22m - p->re33) / p->re23e32 * p->re22)
-            - p->fe22 * (S21m - p->fe30) / p->fe10e32 * (S12m - p->re03) / p->re23e01) / denom;
-    auto S21 = ((S21m - p->fe30) / p->fe10e32 * (1.0 + (S22m - p->re33) / p->re23e32 * (p->re22 - p->fe22))) / denom;
-    auto S22 = ((S22m - p->re33) / p->re23e32 * (1.0 + (S11m - p->fe00) / p->fe10e01 * p->fe11)
-            - p->re11 * (S21m - p->fe30) / p->fe10e32 * (S12m - p->re03) / p->re23e01) / denom;
-    auto S12 = ((S12m - p->re03) / p->re23e01 * (1.0 + (S11m - p->fe00) / p->fe10e01 * (p->fe11 - p->re11))) / denom;
+    auto denom = (1.0 + (S11m - p.fe00) / p.fe10e01 * p.fe11) * (1.0 + (S22m - p.re33) / p.re23e32 * p.re22)
+            - (S21m - p.fe30) / p.fe10e32 * (S12m - p.re03) / p.re23e01 * p.fe22 * p.re11;
+    auto S11 = ((S11m - p.fe00) / p.fe10e01 * (1.0 + (S22m - p.re33) / p.re23e32 * p.re22)
+            - p.fe22 * (S21m - p.fe30) / p.fe10e32 * (S12m - p.re03) / p.re23e01) / denom;
+    auto S21 = ((S21m - p.fe30) / p.fe10e32 * (1.0 + (S22m - p.re33) / p.re23e32 * (p.re22 - p.fe22))) / denom;
+    auto S22 = ((S22m - p.re33) / p.re23e32 * (1.0 + (S11m - p.fe00) / p.fe10e01 * p.fe11)
+            - p.re11 * (S21m - p.fe30) / p.fe10e32 * (S12m - p.re03) / p.re23e01) / denom;
+    auto S12 = ((S12m - p.re03) / p.re23e01 * (1.0 + (S11m - p.fe00) / p.fe10e01 * (p.fe11 - p.re11))) / denom;
 
     d.real_S11 = S11.real();
     d.imag_S11 = S11.imag();
@@ -186,6 +187,27 @@ void Calibration::correctMeasurement(Protocol::Datapoint &d)
     d.imag_S21 = S21.imag();
     d.real_S22 = S22.real();
     d.imag_S22 = S22.imag();
+}
+
+Calibration::InterpolationType Calibration::getInterpolation(Protocol::SweepSettings settings)
+{
+    if(!points.size()) {
+        return InterpolationType::NoCalibration;
+    }
+    if(settings.f_start < points.front().frequency || settings.f_stop > points.back().frequency) {
+        return InterpolationType::Extrapolate;
+    }
+    // Either exact or interpolation, check individual frequencies
+    uint32_t f_step = (settings.f_stop - settings.f_start) / (settings.points - 1);
+    for(uint64_t f = settings.f_start; f <= settings.f_stop; f += f_step) {
+        if(find_if(points.begin(), points.end(), [&f](const Point& p){
+            return abs(f - p.frequency) < 100;
+        }) == points.end()) {
+            return InterpolationType::Interpolate;
+        }
+    }
+    // if we get here all frequency points were matched
+    return InterpolationType::Exact;
 }
 
 bool Calibration::SanityCheckSamples(std::vector<Calibration::Measurement> &requiredMeasurements)
@@ -212,6 +234,48 @@ bool Calibration::SanityCheckSamples(std::vector<Calibration::Measurement> &requ
         }
     }
     return true;
+}
+
+Calibration::Point Calibration::getCalibrationPoint(Protocol::Datapoint &d)
+{
+    if(!points.size()) {
+        throw runtime_error("No calibration points available");
+    }
+    if(d.frequency <= points.front().frequency) {
+        // use first point even for lower frequencies
+        return points.front();
+    }
+    if(d.frequency >= points.back().frequency) {
+        // use last point even for higher frequencies
+        return points.back();
+    }
+    auto p = lower_bound(points.begin(), points.end(), d.frequency, [](Point p, uint64_t freq) -> bool {
+        return p.frequency < freq;
+    });
+    if(p->frequency == d.frequency) {
+        // Exact match, return point
+        return *p;
+    }
+    // need to interpolate
+    auto high = p;
+    p--;
+    auto low = p;
+    double alpha = (d.frequency - low->frequency) / (high->frequency - low->frequency);
+    Point ret;
+    ret.frequency = d.frequency;
+    ret.fe00 = low->fe00 * (1 - alpha) + high->fe00 * alpha;
+    ret.fe11 = low->fe11 * (1 - alpha) + high->fe11 * alpha;
+    ret.fe22 = low->fe22 * (1 - alpha) + high->fe22 * alpha;
+    ret.fe30 = low->fe30 * (1 - alpha) + high->fe30 * alpha;
+    ret.re03 = low->re03 * (1 - alpha) + high->re03 * alpha;
+    ret.re11 = low->re11 * (1 - alpha) + high->re11 * alpha;
+    ret.re22 = low->re22 * (1 - alpha) + high->re22 * alpha;
+    ret.re33 = low->re33 * (1 - alpha) + high->re33 * alpha;
+    ret.fe10e01 = low->fe10e01 * (1 - alpha) + high->fe10e01 * alpha;
+    ret.fe10e32 = low->fe10e32 * (1 - alpha) + high->fe10e32 * alpha;
+    ret.re23e01 = low->re23e01 * (1 - alpha) + high->re23e01 * alpha;
+    ret.re23e32 = low->re23e32 * (1 - alpha) + high->re23e32 * alpha;
+    return ret;
 }
 
 void Calibration::computeOSL(std::complex<double> o_m, std::complex<double> s_m, std::complex<double> l_m, std::complex<double> &directivity, std::complex<double> &match, std::complex<double> &tracking)

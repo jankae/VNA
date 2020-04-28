@@ -8,6 +8,7 @@
 #include "plot.h"
 #include "sparamtable.h"
 #include "calibration.h"
+#include <QProgressDialog>
 
 class VNA : public QMainWindow
 {
@@ -22,20 +23,25 @@ private:
         .if_bandwidth = 50,
         .mdbm_excitation = 0,
     };
+private slots:
     void NewDatapoint(Protocol::Datapoint d);
+private:
     Device device;
     Protocol::SweepSettings settings;
     QList<Plot*> plots;
     QGridLayout plotLayout;
     bool fsPlot;
     int fsRow, fsColumn, fsRowSpan, fsColumnSpan;
-private:
     void SettingsChanged();
     SParamTable dataTable;
+
+    // Calibration
     Calibration cal;
     bool calValid;
     Calibration::Measurement calMeasurement;
     bool calMeasuring;
+    bool calWaitFirst;
+    QProgressDialog *calDialog;
 signals:
     void dataChanged();
 };

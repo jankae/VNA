@@ -219,20 +219,49 @@ VNA::VNA(QWidget *parent)
     });
 
     // Calibration connections
+    auto startCalibration = [=](Calibration::Measurement m) {
+        // Trigger sweep to start from beginning
+        SettingsChanged();
+        calMeasurement = m;
+        // Delete any already captured data of this measurement
+        cal.clearMeasurement(m);
+        calWaitFirst = true;
+        calMeasuring = true;
+        calDialog = new QProgressDialog("Performing calibration measurement...", "Abort", 0, settings.points);
+        calDialog->setValue(0);
+        calDialog->setWindowModality(Qt::WindowModal);
+        // always show the dialog
+        calDialog->setMinimumDuration(0);
+        connect(calDialog, &QProgressDialog::canceled, [=]() {
+            // the user aborted the calibration measurement
+            calMeasuring = false;
+            cal.clearMeasurement(calMeasurement);
+            delete calDialog;
+        });
+    };
     connect(mCalPort1Open, &MenuAction::triggered, [=](){
-       SettingsChanged();
-       calMeasurement = Calibration::Measurement::Port1Open;
-       calMeasuring = true;
+       startCalibration(Calibration::Measurement::Port1Open);
     });
     connect(mCalPort1Short, &MenuAction::triggered, [=](){
-       SettingsChanged();
-       calMeasurement = Calibration::Measurement::Port1Short;
-       calMeasuring = true;
+       startCalibration(Calibration::Measurement::Port1Short);
     });
     connect(mCalPort1Load, &MenuAction::triggered, [=](){
-       SettingsChanged();
-       calMeasurement = Calibration::Measurement::Port1Load;
-       calMeasuring = true;
+       startCalibration(Calibration::Measurement::Port1Load);
+    });
+    connect(mCalPort2Open, &MenuAction::triggered, [=](){
+       startCalibration(Calibration::Measurement::Port2Open);
+    });
+    connect(mCalPort2Short, &MenuAction::triggered, [=](){
+       startCalibration(Calibration::Measurement::Port2Short);
+    });
+    connect(mCalPort2Load, &MenuAction::triggered, [=](){
+       startCalibration(Calibration::Measurement::Port2Load);
+    });
+    connect(mCalThrough, &MenuAction::triggered, [=](){
+       startCalibration(Calibration::Measurement::Through);
+    });
+    connect(mCalIsolation, &MenuAction::triggered, [=](){
+       startCalibration(Calibration::Measurement::Isolation);
     });
     connect(mCalOSL1, &MenuAction::triggered, [=](){
         cal.constructPort1OSL();
@@ -251,18 +280,23 @@ VNA::VNA(QWidget *parent)
     mainLayout->addWidget(menuWidget);
     setCentralWidget(mainWidget);
     //setLayout(mainLayout);
-    device.SetCallback(callback);
+    qRegisterMetaType<Protocol::Datapoint>("Datapoint");
+    auto success = connect(&device, &Device::DatapointReceived, this, &VNA::NewDatapoint);
+    Q_ASSERT(success);
     SettingsChanged();
 }
 
 void VNA::NewDatapoint(Protocol::Datapoint d)
 {
     if(calMeasuring) {
-        cal.addMeasurement(calMeasurement, d);
-        if(d.pointNum == settings.points - 1) {
-            calMeasuring = false;
-            auto message = new QMessageBox(QMessageBox::NoIcon, "Calibration measurement done", "Dummy text", QMessageBox::Ok);
-            message->exec();
+        if(!calWaitFirst || d.pointNum == 0) {
+            calWaitFirst = false;
+            cal.addMeasurement(calMeasurement, d);
+            calDialog->setValue(d.pointNum);
+            if(d.pointNum == settings.points - 1) {
+                calMeasuring = false;
+                delete calDialog;
+            }
         }
     }
     if(calValid) {

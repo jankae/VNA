@@ -22,11 +22,21 @@ public:
         Through,
     };
     void clearMeasurements();
-    void addMeasurement(Measurement type, Protocol::Datapoint d);
+    void clearMeasurement(Measurement type);
+    void addMeasurement(Measurement type, Protocol::Datapoint &d);
     void construct12TermPoints();
     void constructPort1OSL();
     void constructPort2OSL();
     void correctMeasurement(Protocol::Datapoint &d);
+
+    enum class InterpolationType {
+        Exact,
+        Interpolate,
+        Extrapolate,
+        NoCalibration,
+    };
+
+    InterpolationType getInterpolation(Protocol::SweepSettings settings);
 
 private:
     bool SanityCheckSamples(std::vector<Measurement> &requiredMeasurements);
@@ -39,6 +49,7 @@ private:
         // Reverse error terms
         std::complex<double> re33, re11, re23e32, re23e01, re22, re03;
     };
+    Point getCalibrationPoint(Protocol::Datapoint &d);
     void computeOSL(std::complex<double> o_m,
                     std::complex<double> s_m,
                     std::complex<double> l_m,

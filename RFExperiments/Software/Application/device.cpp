@@ -130,11 +130,6 @@ bool Device::Configure(Protocol::SweepSettings settings)
     return true;
 }
 
-void Device::SetCallback(std::function<void (Protocol::Datapoint)> callback)
-{
-    m_callback = callback;
-}
-
 void Device::ReceiveThread()
 {
     BOOST_LOG_TRIVIAL(info) << "Receive thread started" << flush;
@@ -168,9 +163,7 @@ void Device::ReceiveThread()
                     }
                     if(packet.type == Protocol::PacketType::Datapoint) {
                         BOOST_LOG_TRIVIAL(debug) << "Got new datapoint"<< std::flush;
-                        if(m_callback) {
-                            m_callback(packet.datapoint);
-                        }
+                        emit DatapointReceived(packet.datapoint);
                     }
                 } while (handled_len > 0);
             }
