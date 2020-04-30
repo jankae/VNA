@@ -13680,10 +13680,8 @@ Source: Epson Toyocom</description>
 <part name="GND62" library="supply1" deviceset="GND" device=""/>
 <part name="C104" library="rcl" deviceset="C-EU" device="C0603" value="100n"/>
 <part name="C105" library="rcl" deviceset="C-EU" device="C0603" value="100n"/>
-<part name="C106" library="rcl" deviceset="C-EU" device="C0603" value="100n"/>
 <part name="GND92" library="supply1" deviceset="GND" device=""/>
 <part name="GND93" library="supply1" deviceset="GND" device=""/>
-<part name="GND94" library="supply1" deviceset="GND" device=""/>
 <part name="C107" library="rcl" deviceset="C-EU" device="C0603" value="10n"/>
 <part name="R49" library="rcl" deviceset="R-EU_" device="R0603" value="10k"/>
 <part name="GND97" library="supply1" deviceset="GND" device=""/>
@@ -13692,8 +13690,6 @@ Source: Epson Toyocom</description>
 <part name="C109" library="rcl" deviceset="C-EU" device="C0603" value="4p"/>
 <part name="GND98" library="supply1" deviceset="GND" device=""/>
 <part name="L31" library="rf" deviceset="INDUCTOR" device="0603" value="Ferrite"/>
-<part name="C113" library="rcl" deviceset="C-EU" device="C0603" value="100n"/>
-<part name="GND103" library="supply1" deviceset="GND" device=""/>
 <part name="+3V4" library="supply1" deviceset="+3V3" device=""/>
 <part name="C110" library="rcl" deviceset="C-EU" device="C0603" value="100n"/>
 <part name="GND63" library="supply1" deviceset="GND" device=""/>
@@ -13930,18 +13926,11 @@ Source: Epson Toyocom</description>
 <attribute name="NAME" x="92.456" y="187.579" size="1.778" layer="95" rot="R180"/>
 <attribute name="VALUE" x="92.456" y="192.659" size="1.778" layer="96" rot="R180"/>
 </instance>
-<instance part="C106" gate="G$1" x="104.14" y="187.96" smashed="yes" rot="R180">
-<attribute name="NAME" x="102.616" y="187.579" size="1.778" layer="95" rot="R180"/>
-<attribute name="VALUE" x="102.616" y="192.659" size="1.778" layer="96" rot="R180"/>
-</instance>
 <instance part="GND92" gate="1" x="83.82" y="180.34" smashed="yes">
 <attribute name="VALUE" x="81.28" y="177.8" size="1.778" layer="96"/>
 </instance>
 <instance part="GND93" gate="1" x="93.98" y="180.34" smashed="yes">
 <attribute name="VALUE" x="91.44" y="177.8" size="1.778" layer="96"/>
-</instance>
-<instance part="GND94" gate="1" x="104.14" y="180.34" smashed="yes">
-<attribute name="VALUE" x="101.6" y="177.8" size="1.778" layer="96"/>
 </instance>
 <instance part="C107" gate="G$1" x="63.5" y="139.7" smashed="yes" rot="R90">
 <attribute name="NAME" x="63.119" y="141.224" size="1.778" layer="95" rot="R90"/>
@@ -13972,13 +13961,6 @@ Source: Epson Toyocom</description>
 <instance part="L31" gate="G$1" x="71.12" y="195.58" smashed="yes" rot="R90">
 <attribute name="NAME" x="74.93" y="194.0814" size="1.778" layer="95" rot="R180"/>
 <attribute name="VALUE" x="74.93" y="198.882" size="1.778" layer="96" rot="R180"/>
-</instance>
-<instance part="C113" gate="G$1" x="114.3" y="187.96" smashed="yes" rot="R180">
-<attribute name="NAME" x="112.776" y="187.579" size="1.778" layer="95" rot="R180"/>
-<attribute name="VALUE" x="112.776" y="192.659" size="1.778" layer="96" rot="R180"/>
-</instance>
-<instance part="GND103" gate="1" x="114.3" y="180.34" smashed="yes">
-<attribute name="VALUE" x="111.76" y="177.8" size="1.778" layer="96"/>
 </instance>
 <instance part="+3V4" gate="G$1" x="63.5" y="200.66" smashed="yes">
 <attribute name="VALUE" x="60.96" y="195.58" size="1.778" layer="96" rot="R90"/>
@@ -14141,11 +14123,6 @@ Source: Epson Toyocom</description>
 <wire x1="93.98" y1="182.88" x2="93.98" y2="185.42" width="0.1524" layer="91"/>
 </segment>
 <segment>
-<pinref part="C106" gate="G$1" pin="1"/>
-<pinref part="GND94" gate="1" pin="GND"/>
-<wire x1="104.14" y1="182.88" x2="104.14" y2="185.42" width="0.1524" layer="91"/>
-</segment>
-<segment>
 <pinref part="R49" gate="G$1" pin="1"/>
 <pinref part="GND97" gate="1" pin="GND"/>
 <wire x1="93.98" y1="114.3" x2="93.98" y2="111.76" width="0.1524" layer="91"/>
@@ -14166,11 +14143,6 @@ Source: Epson Toyocom</description>
 <wire x1="86.36" y1="157.48" x2="86.36" y2="160.02" width="0.1524" layer="91"/>
 <wire x1="86.36" y1="157.48" x2="86.36" y2="154.94" width="0.1524" layer="91"/>
 <junction x="86.36" y="154.94"/>
-</segment>
-<segment>
-<pinref part="C113" gate="G$1" pin="1"/>
-<pinref part="GND103" gate="1" pin="GND"/>
-<wire x1="114.3" y1="182.88" x2="114.3" y2="185.42" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="GND63" gate="1" pin="GND"/>
@@ -14233,35 +14205,37 @@ Source: Epson Toyocom</description>
 </net>
 <net name="SOURCE_REF" class="0">
 <segment>
-<pinref part="IC13" gate="G$1" pin="CLK0"/>
-<wire x1="144.78" y1="147.32" x2="195.58" y2="147.32" width="0.1524" layer="91"/>
 <wire x1="195.58" y1="147.32" x2="195.58" y2="177.8" width="0.1524" layer="91"/>
 <wire x1="195.58" y1="177.8" x2="195.58" y2="182.88" width="0.1524" layer="91"/>
 <wire x1="195.58" y1="182.88" x2="228.6" y2="182.88" width="0.1524" layer="91"/>
 <label x="228.6" y="182.88" size="2.1844" layer="95" xref="yes"/>
+<pinref part="IC13" gate="G$1" pin="CLK3"/>
+<wire x1="144.78" y1="139.7" x2="195.58" y2="139.7" width="0.1524" layer="91"/>
+<wire x1="195.58" y1="139.7" x2="195.58" y2="147.32" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="LO1_REF" class="0">
 <segment>
-<pinref part="IC13" gate="G$1" pin="CLK1"/>
-<wire x1="144.78" y1="144.78" x2="198.12" y2="144.78" width="0.1524" layer="91"/>
 <wire x1="198.12" y1="144.78" x2="198.12" y2="165.1" width="0.1524" layer="91"/>
 <wire x1="198.12" y1="165.1" x2="198.12" y2="167.64" width="0.1524" layer="91"/>
 <wire x1="198.12" y1="167.64" x2="228.6" y2="167.64" width="0.1524" layer="91"/>
 <label x="228.6" y="167.64" size="2.1844" layer="95" xref="yes"/>
+<pinref part="IC13" gate="G$1" pin="CLK2"/>
+<wire x1="144.78" y1="142.24" x2="198.12" y2="142.24" width="0.1524" layer="91"/>
+<wire x1="198.12" y1="142.24" x2="198.12" y2="144.78" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$101" class="0">
 <segment>
-<pinref part="IC13" gate="G$1" pin="CLK2"/>
-<wire x1="144.78" y1="142.24" x2="200.66" y2="142.24" width="0.1524" layer="91"/>
-<wire x1="200.66" y1="142.24" x2="200.66" y2="160.02" width="0.1524" layer="91"/>
 <pinref part="L33" gate="G$1" pin="1"/>
 <pinref part="C99" gate="G$1" pin="1"/>
 <wire x1="231.14" y1="160.02" x2="228.6" y2="160.02" width="0.1524" layer="91"/>
 <wire x1="228.6" y1="160.02" x2="228.6" y2="157.48" width="0.1524" layer="91"/>
 <wire x1="200.66" y1="160.02" x2="228.6" y2="160.02" width="0.1524" layer="91"/>
 <junction x="228.6" y="160.02"/>
+<pinref part="IC13" gate="G$1" pin="CLK4"/>
+<wire x1="144.78" y1="137.16" x2="200.66" y2="137.16" width="0.1524" layer="91"/>
+<wire x1="200.66" y1="137.16" x2="200.66" y2="160.02" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="FPGA_CLK" class="0">
@@ -14338,11 +14312,6 @@ Source: Epson Toyocom</description>
 <wire x1="83.82" y1="195.58" x2="93.98" y2="195.58" width="0.1524" layer="91"/>
 <wire x1="93.98" y1="195.58" x2="104.14" y2="195.58" width="0.1524" layer="91"/>
 <wire x1="104.14" y1="195.58" x2="114.3" y2="195.58" width="0.1524" layer="91"/>
-<pinref part="C113" gate="G$1" pin="2"/>
-<wire x1="114.3" y1="193.04" x2="114.3" y2="195.58" width="0.1524" layer="91"/>
-<pinref part="C106" gate="G$1" pin="2"/>
-<wire x1="104.14" y1="193.04" x2="104.14" y2="195.58" width="0.1524" layer="91"/>
-<junction x="104.14" y="195.58"/>
 <pinref part="C105" gate="G$1" pin="2"/>
 <wire x1="93.98" y1="193.04" x2="93.98" y2="195.58" width="0.1524" layer="91"/>
 <junction x="93.98" y="195.58"/>
@@ -14364,7 +14333,6 @@ Source: Epson Toyocom</description>
 <junction x="124.46" y="157.48"/>
 <wire x1="114.3" y1="195.58" x2="129.54" y2="195.58" width="0.1524" layer="91"/>
 <wire x1="129.54" y1="195.58" x2="129.54" y2="157.48" width="0.1524" layer="91"/>
-<junction x="114.3" y="195.58"/>
 <junction x="129.54" y="157.48"/>
 </segment>
 </net>
@@ -14455,10 +14423,11 @@ Source: Epson Toyocom</description>
 <pinref part="C102" gate="G$1" pin="1"/>
 <wire x1="231.14" y1="139.7" x2="228.6" y2="139.7" width="0.1524" layer="91"/>
 <wire x1="228.6" y1="139.7" x2="228.6" y2="137.16" width="0.1524" layer="91"/>
-<pinref part="IC13" gate="G$1" pin="CLK3"/>
-<wire x1="144.78" y1="139.7" x2="205.74" y2="139.7" width="0.1524" layer="91"/>
 <wire x1="228.6" y1="139.7" x2="205.74" y2="139.7" width="0.1524" layer="91"/>
 <junction x="228.6" y="139.7"/>
+<pinref part="IC13" gate="G$1" pin="CLK1"/>
+<wire x1="144.78" y1="144.78" x2="205.74" y2="144.78" width="0.1524" layer="91"/>
+<wire x1="205.74" y1="144.78" x2="205.74" y2="139.7" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="REFLO2" class="0">
@@ -14483,30 +14452,18 @@ Source: Epson Toyocom</description>
 <junction x="243.84" y="119.38"/>
 </segment>
 </net>
-<net name="N$100" class="0">
-<segment>
-<pinref part="L37" gate="G$1" pin="1"/>
-<pinref part="C112" gate="G$1" pin="1"/>
-<wire x1="231.14" y1="119.38" x2="228.6" y2="119.38" width="0.1524" layer="91"/>
-<wire x1="228.6" y1="119.38" x2="228.6" y2="116.84" width="0.1524" layer="91"/>
-<pinref part="IC13" gate="G$1" pin="CLK4"/>
-<wire x1="144.78" y1="137.16" x2="200.66" y2="137.16" width="0.1524" layer="91"/>
-<wire x1="200.66" y1="137.16" x2="200.66" y2="119.38" width="0.1524" layer="91"/>
-<wire x1="200.66" y1="119.38" x2="228.6" y2="119.38" width="0.1524" layer="91"/>
-<junction x="228.6" y="119.38"/>
-</segment>
-</net>
 <net name="N$157" class="0">
 <segment>
-<pinref part="IC13" gate="G$1" pin="CLK5"/>
-<wire x1="144.78" y1="134.62" x2="198.12" y2="134.62" width="0.1524" layer="91"/>
-<wire x1="198.12" y1="134.62" x2="198.12" y2="101.6" width="0.1524" layer="91"/>
 <pinref part="R74" gate="G$1" pin="1"/>
 <wire x1="198.12" y1="101.6" x2="203.2" y2="101.6" width="0.1524" layer="91"/>
 <pinref part="R73" gate="G$1" pin="1"/>
 <wire x1="203.2" y1="101.6" x2="205.74" y2="101.6" width="0.1524" layer="91"/>
 <wire x1="203.2" y1="99.06" x2="203.2" y2="101.6" width="0.1524" layer="91"/>
 <junction x="203.2" y="101.6"/>
+<wire x1="198.12" y1="101.6" x2="190.5" y2="101.6" width="0.1524" layer="91"/>
+<wire x1="190.5" y1="101.6" x2="190.5" y2="147.32" width="0.1524" layer="91"/>
+<pinref part="IC13" gate="G$1" pin="CLK0"/>
+<wire x1="190.5" y1="147.32" x2="144.78" y2="147.32" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="SOURCE_LOWBAND" class="0">
@@ -14525,6 +14482,19 @@ Source: Epson Toyocom</description>
 <wire x1="218.44" y1="101.6" x2="223.52" y2="101.6" width="0.1524" layer="91"/>
 <wire x1="218.44" y1="99.06" x2="218.44" y2="101.6" width="0.1524" layer="91"/>
 <junction x="218.44" y="101.6"/>
+</segment>
+</net>
+<net name="N$160" class="0">
+<segment>
+<pinref part="C112" gate="G$1" pin="1"/>
+<pinref part="L37" gate="G$1" pin="1"/>
+<wire x1="231.14" y1="119.38" x2="228.6" y2="119.38" width="0.1524" layer="91"/>
+<wire x1="228.6" y1="119.38" x2="228.6" y2="116.84" width="0.1524" layer="91"/>
+<wire x1="228.6" y1="119.38" x2="203.2" y2="119.38" width="0.1524" layer="91"/>
+<junction x="228.6" y="119.38"/>
+<pinref part="IC13" gate="G$1" pin="CLK5"/>
+<wire x1="144.78" y1="134.62" x2="203.2" y2="134.62" width="0.1524" layer="91"/>
+<wire x1="203.2" y1="134.62" x2="203.2" y2="119.38" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
@@ -18342,28 +18312,18 @@ current consumption</text>
 <wire x1="68.58" y1="195.58" x2="71.12" y2="195.58" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$23" class="0">
-<segment>
-<pinref part="T2" gate="G$1" pin="PIN1"/>
-<wire x1="86.36" y1="193.04" x2="83.82" y2="193.04" width="0.1524" layer="91"/>
-<wire x1="83.82" y1="193.04" x2="83.82" y2="195.58" width="0.1524" layer="91"/>
-<pinref part="R22" gate="G$1" pin="1"/>
-<wire x1="83.82" y1="195.58" x2="81.28" y2="195.58" width="0.1524" layer="91"/>
-<pinref part="C33" gate="G$1" pin="2"/>
-<wire x1="83.82" y1="200.66" x2="83.82" y2="195.58" width="0.1524" layer="91"/>
-<junction x="83.82" y="195.58"/>
-</segment>
-</net>
 <net name="N$25" class="0">
 <segment>
 <pinref part="R23" gate="G$1" pin="1"/>
 <wire x1="81.28" y1="185.42" x2="83.82" y2="185.42" width="0.1524" layer="91"/>
 <wire x1="83.82" y1="185.42" x2="83.82" y2="187.96" width="0.1524" layer="91"/>
-<pinref part="T2" gate="G$1" pin="PIN2"/>
-<wire x1="83.82" y1="187.96" x2="86.36" y2="187.96" width="0.1524" layer="91"/>
 <pinref part="R24" gate="G$1" pin="1"/>
 <wire x1="83.82" y1="185.42" x2="83.82" y2="182.88" width="0.1524" layer="91"/>
 <junction x="83.82" y="185.42"/>
+<wire x1="83.82" y1="187.96" x2="83.82" y2="190.5" width="0.1524" layer="91"/>
+<wire x1="83.82" y1="190.5" x2="83.82" y2="193.04" width="0.1524" layer="91"/>
+<pinref part="T2" gate="G$1" pin="PIN1"/>
+<wire x1="83.82" y1="193.04" x2="86.36" y2="193.04" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$26" class="0">
@@ -18914,6 +18874,19 @@ current consumption</text>
 <junction x="294.64" y="73.66"/>
 <pinref part="SUPPLY14" gate="G$1" pin="+5V/2"/>
 <junction x="294.64" y="91.44"/>
+</segment>
+</net>
+<net name="N$23" class="0">
+<segment>
+<pinref part="C33" gate="G$1" pin="2"/>
+<wire x1="83.82" y1="200.66" x2="83.82" y2="198.12" width="0.1524" layer="91"/>
+<wire x1="83.82" y1="198.12" x2="81.28" y2="198.12" width="0.1524" layer="91"/>
+<wire x1="81.28" y1="198.12" x2="81.28" y2="195.58" width="0.1524" layer="91"/>
+<pinref part="T2" gate="G$1" pin="PIN2"/>
+<wire x1="81.28" y1="195.58" x2="81.28" y2="187.96" width="0.1524" layer="91"/>
+<wire x1="81.28" y1="187.96" x2="86.36" y2="187.96" width="0.1524" layer="91"/>
+<pinref part="R22" gate="G$1" pin="1"/>
+<junction x="81.28" y="195.58"/>
 </segment>
 </net>
 </nets>
