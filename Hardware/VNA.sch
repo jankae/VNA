@@ -19861,7 +19861,7 @@ current consumption</text>
 <wire x1="127" y1="119.38" x2="101.6" y2="119.38" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="LO1_EN" class="0">
+<net name="LO1_RF_EN" class="0">
 <segment>
 <pinref part="IC19" gate="G$1" pin="RFOUT_EN"/>
 <wire x1="127" y1="111.76" x2="101.6" y2="111.76" width="0.1524" layer="91"/>
@@ -24266,9 +24266,9 @@ current consumption</text>
 <instance part="+3V24" gate="G$1" x="40.64" y="254" smashed="yes">
 <attribute name="VALUE" x="38.1" y="248.92" size="1.778" layer="96" rot="R90"/>
 </instance>
-<instance part="R96" gate="G$1" x="81.28" y="43.18" smashed="yes" rot="R180">
-<attribute name="NAME" x="77.47" y="46.7614" size="1.778" layer="95" rot="R180"/>
-<attribute name="VALUE" x="85.09" y="46.482" size="1.778" layer="96" rot="R180"/>
+<instance part="R96" gate="G$1" x="78.74" y="35.56" smashed="yes" rot="R180">
+<attribute name="NAME" x="74.93" y="39.1414" size="1.778" layer="95" rot="R180"/>
+<attribute name="VALUE" x="82.55" y="38.862" size="1.778" layer="96" rot="R180"/>
 </instance>
 </instances>
 <busses>
@@ -24314,18 +24314,11 @@ current consumption</text>
 <junction x="40.64" y="78.74"/>
 </segment>
 </net>
-<net name="N$198" class="0">
-<segment>
-<pinref part="U2" gate="B3" pin="IO_L43P_GCLK23_3"/>
-<pinref part="R96" gate="G$1" pin="2"/>
-<wire x1="38.1" y1="43.18" x2="76.2" y2="43.18" width="0.1524" layer="91"/>
-</segment>
-</net>
 <net name="FPGA_CLK" class="0">
 <segment>
 <pinref part="R96" gate="G$1" pin="1"/>
-<wire x1="86.36" y1="43.18" x2="91.44" y2="43.18" width="0.1524" layer="91"/>
-<label x="91.44" y="43.18" size="1.778" layer="95" xref="yes"/>
+<wire x1="83.82" y1="35.56" x2="88.9" y2="35.56" width="0.1524" layer="91"/>
+<label x="88.9" y="35.56" size="1.778" layer="95" xref="yes"/>
 </segment>
 </net>
 <net name="PORT1_CONVSTART" class="0">
@@ -24363,27 +24356,6 @@ current consumption</text>
 <label x="43.18" y="73.66" size="1.778" layer="95" xref="yes"/>
 </segment>
 </net>
-<net name="ATT_D6" class="0">
-<segment>
-<pinref part="U2" gate="B3" pin="IO_L1N_VREF_3"/>
-<wire x1="38.1" y1="71.12" x2="43.18" y2="71.12" width="0.1524" layer="91"/>
-<label x="43.18" y="71.12" size="1.778" layer="95" xref="yes"/>
-</segment>
-</net>
-<net name="ATT_D5" class="0">
-<segment>
-<pinref part="U2" gate="B3" pin="IO_L2P_3"/>
-<wire x1="38.1" y1="68.58" x2="43.18" y2="68.58" width="0.1524" layer="91"/>
-<label x="43.18" y="68.58" size="1.778" layer="95" xref="yes"/>
-</segment>
-</net>
-<net name="ATT_D4" class="0">
-<segment>
-<pinref part="U2" gate="B3" pin="IO_L2N_3"/>
-<wire x1="38.1" y1="66.04" x2="43.18" y2="66.04" width="0.1524" layer="91"/>
-<label x="43.18" y="66.04" size="1.778" layer="95" xref="yes"/>
-</segment>
-</net>
 <net name="ATT_D3" class="0">
 <segment>
 <pinref part="U2" gate="B3" pin="IO_L36P_3"/>
@@ -24393,23 +24365,23 @@ current consumption</text>
 </net>
 <net name="ATT_D2" class="0">
 <segment>
-<pinref part="U2" gate="B3" pin="IO_L36N_3"/>
-<wire x1="38.1" y1="60.96" x2="43.18" y2="60.96" width="0.1524" layer="91"/>
-<label x="43.18" y="60.96" size="1.778" layer="95" xref="yes"/>
+<pinref part="U2" gate="B3" pin="IO_L2N_3"/>
+<wire x1="38.1" y1="66.04" x2="43.18" y2="66.04" width="0.1524" layer="91"/>
+<label x="43.18" y="66.04" size="1.778" layer="95" xref="yes"/>
 </segment>
 </net>
 <net name="ATT_D1" class="0">
 <segment>
-<pinref part="U2" gate="B3" pin="IO_L37P_3"/>
-<wire x1="38.1" y1="58.42" x2="43.18" y2="58.42" width="0.1524" layer="91"/>
-<label x="43.18" y="58.42" size="1.778" layer="95" xref="yes"/>
+<pinref part="U2" gate="B3" pin="IO_L2P_3"/>
+<wire x1="38.1" y1="68.58" x2="43.18" y2="68.58" width="0.1524" layer="91"/>
+<label x="43.18" y="68.58" size="1.778" layer="95" xref="yes"/>
 </segment>
 </net>
 <net name="ATT_D0" class="0">
 <segment>
-<pinref part="U2" gate="B3" pin="IO_L37N_3"/>
-<wire x1="38.1" y1="55.88" x2="43.18" y2="55.88" width="0.1524" layer="91"/>
-<label x="43.18" y="55.88" size="1.778" layer="95" xref="yes"/>
+<pinref part="U2" gate="B3" pin="IO_L1N_VREF_3"/>
+<wire x1="38.1" y1="71.12" x2="43.18" y2="71.12" width="0.1524" layer="91"/>
+<label x="43.18" y="71.12" size="1.778" layer="95" xref="yes"/>
 </segment>
 </net>
 <net name="AMP_PWDN" class="0">
@@ -24434,61 +24406,19 @@ current consumption</text>
 <label x="43.18" y="48.26" size="1.778" layer="95" xref="yes"/>
 </segment>
 </net>
-<net name="LO1_EN" class="0">
+<net name="FILT_IN_C1" class="0">
 <segment>
-<pinref part="U2" gate="B3" pin="IO_L49N_3"/>
-<wire x1="38.1" y1="30.48" x2="43.18" y2="30.48" width="0.1524" layer="91"/>
-<label x="43.18" y="30.48" size="1.778" layer="95" xref="yes"/>
-</segment>
-</net>
-<net name="LO1_MUX" class="0">
-<segment>
-<pinref part="U2" gate="B3" pin="IO_L50P_3"/>
-<wire x1="38.1" y1="27.94" x2="43.18" y2="27.94" width="0.1524" layer="91"/>
-<label x="43.18" y="27.94" size="1.778" layer="95" xref="yes"/>
-</segment>
-</net>
-<net name="LO1_CLK" class="0">
-<segment>
-<pinref part="U2" gate="B3" pin="IO_L50N_3"/>
-<wire x1="38.1" y1="25.4" x2="43.18" y2="25.4" width="0.1524" layer="91"/>
-<label x="43.18" y="25.4" size="1.778" layer="95" xref="yes"/>
-</segment>
-</net>
-<net name="LO1_MOSI" class="0">
-<segment>
-<pinref part="U2" gate="B3" pin="IO_L51P_3"/>
-<wire x1="38.1" y1="22.86" x2="43.18" y2="22.86" width="0.1524" layer="91"/>
-<label x="43.18" y="22.86" size="1.778" layer="95" xref="yes"/>
-</segment>
-</net>
-<net name="LO1_LE" class="0">
-<segment>
-<pinref part="U2" gate="B3" pin="IO_L51N_3"/>
-<wire x1="38.1" y1="20.32" x2="43.18" y2="20.32" width="0.1524" layer="91"/>
-<label x="43.18" y="20.32" size="1.778" layer="95" xref="yes"/>
-</segment>
-</net>
-<net name="LO1_CE" class="0">
-<segment>
-<pinref part="U2" gate="B3" pin="IO_L52P_3"/>
-<wire x1="38.1" y1="17.78" x2="43.18" y2="17.78" width="0.1524" layer="91"/>
-<label x="43.18" y="17.78" size="1.778" layer="95" xref="yes"/>
-</segment>
-</net>
-<net name="LO1_LD" class="0">
-<segment>
-<pinref part="U2" gate="B3" pin="IO_L49P_3"/>
-<wire x1="38.1" y1="33.02" x2="40.64" y2="33.02" width="0.1524" layer="91"/>
-<wire x1="40.64" y1="33.02" x2="43.18" y2="33.02" width="0.1524" layer="91"/>
-<label x="43.18" y="33.02" size="1.778" layer="95" xref="yes"/>
+<pinref part="U2" gate="B3" pin="IO_L43N_GCLK22_IRDY2_3"/>
+<wire x1="38.1" y1="40.64" x2="43.18" y2="40.64" width="0.1524" layer="91"/>
+<label x="43.18" y="40.64" size="1.778" layer="95" xref="yes"/>
 </segment>
 </net>
 <net name="SOURCE_CE" class="0">
 <segment>
-<pinref part="U2" gate="B3" pin="IO_L52N_3"/>
-<wire x1="38.1" y1="15.24" x2="43.18" y2="15.24" width="0.1524" layer="91"/>
-<label x="43.18" y="15.24" size="1.778" layer="95" xref="yes"/>
+<pinref part="U2" gate="B3" pin="IO_L83N_VREF_3"/>
+<wire x1="38.1" y1="10.16" x2="40.64" y2="10.16" width="0.1524" layer="91"/>
+<wire x1="40.64" y1="10.16" x2="43.18" y2="10.16" width="0.1524" layer="91"/>
+<label x="43.18" y="10.16" size="1.778" layer="95" xref="yes"/>
 </segment>
 </net>
 <net name="SOURCE_LE" class="0">
@@ -24500,65 +24430,149 @@ current consumption</text>
 </net>
 <net name="SOURCE_MOSI" class="0">
 <segment>
-<pinref part="U2" gate="B3" pin="IO_L83N_VREF_3"/>
-<wire x1="38.1" y1="10.16" x2="43.18" y2="10.16" width="0.1524" layer="91"/>
-<label x="43.18" y="10.16" size="1.778" layer="95" xref="yes"/>
+<pinref part="U2" gate="B3" pin="IO_L52N_3"/>
+<wire x1="38.1" y1="15.24" x2="43.18" y2="15.24" width="0.1524" layer="91"/>
+<label x="43.18" y="15.24" size="1.778" layer="95" xref="yes"/>
+</segment>
+</net>
+<net name="SCL" class="0">
+<segment>
+<pinref part="U2" gate="B3" pin="IO_L52P_3"/>
+<wire x1="38.1" y1="17.78" x2="43.18" y2="17.78" width="0.1524" layer="91"/>
+<label x="43.18" y="17.78" size="1.778" layer="95" xref="yes"/>
 </segment>
 </net>
 <net name="SOURCE_CLK" class="0">
+<segment>
+<pinref part="U2" gate="B3" pin="IO_L51N_3"/>
+<wire x1="38.1" y1="20.32" x2="43.18" y2="20.32" width="0.1524" layer="91"/>
+<label x="43.18" y="20.32" size="1.778" layer="95" xref="yes"/>
+</segment>
+</net>
+<net name="SOURCE_MUX" class="0">
+<segment>
+<pinref part="U2" gate="B3" pin="IO_L51P_3"/>
+<wire x1="38.1" y1="22.86" x2="43.18" y2="22.86" width="0.1524" layer="91"/>
+<label x="43.18" y="22.86" size="1.778" layer="95" xref="yes"/>
+</segment>
+</net>
+<net name="SDA" class="0">
+<segment>
+<pinref part="U2" gate="B3" pin="IO_L50N_3"/>
+<wire x1="38.1" y1="25.4" x2="43.18" y2="25.4" width="0.1524" layer="91"/>
+<label x="43.18" y="25.4" size="1.778" layer="95" xref="yes"/>
+</segment>
+</net>
+<net name="SOURCE_LD" class="0">
+<segment>
+<pinref part="U2" gate="B3" pin="IO_L50P_3"/>
+<wire x1="38.1" y1="27.94" x2="43.18" y2="27.94" width="0.1524" layer="91"/>
+<label x="43.18" y="27.94" size="1.778" layer="95" xref="yes"/>
+</segment>
+</net>
+<net name="SOURCE_RF_EN" class="0">
+<segment>
+<pinref part="U2" gate="B3" pin="IO_L49N_3"/>
+<wire x1="38.1" y1="30.48" x2="43.18" y2="30.48" width="0.1524" layer="91"/>
+<label x="43.18" y="30.48" size="1.778" layer="95" xref="yes"/>
+</segment>
+</net>
+<net name="LO1_MUX" class="0">
 <segment>
 <pinref part="U2" gate="B0" pin="IO_L1P_HSWAPEN_0"/>
 <wire x1="38.1" y1="236.22" x2="43.18" y2="236.22" width="0.1524" layer="91"/>
 <label x="43.18" y="236.22" size="1.778" layer="95" xref="yes"/>
 </segment>
 </net>
-<net name="SOURCE_MUX" class="0">
+<net name="LO1_RF_EN" class="0">
 <segment>
 <pinref part="U2" gate="B0" pin="IO_L1N_VREF_0"/>
 <wire x1="38.1" y1="233.68" x2="43.18" y2="233.68" width="0.1524" layer="91"/>
 <label x="43.18" y="233.68" size="1.778" layer="95" xref="yes"/>
 </segment>
 </net>
-<net name="SOURCE_RF_EN" class="0">
+<net name="LO1_LD" class="0">
 <segment>
 <pinref part="U2" gate="B0" pin="IO_L2P_0"/>
 <wire x1="38.1" y1="231.14" x2="43.18" y2="231.14" width="0.1524" layer="91"/>
 <label x="43.18" y="231.14" size="1.778" layer="95" xref="yes"/>
 </segment>
 </net>
-<net name="SOURCE_LD" class="0">
+<net name="LO1_CLK" class="0">
 <segment>
 <pinref part="U2" gate="B0" pin="IO_L2N_0"/>
 <wire x1="38.1" y1="228.6" x2="43.18" y2="228.6" width="0.1524" layer="91"/>
 <label x="43.18" y="228.6" size="1.778" layer="95" xref="yes"/>
 </segment>
 </net>
-<net name="FILT_IN_C1" class="0">
+<net name="LO1_MOSI" class="0">
 <segment>
-<pinref part="U2" gate="B3" pin="IO_L42N_GCLK24_3"/>
-<wire x1="38.1" y1="45.72" x2="43.18" y2="45.72" width="0.1524" layer="91"/>
-<label x="43.18" y="45.72" size="1.778" layer="95" xref="yes"/>
+<pinref part="U2" gate="B0" pin="IO_L3P_0"/>
+<wire x1="38.1" y1="226.06" x2="43.18" y2="226.06" width="0.1524" layer="91"/>
+<label x="43.18" y="226.06" size="1.778" layer="95" xref="yes"/>
 </segment>
 </net>
-<net name="FILT_OUT_C1" class="0">
+<net name="LO1_LE" class="0">
 <segment>
-<pinref part="U2" gate="B3" pin="IO_L43N_GCLK22_IRDY2_3"/>
-<wire x1="38.1" y1="40.64" x2="43.18" y2="40.64" width="0.1524" layer="91"/>
-<label x="43.18" y="40.64" size="1.778" layer="95" xref="yes"/>
+<pinref part="U2" gate="B0" pin="IO_L3N_0"/>
+<wire x1="38.1" y1="223.52" x2="43.18" y2="223.52" width="0.1524" layer="91"/>
+<label x="43.18" y="223.52" size="1.778" layer="95" xref="yes"/>
 </segment>
 </net>
-<net name="FILT_OUT_C2" class="0">
+<net name="LO1_CE" class="0">
+<segment>
+<pinref part="U2" gate="B0" pin="IO_L4P_0"/>
+<wire x1="38.1" y1="220.98" x2="43.18" y2="220.98" width="0.1524" layer="91"/>
+<label x="43.18" y="220.98" size="1.778" layer="95" xref="yes"/>
+</segment>
+</net>
+<net name="N$198" class="0">
+<segment>
+<pinref part="U2" gate="B3" pin="IO_L44N_GCLK20_3"/>
+<wire x1="38.1" y1="35.56" x2="73.66" y2="35.56" width="0.1524" layer="91"/>
+<pinref part="R96" gate="G$1" pin="2"/>
+</segment>
+</net>
+<net name="FILT_IN_C2" class="0">
 <segment>
 <pinref part="U2" gate="B3" pin="IO_L44P_GCLK21_3"/>
 <wire x1="38.1" y1="38.1" x2="43.18" y2="38.1" width="0.1524" layer="91"/>
 <label x="43.18" y="38.1" size="1.778" layer="95" xref="yes"/>
 </segment>
 </net>
-<net name="FILT_IN_C2" class="0">
+<net name="FILT_OUT_C2" class="0">
 <segment>
-<pinref part="U2" gate="B3" pin="IO_L44N_GCLK20_3"/>
-<wire x1="38.1" y1="35.56" x2="43.18" y2="35.56" width="0.1524" layer="91"/>
-<label x="43.18" y="35.56" size="1.778" layer="95" xref="yes"/>
+<pinref part="U2" gate="B3" pin="IO_L43P_GCLK23_3"/>
+<wire x1="38.1" y1="43.18" x2="43.18" y2="43.18" width="0.1524" layer="91"/>
+<label x="43.18" y="43.18" size="1.778" layer="95" xref="yes"/>
+</segment>
+</net>
+<net name="FILT_OUT_C1" class="0">
+<segment>
+<pinref part="U2" gate="B3" pin="IO_L42N_GCLK24_3"/>
+<wire x1="38.1" y1="45.72" x2="43.18" y2="45.72" width="0.1524" layer="91"/>
+<label x="43.18" y="45.72" size="1.778" layer="95" xref="yes"/>
+</segment>
+</net>
+<net name="ATT_D4" class="0">
+<segment>
+<pinref part="U2" gate="B3" pin="IO_L36N_3"/>
+<wire x1="38.1" y1="60.96" x2="43.18" y2="60.96" width="0.1524" layer="91"/>
+<label x="43.18" y="60.96" size="1.778" layer="95" xref="yes"/>
+</segment>
+</net>
+<net name="ATT_D5" class="0">
+<segment>
+<pinref part="U2" gate="B3" pin="IO_L37P_3"/>
+<wire x1="38.1" y1="58.42" x2="43.18" y2="58.42" width="0.1524" layer="91"/>
+<label x="43.18" y="58.42" size="1.778" layer="95" xref="yes"/>
+</segment>
+</net>
+<net name="ATT_D6" class="0">
+<segment>
+<pinref part="U2" gate="B3" pin="IO_L37N_3"/>
+<wire x1="38.1" y1="55.88" x2="43.18" y2="55.88" width="0.1524" layer="91"/>
+<label x="43.18" y="55.88" size="1.778" layer="95" xref="yes"/>
 </segment>
 </net>
 </nets>
