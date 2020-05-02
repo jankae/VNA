@@ -14776,13 +14776,31 @@ Source: http://www.cypressindustries.com/pdf/32005-301.pdf</description>
 <pin name="4" x="-5.08" y="-2.54" visible="pin" direction="pas"/>
 <pin name="5" x="-5.08" y="-5.08" visible="pin" direction="pas"/>
 </symbol>
+<symbol name="SHIELD_4">
+<wire x1="-2.54" y1="0" x2="0" y2="0" width="0.254" layer="94" style="shortdash"/>
+<wire x1="0" y1="0" x2="2.54" y2="0" width="0.254" layer="94" style="shortdash"/>
+<wire x1="2.54" y1="0" x2="5.08" y2="0" width="0.254" layer="94" style="shortdash"/>
+<wire x1="-2.54" y1="-1.27" x2="-2.54" y2="0" width="0.1524" layer="94"/>
+<wire x1="0" y1="-1.27" x2="0" y2="0" width="0.1524" layer="94"/>
+<wire x1="2.54" y1="-1.27" x2="2.54" y2="0" width="0.1524" layer="94"/>
+<wire x1="5.08" y1="0" x2="7.62" y2="2.54" width="0.254" layer="94" style="shortdash" curve="90"/>
+<wire x1="7.62" y1="2.54" x2="7.62" y2="17.78" width="0.254" layer="94" style="shortdash"/>
+<wire x1="7.62" y1="17.78" x2="5.08" y2="20.32" width="0.254" layer="94" style="shortdash" curve="90"/>
+<wire x1="5.08" y1="20.32" x2="0" y2="20.32" width="0.254" layer="94" style="shortdash"/>
+<text x="7.62" y="-2.54" size="1.778" layer="95">&gt;NAME</text>
+<pin name="S1" x="-2.54" y="-2.54" visible="off" length="short" direction="pas" rot="R90"/>
+<pin name="S2" x="0" y="-2.54" visible="off" length="short" direction="pas" rot="R90"/>
+<pin name="S3" x="2.54" y="-2.54" visible="off" length="short" direction="pas" rot="R90"/>
+<pin name="S4" x="5.08" y="-2.54" visible="off" length="short" direction="pas" rot="R90"/>
+</symbol>
 </symbols>
 <devicesets>
-<deviceset name="MINI-USB-" prefix="X">
+<deviceset name="MINI-USB-SCHIELD-" prefix="X">
 <description>&lt;b&gt;MINI USB-B Conector&lt;/b&gt;&lt;p&gt;
 Source: www.cypressindustries.com</description>
 <gates>
 <gate name="G$1" symbol="MINI-USB-5" x="0" y="0"/>
+<gate name="S" symbol="SHIELD_4" x="0" y="-10.16" addlevel="always"/>
 </gates>
 <devices>
 <device name="32005-201" package="32005-201">
@@ -14792,6 +14810,10 @@ Source: www.cypressindustries.com</description>
 <connect gate="G$1" pin="3" pad="3"/>
 <connect gate="G$1" pin="4" pad="4"/>
 <connect gate="G$1" pin="5" pad="5"/>
+<connect gate="S" pin="S1" pad="M1"/>
+<connect gate="S" pin="S2" pad="M2"/>
+<connect gate="S" pin="S3" pad="M3"/>
+<connect gate="S" pin="S4" pad="M4"/>
 </connects>
 <technologies>
 <technology name="">
@@ -14809,6 +14831,10 @@ Source: www.cypressindustries.com</description>
 <connect gate="G$1" pin="3" pad="3"/>
 <connect gate="G$1" pin="4" pad="4"/>
 <connect gate="G$1" pin="5" pad="5"/>
+<connect gate="S" pin="S1" pad="M1"/>
+<connect gate="S" pin="S2" pad="M2"/>
+<connect gate="S" pin="S3" pad="M3"/>
+<connect gate="S" pin="S4" pad="M4"/>
 </connects>
 <technologies>
 <technology name="">
@@ -15975,7 +16001,6 @@ body 6.00 x 5.00 mm</description>
 <part name="J3" library="con-jack" deviceset="DCJ0202" device=""/>
 <part name="GND212" library="supply1" deviceset="GND" device=""/>
 <part name="SUPPLY29" library="supply2" deviceset="+12V" device=""/>
-<part name="X3" library="con-cypressindustries" deviceset="MINI-USB-" device="32005-201"/>
 <part name="U2" library="xilinx_devices_V6" deviceset="6SLX9TQG144" device=""/>
 <part name="JTAG" library="con-ml" deviceset="ML10" device=""/>
 <part name="GND188" library="supply1" deviceset="GND" device=""/>
@@ -16067,6 +16092,7 @@ body 6.00 x 5.00 mm</description>
 <part name="GND228" library="supply1" deviceset="GND" device=""/>
 <part name="SUPPLY21" library="supply2" deviceset="+5V/3" device=""/>
 <part name="SUPPLY14" library="supply2" deviceset="+5V/2" device=""/>
+<part name="X4" library="con-cypressindustries" deviceset="MINI-USB-SCHIELD-" device="32005-301"/>
 </parts>
 <sheets>
 <sheet>
@@ -23325,10 +23351,6 @@ current consumption</text>
 <text x="345.44" y="20.32" size="1.778" layer="94">FPGA + MCU Connections</text>
 </plain>
 <instances>
-<instance part="X3" gate="G$1" x="223.52" y="66.04" smashed="yes">
-<attribute name="NAME" x="220.98" y="77.47" size="1.778" layer="95"/>
-<attribute name="VALUE" x="233.68" y="58.42" size="1.778" layer="96" rot="R90"/>
-</instance>
 <instance part="U2" gate="B2" x="327.66" y="190.5" smashed="yes" rot="MR0">
 <attribute name="NAME" x="327.66" y="231.902" size="1.778" layer="95"/>
 <attribute name="VALUE" x="327.66" y="147.32" size="1.778" layer="96"/>
@@ -23504,8 +23526,8 @@ current consumption</text>
 <instance part="GND216" gate="1" x="78.74" y="68.58" smashed="yes">
 <attribute name="VALUE" x="76.2" y="66.04" size="1.778" layer="96"/>
 </instance>
-<instance part="GND217" gate="1" x="215.9" y="55.88" smashed="yes">
-<attribute name="VALUE" x="213.36" y="53.34" size="1.778" layer="96"/>
+<instance part="GND217" gate="1" x="215.9" y="45.72" smashed="yes">
+<attribute name="VALUE" x="213.36" y="43.18" size="1.778" layer="96"/>
 </instance>
 <instance part="R76" gate="G$1" x="203.2" y="66.04" smashed="yes">
 <attribute name="NAME" x="207.01" y="62.4586" size="1.778" layer="95"/>
@@ -23539,6 +23561,13 @@ current consumption</text>
 </instance>
 <instance part="GND218" gate="1" x="53.34" y="83.82" smashed="yes">
 <attribute name="VALUE" x="50.8" y="81.28" size="1.778" layer="96"/>
+</instance>
+<instance part="X4" gate="G$1" x="223.52" y="66.04" smashed="yes">
+<attribute name="NAME" x="220.98" y="77.47" size="1.778" layer="95"/>
+<attribute name="VALUE" x="233.68" y="58.42" size="1.778" layer="96" rot="R90"/>
+</instance>
+<instance part="X4" gate="S" x="223.52" y="55.88" smashed="yes">
+<attribute name="NAME" x="231.14" y="53.34" size="1.778" layer="95"/>
 </instance>
 </instances>
 <busses>
@@ -23724,10 +23753,27 @@ current consumption</text>
 <junction x="78.74" y="43.18"/>
 </segment>
 <segment>
-<pinref part="X3" gate="G$1" pin="5"/>
 <pinref part="GND217" gate="1" pin="GND"/>
 <wire x1="218.44" y1="60.96" x2="215.9" y2="60.96" width="0.1524" layer="91"/>
-<wire x1="215.9" y1="60.96" x2="215.9" y2="58.42" width="0.1524" layer="91"/>
+<wire x1="215.9" y1="60.96" x2="215.9" y2="50.8" width="0.1524" layer="91"/>
+<pinref part="X4" gate="G$1" pin="5"/>
+<pinref part="X4" gate="S" pin="S4"/>
+<wire x1="215.9" y1="50.8" x2="215.9" y2="48.26" width="0.1524" layer="91"/>
+<wire x1="215.9" y1="50.8" x2="220.98" y2="50.8" width="0.1524" layer="91"/>
+<wire x1="220.98" y1="50.8" x2="223.52" y2="50.8" width="0.1524" layer="91"/>
+<wire x1="223.52" y1="50.8" x2="226.06" y2="50.8" width="0.1524" layer="91"/>
+<wire x1="226.06" y1="50.8" x2="228.6" y2="50.8" width="0.1524" layer="91"/>
+<wire x1="228.6" y1="50.8" x2="228.6" y2="53.34" width="0.1524" layer="91"/>
+<junction x="215.9" y="50.8"/>
+<pinref part="X4" gate="S" pin="S3"/>
+<wire x1="226.06" y1="53.34" x2="226.06" y2="50.8" width="0.1524" layer="91"/>
+<junction x="226.06" y="50.8"/>
+<pinref part="X4" gate="S" pin="S2"/>
+<wire x1="223.52" y1="53.34" x2="223.52" y2="50.8" width="0.1524" layer="91"/>
+<junction x="223.52" y="50.8"/>
+<pinref part="X4" gate="S" pin="S1"/>
+<wire x1="220.98" y1="53.34" x2="220.98" y2="50.8" width="0.1524" layer="91"/>
+<junction x="220.98" y="50.8"/>
 </segment>
 <segment>
 <pinref part="JP1" gate="A" pin="3"/>
@@ -23974,14 +24020,13 @@ current consumption</text>
 </net>
 <net name="N$185" class="0">
 <segment>
-<pinref part="X3" gate="G$1" pin="2"/>
 <pinref part="R88" gate="G$1" pin="1"/>
 <wire x1="218.44" y1="68.58" x2="208.28" y2="68.58" width="0.1524" layer="91"/>
+<pinref part="X4" gate="G$1" pin="2"/>
 </segment>
 </net>
 <net name="N$186" class="0">
 <segment>
-<pinref part="X3" gate="G$1" pin="3"/>
 <pinref part="R76" gate="G$1" pin="2"/>
 <wire x1="218.44" y1="66.04" x2="213.36" y2="66.04" width="0.1524" layer="91"/>
 <wire x1="213.36" y1="66.04" x2="210.82" y2="66.04" width="0.1524" layer="91"/>
@@ -23992,6 +24037,7 @@ current consumption</text>
 <wire x1="198.12" y1="60.96" x2="213.36" y2="60.96" width="0.1524" layer="91"/>
 <wire x1="213.36" y1="60.96" x2="213.36" y2="66.04" width="0.1524" layer="91"/>
 <junction x="213.36" y="66.04"/>
+<pinref part="X4" gate="G$1" pin="3"/>
 </segment>
 </net>
 <net name="N$187" class="0">
