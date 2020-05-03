@@ -6383,6 +6383,12 @@ Source: www.kingbright.com</description>
 <part name="R109" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="330"/>
 <part name="R110" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="330"/>
 <part name="GND240" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="GND" device=""/>
+<part name="R111" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="10k"/>
+<part name="GND241" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="GND" device=""/>
+<part name="R112" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="10k"/>
+<part name="GND242" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="GND" device=""/>
+<part name="R113" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="10k"/>
+<part name="GND243" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="GND" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -6392,6 +6398,7 @@ Source: www.kingbright.com</description>
 <text x="327.66" y="162.56" size="1.778" layer="97">Reference Mixers, up to 200mA</text>
 <text x="327.66" y="127" size="1.778" layer="97">Source and 1.LO, up to 350mA</text>
 <text x="30.48" y="53.34" size="1.778" layer="97">Resistor set for 1MHz, can be overwritten by signal at ROSC</text>
+<text x="53.34" y="200.66" size="1.778" layer="97">Regulators on with floating enable</text>
 </plain>
 <instances>
 <instance part="FRAME8" gate="G$1" x="0" y="0" smashed="yes">
@@ -8094,6 +8101,7 @@ current consumption</text>
 <text x="198.12" y="144.78" size="1.778" layer="97">ca. -1db</text>
 <text x="292.1" y="106.68" size="1.778" layer="97">ca. -1db</text>
 <text x="337.82" y="121.92" size="1.778" layer="97">ca. 2dbm</text>
+<text x="297.18" y="177.8" size="1.778" layer="97">C1/C2 should not be driven above 1.8V</text>
 </plain>
 <instances>
 <instance part="FRAME5" gate="G$1" x="0" y="0" smashed="yes">
@@ -13859,6 +13867,13 @@ current consumption</text>
 <instance part="X4" gate="S" x="223.52" y="55.88" smashed="yes">
 <attribute name="NAME" x="231.14" y="53.34" size="1.778" layer="95"/>
 </instance>
+<instance part="R111" gate="G$1" x="276.86" y="144.78" smashed="yes" rot="R90">
+<attribute name="NAME" x="275.3614" y="140.97" size="1.778" layer="95" rot="R90"/>
+<attribute name="VALUE" x="280.162" y="140.97" size="1.778" layer="96" rot="R90"/>
+</instance>
+<instance part="GND241" gate="1" x="276.86" y="137.16" smashed="yes">
+<attribute name="VALUE" x="274.32" y="134.62" size="1.778" layer="96"/>
+</instance>
 </instances>
 <busses>
 </busses>
@@ -14070,6 +14085,10 @@ current consumption</text>
 <pinref part="GND218" gate="1" pin="GND"/>
 <wire x1="43.18" y1="99.06" x2="53.34" y2="99.06" width="0.1524" layer="91"/>
 <wire x1="53.34" y1="99.06" x2="53.34" y2="86.36" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="R111" gate="G$1" pin="1"/>
+<pinref part="GND241" gate="1" pin="GND"/>
 </segment>
 </net>
 <net name="+3V3" class="0">
@@ -14544,8 +14563,12 @@ current consumption</text>
 <net name="PORT2MIX_EN" class="0">
 <segment>
 <pinref part="U2" gate="B2" pin="IO_L62P_D5_2"/>
-<wire x1="322.58" y1="165.1" x2="317.5" y2="165.1" width="0.1524" layer="91"/>
-<label x="317.5" y="165.1" size="1.778" layer="95" rot="R180" xref="yes"/>
+<wire x1="322.58" y1="165.1" x2="276.86" y2="165.1" width="0.1524" layer="91"/>
+<label x="274.32" y="165.1" size="1.778" layer="95" rot="R180" xref="yes"/>
+<pinref part="R111" gate="G$1" pin="2"/>
+<wire x1="276.86" y1="165.1" x2="274.32" y2="165.1" width="0.1524" layer="91"/>
+<wire x1="276.86" y1="149.86" x2="276.86" y2="165.1" width="0.1524" layer="91"/>
+<junction x="276.86" y="165.1"/>
 </segment>
 </net>
 <net name="REF_CONVSTART" class="0">
@@ -14684,6 +14707,20 @@ current consumption</text>
 <instance part="GND240" gate="1" x="53.34" y="157.48" smashed="yes">
 <attribute name="VALUE" x="50.8" y="154.94" size="1.778" layer="96"/>
 </instance>
+<instance part="R112" gate="G$1" x="81.28" y="210.82" smashed="yes" rot="R90">
+<attribute name="NAME" x="79.7814" y="207.01" size="1.778" layer="95" rot="R90"/>
+<attribute name="VALUE" x="84.582" y="207.01" size="1.778" layer="96" rot="R90"/>
+</instance>
+<instance part="GND242" gate="1" x="81.28" y="203.2" smashed="yes">
+<attribute name="VALUE" x="78.74" y="200.66" size="1.778" layer="96"/>
+</instance>
+<instance part="R113" gate="G$1" x="78.74" y="66.04" smashed="yes" rot="R90">
+<attribute name="NAME" x="77.2414" y="62.23" size="1.778" layer="95" rot="R90"/>
+<attribute name="VALUE" x="82.042" y="62.23" size="1.778" layer="96" rot="R90"/>
+</instance>
+<instance part="GND243" gate="1" x="78.74" y="58.42" smashed="yes">
+<attribute name="VALUE" x="76.2" y="55.88" size="1.778" layer="96"/>
+</instance>
 </instances>
 <busses>
 </busses>
@@ -14797,15 +14834,23 @@ current consumption</text>
 <net name="PORT1MIX_EN" class="0">
 <segment>
 <pinref part="U2" gate="B0" pin="IO_L4N_0"/>
-<wire x1="38.1" y1="218.44" x2="43.18" y2="218.44" width="0.1524" layer="91"/>
-<label x="43.18" y="218.44" size="1.778" layer="95" xref="yes"/>
+<wire x1="38.1" y1="218.44" x2="81.28" y2="218.44" width="0.1524" layer="91"/>
+<label x="83.82" y="218.44" size="1.778" layer="95" xref="yes"/>
+<pinref part="R112" gate="G$1" pin="2"/>
+<wire x1="81.28" y1="218.44" x2="83.82" y2="218.44" width="0.1524" layer="91"/>
+<wire x1="81.28" y1="215.9" x2="81.28" y2="218.44" width="0.1524" layer="91"/>
+<junction x="81.28" y="218.44"/>
 </segment>
 </net>
 <net name="REFMIX_EN" class="0">
 <segment>
 <pinref part="U2" gate="B3" pin="IO_L1P_3"/>
-<wire x1="38.1" y1="73.66" x2="43.18" y2="73.66" width="0.1524" layer="91"/>
-<label x="43.18" y="73.66" size="1.778" layer="95" xref="yes"/>
+<wire x1="38.1" y1="73.66" x2="78.74" y2="73.66" width="0.1524" layer="91"/>
+<label x="81.28" y="73.66" size="1.778" layer="95" xref="yes"/>
+<pinref part="R113" gate="G$1" pin="2"/>
+<wire x1="78.74" y1="73.66" x2="81.28" y2="73.66" width="0.1524" layer="91"/>
+<wire x1="78.74" y1="71.12" x2="78.74" y2="73.66" width="0.1524" layer="91"/>
+<junction x="78.74" y="73.66"/>
 </segment>
 </net>
 <net name="ATT_D3" class="0">
@@ -15095,6 +15140,14 @@ current consumption</text>
 <pinref part="GND240" gate="1" pin="GND"/>
 <pinref part="R110" gate="G$1" pin="2"/>
 <wire x1="53.34" y1="160.02" x2="53.34" y2="162.56" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="R112" gate="G$1" pin="1"/>
+<pinref part="GND242" gate="1" pin="GND"/>
+</segment>
+<segment>
+<pinref part="R113" gate="G$1" pin="1"/>
+<pinref part="GND243" gate="1" pin="GND"/>
 </segment>
 </net>
 <net name="N$215" class="0">
