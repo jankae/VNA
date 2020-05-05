@@ -15350,7 +15350,7 @@ current consumption</text>
 <label x="317.5" y="177.8" size="1.778" layer="95" rot="R180" xref="yes"/>
 </segment>
 </net>
-<net name="MCU_AUX4" class="0">
+<net name="FPGA_RESET" class="0">
 <segment>
 <pinref part="IC33" gate="G$1" pin="PA1/TIM2_CH2/SPI1_SCK"/>
 <wire x1="157.48" y1="93.98" x2="167.64" y2="93.98" width="0.1524" layer="91"/>

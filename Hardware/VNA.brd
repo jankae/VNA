@@ -3,7 +3,7 @@
 <eagle version="9.3.1">
 <drawing>
 <settings>
-<setting alwaysvectorfont="yes"/>
+<setting alwaysvectorfont="no"/>
 <setting verticaltext="up"/>
 </settings>
 <grid distance="0.1" unitdist="mm" unit="mm" style="lines" multiple="10" display="yes" altdistance="0.025" altunitdist="mm" altunit="mm"/>
@@ -11598,7 +11598,7 @@ design rules under a new name.</description>
 <wire x1="43.6" y1="76.75" x2="51.25" y2="76.75" width="0.3" layer="1"/>
 <wire x1="51.25" y1="76.75" x2="51.75" y2="77.25" width="0.3" layer="1"/>
 </signal>
-<signal name="MCU_AUX4">
+<signal name="FPGA_RESET">
 <contactref element="IC33" pad="7"/>
 <contactref element="U2" pad="P48"/>
 <wire x1="52.05" y1="76.75" x2="52.5654" y2="76.75" width="0.3" layer="1"/>
