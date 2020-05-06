@@ -36,7 +36,7 @@ entity SPICommands is
            MOSI : in  STD_LOGIC;
            MISO : out  STD_LOGIC;
            NSS : in  STD_LOGIC;
-           SAMPLING_DONE : in  STD_LOGIC;
+           NEW_SAMPLING_DATA : in  STD_LOGIC;
            SAMPLING_RESULT : in  STD_LOGIC_VECTOR (287 downto 0);
            SOURCE_UNLOCKED : in  STD_LOGIC;
            LO_UNLOCKED : in  STD_LOGIC;
@@ -44,7 +44,7 @@ entity SPICommands is
            MAX2871_DEF_3 : out  STD_LOGIC_VECTOR (31 downto 0);
            MAX2871_DEF_1 : out  STD_LOGIC_VECTOR (31 downto 0);
            MAX2871_DEF_0 : out  STD_LOGIC_VECTOR (31 downto 0);
-           SWEEP_DATA : out  STD_LOGIC_VECTOR (95 downto 0);
+           SWEEP_DATA : out  STD_LOGIC_VECTOR (111 downto 0);
            SWEEP_ADDRESS : out  STD_LOGIC_VECTOR (12 downto 0);
            SWEEP_WRITE : out  STD_LOGIC_VECTOR (0 downto 0);
            SWEEP_POINTS : out  STD_LOGIC_VECTOR (12 downto 0);
@@ -72,19 +72,21 @@ architecture Behavioral of SPICommands is
 	signal spi_buf_in : std_logic_vector(15 downto 0);
 	signal spi_complete : std_logic;
 	signal word_cnt : integer range 0 to 19;
-	type SPI_states is (Invalid, RecSweepConfig, ReadResult, WriteRegister);
+	type SPI_states is (Invalid, WriteSweepConfig, ReadResult, WriteRegister);
 	signal state : SPI_states;
 	signal selected_register : integer range 0 to 15;
 	
 	signal sweep_config_write : std_logic;
+	signal unread_sampling_data : std_logic;
+	signal data_overrun : std_logic;
 	-- Configuration registers
 	signal interrupt_mask : std_logic_vector(15 downto 0);
 	signal interrupt_status : std_logic_vector(15 downto 0);
 	
 	signal latched_result : std_logic_vector(271 downto 0);
-	signal sweepconfig_buffer : std_logic_vector(79 downto 0);
+	signal sweepconfig_buffer : std_logic_vector(95 downto 0);
 begin
-	SPI_Slave: spi_slave
+	SPI: spi_slave
 	GENERIC MAP(w => 16)
 	PORT MAP(
 		SPI_CLK => SCLK,
@@ -97,7 +99,7 @@ begin
 		COMPLETE =>spi_complete 
 	);
 	
-	interrupt_status <= "0000000000000" & SAMPLING_DONE & SOURCE_UNLOCKED & LO_UNLOCKED;
+	interrupt_status <= "000000000000" & data_overrun & unread_sampling_data & SOURCE_UNLOCKED & LO_UNLOCKED;
 	INTERRUPT_ASSERTED <= '1' when (interrupt_status and interrupt_mask) /= "0000000000000000" else
 									'0';
 
@@ -108,6 +110,12 @@ begin
 		if rising_edge(CLK) then
 			if sweep_config_write = '1' then
 				sweep_config_write <= '0';
+			end if;
+			if NEW_SAMPLING_DATA = '1' then
+				unread_sampling_data <= '1';
+				if unread_sampling_data = '1' then
+					data_overrun <= '1';
+				end if;
 			end if;
 			if NSS = '1' then
 				word_cnt <= 0;
@@ -125,6 +133,7 @@ begin
 						when "11" => state <= ReadResult;
 										latched_result <= SAMPLING_RESULT(287 downto 16);
 										spi_buf_in <= SAMPLING_RESULT(15 downto 0);
+										unread_sampling_data <= '0';
 						when others => state <= Invalid;
 					end case;
 				else
@@ -144,16 +153,17 @@ begin
 							when 13 => MAX2871_DEF_3(31 downto 16) <= spi_buf_out;
 							when 14 => MAX2871_DEF_4(15 downto 0) <= spi_buf_out;
 							when 15 => MAX2871_DEF_4(31 downto 16) <= spi_buf_out;
+							when others => 
 						end case;
 						selected_register <= selected_register + 1;
 					elsif state = WriteSweepConfig then
-						if word_cnt = 6 then
+						if word_cnt = 7 then
 							-- Sweep config data is complete pass on
 							SWEEP_DATA <= sweepconfig_buffer & spi_buf_out;
 							sweep_config_write <= '1';
 						else
 							-- shift next word into buffer
-							sweepconfig_buffer <= sweepconfig_buffer(63 downto 0) & spi_buf_out;
+							sweepconfig_buffer <= sweepconfig_buffer(79 downto 0) & spi_buf_out;
 						end if;
 					elsif state = ReadResult then
 						-- pass on next word of latched result

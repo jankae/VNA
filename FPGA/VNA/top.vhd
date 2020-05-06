@@ -81,9 +81,358 @@ entity top is
 end top;
 
 architecture Behavioral of top is
+	component PLL
+	port
+		(-- Clock in ports
+		CLK_IN1           : in     std_logic;
+		-- Clock out ports
+		CLK_OUT1          : out    std_logic;
+		-- Status and control signals
+		RESET             : in     std_logic
+		);
+	end component;
 
+	COMPONENT Sweep
+	PORT(
+		CLK : IN std_logic;
+		RESET : IN std_logic;
+		NPOINTS : IN std_logic_vector(12 downto 0);
+		CONFIG_DATA : IN std_logic_vector(111 downto 0);
+		SAMPLING_DONE : IN std_logic;
+		MAX2871_DEF_4 : IN std_logic_vector(31 downto 0);
+		MAX2871_DEF_3 : IN std_logic_vector(31 downto 0);
+		MAX2871_DEF_1 : IN std_logic_vector(31 downto 0);
+		MAX2871_DEF_0 : IN std_logic_vector(31 downto 0);
+		PLL_RELOAD_DONE : IN std_logic;
+		PLL_LOCKED : IN std_logic;
+		SETTLING_TIME : IN std_logic_vector(15 downto 0);          
+		CONFIG_ADDRESS : OUT std_logic_vector(12 downto 0);
+		START_SAMPLING : OUT std_logic;
+		PORT_SELECT : OUT std_logic;
+		SOURCE_REG_4 : OUT std_logic_vector(31 downto 0);
+		SOURCE_REG_3 : OUT std_logic_vector(31 downto 0);
+		SOURCE_REG_1 : OUT std_logic_vector(31 downto 0);
+		SOURCE_REG_0 : OUT std_logic_vector(31 downto 0);
+		LO_REG_4 : OUT std_logic_vector(31 downto 0);
+		LO_REG_3 : OUT std_logic_vector(31 downto 0);
+		LO_REG_1 : OUT std_logic_vector(31 downto 0);
+		LO_REG_0 : OUT std_logic_vector(31 downto 0);
+		RELOAD_PLL_REGS : OUT std_logic;
+		ATTENUATOR : OUT std_logic_vector(6 downto 0);
+		SOURCE_FILTER : OUT std_logic_vector(1 downto 0)
+		);
+	END COMPONENT;
+	COMPONENT Sampling
+	Generic(CLK_DIV : integer;
+		CLK_FREQ : integer;
+		IF_FREQ : integer;
+		CLK_CYCLES_PRE_DONE : integer);
+	PORT(
+		CLK : IN std_logic;
+		RESET : IN std_logic;
+		PORT1 : IN std_logic_vector(15 downto 0);
+		PORT2 : IN std_logic_vector(15 downto 0);
+		REF : IN std_logic_vector(15 downto 0);
+		NEW_SAMPLE : IN std_logic;
+		START : IN std_logic;
+		SAMPLES : IN std_logic_vector(16 downto 0);          
+		ADC_START : OUT std_logic;
+		DONE : OUT std_logic;
+		PRE_DONE : OUT std_logic;
+		PORT1_I : OUT std_logic_vector(47 downto 0);
+		PORT1_Q : OUT std_logic_vector(47 downto 0);
+		PORT2_I : OUT std_logic_vector(47 downto 0);
+		PORT2_Q : OUT std_logic_vector(47 downto 0);
+		REF_I : OUT std_logic_vector(47 downto 0);
+		REF_Q : OUT std_logic_vector(47 downto 0)
+		);
+	END COMPONENT;
+	COMPONENT MCP33131
+	Generic(CLK_DIV : integer;
+			CONVCYCLES : integer);
+	PORT(
+		CLK : IN std_logic;
+		RESET : IN std_logic;
+		START : IN std_logic;
+		SDO : IN std_logic;          
+		READY : OUT std_logic;
+		DATA : OUT std_logic_vector(15 downto 0);
+		CONVSTART : OUT std_logic;
+		SCLK : OUT std_logic
+		);
+	END COMPONENT;
+	COMPONENT MAX2871
+	Generic (CLK_DIV : integer);
+	PORT(
+		CLK : IN std_logic;
+		RESET : IN std_logic;
+		REG4 : IN std_logic_vector(31 downto 0);
+		REG3 : IN std_logic_vector(31 downto 0);
+		REG1 : IN std_logic_vector(31 downto 0);
+		REG0 : IN std_logic_vector(31 downto 0);
+		RELOAD : IN std_logic;          
+		CLK_OUT : OUT std_logic;
+		MOSI : OUT std_logic;
+		LE : OUT std_logic;
+		DONE : OUT std_logic
+		);
+	END COMPONENT;
+	COMPONENT SPICommands
+	PORT(
+		CLK : IN std_logic;
+		RESET : IN std_logic;
+		SCLK : IN std_logic;
+		MOSI : IN std_logic;
+		NSS : IN std_logic;
+		NEW_SAMPLING_DATA : IN std_logic;
+		SAMPLING_RESULT : IN std_logic_vector(287 downto 0);
+		SOURCE_UNLOCKED : IN std_logic;
+		LO_UNLOCKED : IN std_logic;          
+		MISO : OUT std_logic;
+		MAX2871_DEF_4 : OUT std_logic_vector(31 downto 0);
+		MAX2871_DEF_3 : OUT std_logic_vector(31 downto 0);
+		MAX2871_DEF_1 : OUT std_logic_vector(31 downto 0);
+		MAX2871_DEF_0 : OUT std_logic_vector(31 downto 0);
+		SWEEP_DATA : OUT std_logic_vector(111 downto 0);
+		SWEEP_ADDRESS : OUT std_logic_vector(12 downto 0);
+		SWEEP_WRITE : OUT std_logic_vector(0 to 0);
+		SWEEP_POINTS : OUT std_logic_vector(12 downto 0);
+		NSAMPLES : OUT std_logic_vector(16 downto 0);
+		INTERRUPT_ASSERTED : OUT std_logic
+		);
+	END COMPONENT;
+	
+	COMPONENT SweepConfigMem
+	PORT (
+		clka : IN STD_LOGIC;
+		ena : IN STD_LOGIC;
+		wea : IN STD_LOGIC_VECTOR(0 DOWNTO 0);
+		addra : IN STD_LOGIC_VECTOR(12 DOWNTO 0);
+		dina : IN STD_LOGIC_VECTOR(111 DOWNTO 0);
+		clkb : IN STD_LOGIC;
+		addrb : IN STD_LOGIC_VECTOR(12 DOWNTO 0);
+		doutb : OUT STD_LOGIC_VECTOR(111 DOWNTO 0)
+		);
+	END COMPONENT;
+	
+	signal clk160 : std_logic;
+	
+	-- PLL signals
+	signal source_reg_4 : std_logic_vector(31 downto 0);
+	signal source_reg_3 : std_logic_vector(31 downto 0);
+	signal source_reg_1 : std_logic_vector(31 downto 0);
+	signal source_reg_0 : std_logic_vector(31 downto 0);
+	signal lo_reg_4 : std_logic_vector(31 downto 0);
+	signal lo_reg_3 : std_logic_vector(31 downto 0);
+	signal lo_reg_1 : std_logic_vector(31 downto 0);
+	signal lo_reg_0 : std_logic_vector(31 downto 0);
+	signal reload_plls : std_logic;
+	signal source_reloaded : std_logic;
+	signal lo_reloaded : std_logic;
+	signal plls_reloaded : std_logic;
+	signal plls_locked : std_logic;
+	
+	-- ADC signals
+	signal adc_trigger_sample : std_logic;
+	signal adc_port1_ready : std_logic;
+	signal adc_port1_data : std_logic_vector(15 downto 0);
+	signal adc_port2_data : std_logic_vector(15 downto 0);
+	signal adc_ref_data : std_logic_vector(15 downto 0);
+	
+	-- Sampling signals
+	signal sampling_done : std_logic;
+	signal sampling_start : std_logic;
+	signal sampling_samples : std_logic_vector(16 downto 0);
+	signal sampling_result : std_logic_vector(287 downto 0);
+	
+	-- Sweep signals
+	signal sweep_points : std_logic_vector(12 downto 0);
+	signal sweep_config_data : std_logic_vector(111 downto 0);
+	signal sweep_config_address : std_logic_vector(12 downto 0);
+	signal source_filter : std_logic_vector(1 downto 0);
+	
+	signal sweep_config_write_address : std_logic_vector(12 downto 0);
+	signal sweep_config_write_data : std_logic_vector(111 downto 0);
+	signal sweep_config_write : std_logic_vector(0 downto 0);
+	
+	-- Configuration signals
+	signal settling_time : std_logic_vector(15 downto 0);
+	signal def_reg_4 : std_logic_vector(31 downto 0);
+	signal def_reg_3 : std_logic_vector(31 downto 0);
+	signal def_reg_1 : std_logic_vector(31 downto 0);
+	signal def_reg_0 : std_logic_vector(31 downto 0);
 begin
+	MainCLK : PLL
+	port map(
+		-- Clock in ports
+		CLK_IN1 => CLK,
+		-- Clock out ports
+		CLK_OUT1 => clk160,
+		-- Status and control signals
+		RESET  => RESET
+	);
 
+	Source: MAX2871
+	GENERIC MAP(CLK_DIV => 10)
+	PORT MAP(
+		CLK => clk160,
+		RESET => RESET,
+		REG4 => source_reg_4,
+		REG3 => source_reg_3,
+		REG1 => source_reg_1,
+		REG0 => source_reg_0,
+		RELOAD => reload_plls,
+		CLK_OUT => SOURCE_CLK,
+		MOSI => SOURCE_MOSI,
+		LE => SOURCE_LE,
+		DONE => source_reloaded
+	);
+	LO1: MAX2871
+	GENERIC MAP(CLK_DIV => 10)
+	PORT MAP(
+		CLK => clk160,
+		RESET => RESET,
+		REG4 => lo_reg_4,
+		REG3 => lo_reg_3,
+		REG1 => lo_reg_1,
+		REG0 => lo_reg_0,
+		RELOAD => reload_plls,
+		CLK_OUT => LO1_CLK,
+		MOSI => LO1_MOSI,
+		LE => LO1_LE,
+		DONE => lo_reloaded
+	);
+	plls_reloaded <= source_reloaded and lo_reloaded;
+	plls_locked <= SOURCE_LD and LO1_LD;
+
+	Port1ADC: MCP33131
+	GENERIC MAP(CLK_DIV => 2,
+				CONVCYCLES => 114)
+	PORT MAP(
+		CLK => clk160,
+		RESET => RESET,
+		START => adc_trigger_sample,
+		READY => adc_port1_ready,
+		DATA => adc_port1_data,
+		SDO => PORT1_SDO,
+		CONVSTART => PORT1_CONVSTART,
+		SCLK => PORT1_SCLK
+	);
+	Port2ADC: MCP33131
+	GENERIC MAP(CLK_DIV => 2,
+				CONVCYCLES => 114)
+	PORT MAP(
+		CLK => clk160,
+		RESET => RESET,
+		START => adc_trigger_sample,
+		READY => open, -- synchronous ADCs, ready indicated by port 1 ADC
+		DATA => adc_port2_data,
+		SDO => PORT2_SDO,
+		CONVSTART => PORT2_CONVSTART,
+		SCLK => PORT2_SCLK
+	);
+	RefADC: MCP33131
+	GENERIC MAP(CLK_DIV => 2,
+				CONVCYCLES => 114)
+	PORT MAP(
+		CLK => clk160,
+		RESET => RESET,
+		START => adc_trigger_sample,
+		READY => open, -- synchronous ADCs, ready indicated by port 1 ADC
+		DATA => adc_ref_data,
+		SDO => REF_SDO,
+		CONVSTART => REF_CONVSTART,
+		SCLK => REF_SCLK
+	);
+	
+	Sampler: Sampling
+	GENERIC MAP(CLK_DIV => 165,
+			CLK_FREQ => 160000000,
+			IF_FREQ => 250000,
+			CLK_CYCLES_PRE_DONE => 0)
+	PORT MAP(
+		CLK => clk160,
+		RESET => RESET,
+		PORT1 => adc_port1_data,
+		PORT2 => adc_port2_data,
+		REF => adc_ref_data,
+		ADC_START => adc_trigger_sample,
+		NEW_SAMPLE => adc_port1_ready,
+		DONE => sampling_done,
+		PRE_DONE => open,
+		START => sampling_start,
+		SAMPLES => sampling_samples,
+		PORT1_I => sampling_result(287 downto 240),
+		PORT1_Q => sampling_result(239 downto 192),
+		PORT2_I => sampling_result(191 downto 144),
+		PORT2_Q => sampling_result(143 downto 96),
+		REF_I => sampling_result(95 downto 48),
+		REF_Q => sampling_result(47 downto 0)
+	);
+
+	SweepModule: Sweep PORT MAP(
+		CLK => clk160,
+		RESET => RESET,
+		NPOINTS => sweep_points,
+		CONFIG_ADDRESS => sweep_config_address,
+		CONFIG_DATA => sweep_config_data,
+		SAMPLING_DONE => sampling_done,
+		START_SAMPLING => sampling_start,
+		PORT_SELECT => PORT_SELECT,
+		MAX2871_DEF_4 => def_reg_4,
+		MAX2871_DEF_3 => def_reg_3,
+		MAX2871_DEF_1 => def_reg_1,
+		MAX2871_DEF_0 => def_reg_0,
+		SOURCE_REG_4 => source_reg_4,
+		SOURCE_REG_3 => source_reg_3,
+		SOURCE_REG_1 => source_reg_1,
+		SOURCE_REG_0 => source_reg_0,
+		LO_REG_4 => lo_reg_4,
+		LO_REG_3 => lo_reg_3,
+		LO_REG_1 => lo_reg_1,
+		LO_REG_0 => lo_reg_0,
+		RELOAD_PLL_REGS => reload_plls,
+		PLL_RELOAD_DONE => plls_reloaded,
+		PLL_LOCKED => plls_locked,
+		ATTENUATOR => ATTENUATION,
+		SOURCE_FILTER => source_filter,
+		SETTLING_TIME => settling_time
+	);
+
+	SPI: SPICommands PORT MAP(
+		CLK => clk160,
+		RESET => RESET,
+		SCLK => MCU_SCK,
+		MOSI => MCU_MOSI,
+		MISO => MCU_MISO,
+		NSS => MCU_NSS,
+		NEW_SAMPLING_DATA => sampling_done,
+		SAMPLING_RESULT => sampling_result,
+		SOURCE_UNLOCKED => SOURCE_LD, -- TODO invert
+		LO_UNLOCKED => LO1_LD, -- TODO invert
+		MAX2871_DEF_4 => def_reg_4,
+		MAX2871_DEF_3 => def_reg_3,
+		MAX2871_DEF_1 => def_reg_1,
+		MAX2871_DEF_0 => def_reg_0,
+		SWEEP_DATA => sweep_config_write_data,
+		SWEEP_ADDRESS => sweep_config_write_address,
+		SWEEP_WRITE => sweep_config_write,
+		SWEEP_POINTS => sweep_points,
+		NSAMPLES => sampling_samples,
+		INTERRUPT_ASSERTED => MCU_INTR
+	);
+	
+	ConfigMem : SweepConfigMem
+	PORT MAP (
+		clka => clk160,
+		ena => '1',
+		wea => sweep_config_write,
+		addra => sweep_config_write_address,
+		dina => sweep_config_write_data,
+		clkb => clk160,
+		addrb => sweep_config_address,
+		doutb => sweep_config_data
+	);
 
 end Behavioral;
 
