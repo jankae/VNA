@@ -22,7 +22,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx primitives in this code.
@@ -129,6 +129,7 @@ begin
 				SOURCE_RF_EN <= '0';
 				LO_RF_EN <= '0';
 				LEDS <= (others => '1');
+				unread_sampling_data <= '0';
 			else
 				if sweep_config_write = '1' then
 					sweep_config_write <= '0';
@@ -149,6 +150,7 @@ begin
 						-- initial word determines action
 						case spi_buf_out(15 downto 14) is
 							when "10" => state <= WriteRegister;
+											selected_register <= to_integer(unsigned(spi_buf_out(3 downto 0)));
 							when "00" => state <= WriteSweepConfig;
 											-- also extract the point number
 											SWEEP_ADDRESS <= spi_buf_out(12 downto 0);
