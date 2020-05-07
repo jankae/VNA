@@ -39,8 +39,8 @@ NET "LEDS[6]" LOC = P104;
 NET "LEDS[5]" LOC = P99;
 NET "LEDS[4]" LOC = P94;
 NET "LEDS[3]" LOC = P85;
-NET "LEDS[1]" LOC = P75;
 NET "LEDS[2]" LOC = P82;
+NET "LEDS[1]" LOC = P75;
 NET "LEDS[0]" LOC = P118;
 
 # PlanAhead Generated IO constraints 

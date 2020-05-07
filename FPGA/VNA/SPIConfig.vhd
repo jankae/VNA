@@ -49,6 +49,14 @@ entity SPICommands is
            SWEEP_WRITE : out  STD_LOGIC_VECTOR (0 downto 0);
            SWEEP_POINTS : out  STD_LOGIC_VECTOR (12 downto 0);
            NSAMPLES : out  STD_LOGIC_VECTOR (16 downto 0);
+			  SETTLING_TIME : out STD_LOGIC_VECTOR (15 downto 0);
+			  PORT1_EN : out STD_LOGIC;
+			  PORT2_EN : out STD_LOGIC;
+			  REF_EN : out STD_LOGIC;
+			  AMP_SHDN : out STD_LOGIC;
+			  SOURCE_RF_EN : out STD_LOGIC;
+			  LO_RF_EN : out STD_LOGIC;
+			  LEDS : out STD_LOGIC_VECTOR(2 downto 0);
 			  INTERRUPT_ASSERTED : out STD_LOGIC);
 end SPICommands;
 
@@ -108,67 +116,90 @@ begin
 	process(CLK, RESET)
 	begin
 		if rising_edge(CLK) then
-			if sweep_config_write = '1' then
+			if RESET = '1' then
 				sweep_config_write <= '0';
-			end if;
-			if NEW_SAMPLING_DATA = '1' then
-				unread_sampling_data <= '1';
-				if unread_sampling_data = '1' then
-					data_overrun <= '1';
+				data_overrun <= '0';
+				SWEEP_POINTS <= (others => '0');
+				NSAMPLES <= (others => '0');
+				SETTLING_TIME <= (others => '0');
+				PORT1_EN <= '0';
+				PORT2_EN <= '0';
+				REF_EN <= '0';
+				AMP_SHDN <= '1';
+				SOURCE_RF_EN <= '0';
+				LO_RF_EN <= '0';
+				LEDS <= (others => '1');
+			else
+				if sweep_config_write = '1' then
+					sweep_config_write <= '0';
 				end if;
-			end if;
-			if NSS = '1' then
-				word_cnt <= 0;
-				spi_buf_in <= interrupt_status;
-				word_cnt <= 0;
-			elsif spi_complete = '1' then
-				word_cnt <= word_cnt + 1;
-				if word_cnt = 0 then
-					-- initial word determines action
-					case spi_buf_out(15 downto 14) is
-						when "10" => state <= WriteRegister;
-						when "00" => state <= WriteSweepConfig;
-										-- also extract the point number
-										SWEEP_ADDRESS <= spi_buf_out(12 downto 0);
-						when "11" => state <= ReadResult;
-										latched_result <= SAMPLING_RESULT(287 downto 16);
-										spi_buf_in <= SAMPLING_RESULT(15 downto 0);
-										unread_sampling_data <= '0';
-						when others => state <= Invalid;
-					end case;
-				else
-					if state = WriteRegister then
-						-- write received data into previously selected register
-						case selected_register is
-							when 0 => interrupt_mask <= spi_buf_out;
-							when 1 => SWEEP_POINTS <= spi_buf_out(12 downto 0);
-							when 2 => NSAMPLES(15 downto 0) <= spi_buf_out;
-							when 3 => NSAMPLES(16) <= spi_buf_out(0);
-							
-							when 8 => MAX2871_DEF_0(15 downto 0) <= spi_buf_out;
-							when 9 => MAX2871_DEF_0(31 downto 16) <= spi_buf_out;
-							when 10 => MAX2871_DEF_1(15 downto 0) <= spi_buf_out;
-							when 11 => MAX2871_DEF_1(31 downto 16) <= spi_buf_out;
-							when 12 => MAX2871_DEF_3(15 downto 0) <= spi_buf_out;
-							when 13 => MAX2871_DEF_3(31 downto 16) <= spi_buf_out;
-							when 14 => MAX2871_DEF_4(15 downto 0) <= spi_buf_out;
-							when 15 => MAX2871_DEF_4(31 downto 16) <= spi_buf_out;
-							when others => 
+				if NEW_SAMPLING_DATA = '1' then
+					unread_sampling_data <= '1';
+					if unread_sampling_data = '1' then
+						data_overrun <= '1';
+					end if;
+				end if;
+				if NSS = '1' then
+					word_cnt <= 0;
+					spi_buf_in <= interrupt_status;
+					word_cnt <= 0;
+				elsif spi_complete = '1' then
+					word_cnt <= word_cnt + 1;
+					if word_cnt = 0 then
+						-- initial word determines action
+						case spi_buf_out(15 downto 14) is
+							when "10" => state <= WriteRegister;
+							when "00" => state <= WriteSweepConfig;
+											-- also extract the point number
+											SWEEP_ADDRESS <= spi_buf_out(12 downto 0);
+							when "11" => state <= ReadResult;
+											latched_result <= SAMPLING_RESULT(287 downto 16);
+											spi_buf_in <= SAMPLING_RESULT(15 downto 0);
+											unread_sampling_data <= '0';
+							when others => state <= Invalid;
 						end case;
-						selected_register <= selected_register + 1;
-					elsif state = WriteSweepConfig then
-						if word_cnt = 7 then
-							-- Sweep config data is complete pass on
-							SWEEP_DATA <= sweepconfig_buffer & spi_buf_out;
-							sweep_config_write <= '1';
-						else
-							-- shift next word into buffer
-							sweepconfig_buffer <= sweepconfig_buffer(79 downto 0) & spi_buf_out;
+					else
+						if state = WriteRegister then
+							-- write received data into previously selected register
+							case selected_register is
+								when 0 => interrupt_mask <= spi_buf_out;
+								when 1 => SWEEP_POINTS <= spi_buf_out(12 downto 0);
+								when 2 => NSAMPLES(15 downto 0) <= spi_buf_out;
+								when 3 => NSAMPLES(16) <= spi_buf_out(0);
+											PORT1_EN <= spi_buf_out(15);
+											PORT2_EN <= spi_buf_out(14);
+											REF_EN <= spi_buf_out(13);
+											AMP_SHDN <= not spi_buf_out(12);
+											SOURCE_RF_EN <= spi_buf_out(11);
+											LO_RF_EN <= spi_buf_out(10);
+											LEDS <= not spi_buf_out(9 downto 7);
+								when 4 => SETTLING_TIME <= spi_buf_out;
+								
+								when 8 => MAX2871_DEF_0(15 downto 0) <= spi_buf_out;
+								when 9 => MAX2871_DEF_0(31 downto 16) <= spi_buf_out;
+								when 10 => MAX2871_DEF_1(15 downto 0) <= spi_buf_out;
+								when 11 => MAX2871_DEF_1(31 downto 16) <= spi_buf_out;
+								when 12 => MAX2871_DEF_3(15 downto 0) <= spi_buf_out;
+								when 13 => MAX2871_DEF_3(31 downto 16) <= spi_buf_out;
+								when 14 => MAX2871_DEF_4(15 downto 0) <= spi_buf_out;
+								when 15 => MAX2871_DEF_4(31 downto 16) <= spi_buf_out;
+								when others => 
+							end case;
+							selected_register <= selected_register + 1;
+						elsif state = WriteSweepConfig then
+							if word_cnt = 7 then
+								-- Sweep config data is complete pass on
+								SWEEP_DATA <= sweepconfig_buffer & spi_buf_out;
+								sweep_config_write <= '1';
+							else
+								-- shift next word into buffer
+								sweepconfig_buffer <= sweepconfig_buffer(79 downto 0) & spi_buf_out;
+							end if;
+						elsif state = ReadResult then
+							-- pass on next word of latched result
+							spi_buf_in <= latched_result(15 downto 0);
+							latched_result <= "0000000000000000" & latched_result(271 downto 16);
 						end if;
-					elsif state = ReadResult then
-						-- pass on next word of latched result
-						spi_buf_in <= latched_result(15 downto 0);
-						latched_result <= "0000000000000000" & latched_result(271 downto 16);
 					end if;
 				end if;
 			end if;

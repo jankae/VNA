@@ -94,7 +94,7 @@ BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
    uut: Sampling
-	Generic MAP(CLK_DIV => 160,
+	Generic MAP(CLK_DIV => 165,
 				CLK_FREQ => 160000000,
 				IF_FREQ => 250000,
 				CLK_CYCLES_PRE_DONE => 0)

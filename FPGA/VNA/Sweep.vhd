@@ -106,7 +106,7 @@ begin
 				point_cnt <= (others => '0');
 				state <= TriggerSetup;
 				START_SAMPLING <= '0';
-				PORT_SELECT <= '0';
+				PORT_SELECT <= '1';
 				RELOAD_PLL_REGS <= '0';
 			else
 				case state is
@@ -118,7 +118,7 @@ begin
 						if PLL_RELOAD_DONE = '1' and PLL_LOCKED = '1' then
 							state <= SettlingPort1;
 							settling_cnt <= unsigned(SETTLING_TIME);
-							PORT_SELECT <= '0';
+							PORT_SELECT <= '1';
 						end if;
 					when SettlingPort1 =>
 						-- wait for settling time to elapse
@@ -133,7 +133,7 @@ begin
 						START_SAMPLING <= '0';
 						if SAMPLING_DONE = '1' then
 							state <= SettlingPort2;
-							PORT_SELECT <= '1';
+							PORT_SELECT <= '0';
 							settling_cnt <= unsigned(SETTLING_TIME);
 						end if;
 					when SettlingPort2 =>

@@ -88,7 +88,8 @@ architecture Behavioral of top is
 		-- Clock out ports
 		CLK_OUT1          : out    std_logic;
 		-- Status and control signals
-		RESET             : in     std_logic
+		RESET             : in     std_logic;
+		LOCKED            : out    std_logic
 		);
 	end component;
 
@@ -198,6 +199,14 @@ architecture Behavioral of top is
 		SWEEP_WRITE : OUT std_logic_vector(0 to 0);
 		SWEEP_POINTS : OUT std_logic_vector(12 downto 0);
 		NSAMPLES : OUT std_logic_vector(16 downto 0);
+		SETTLING_TIME : out STD_LOGIC_VECTOR (15 downto 0);
+		PORT1_EN : out STD_LOGIC;
+		PORT2_EN : out STD_LOGIC;
+		REF_EN : out STD_LOGIC;
+		AMP_SHDN : out STD_LOGIC;
+		SOURCE_RF_EN : out STD_LOGIC;
+		LO_RF_EN : out STD_LOGIC;
+		LEDS : out STD_LOGIC_VECTOR(2 downto 0);
 		INTERRUPT_ASSERTED : OUT std_logic
 		);
 	END COMPONENT;
@@ -216,6 +225,7 @@ architecture Behavioral of top is
 	END COMPONENT;
 	
 	signal clk160 : std_logic;
+	signal clk_locked : std_logic;
 	
 	-- PLL signals
 	signal source_reg_4 : std_logic_vector(31 downto 0);
@@ -250,6 +260,7 @@ architecture Behavioral of top is
 	signal sweep_config_data : std_logic_vector(111 downto 0);
 	signal sweep_config_address : std_logic_vector(12 downto 0);
 	signal source_filter : std_logic_vector(1 downto 0);
+	signal sweep_port_select : std_logic;
 	
 	signal sweep_config_write_address : std_logic_vector(12 downto 0);
 	signal sweep_config_write_data : std_logic_vector(111 downto 0);
@@ -261,7 +272,40 @@ architecture Behavioral of top is
 	signal def_reg_3 : std_logic_vector(31 downto 0);
 	signal def_reg_1 : std_logic_vector(31 downto 0);
 	signal def_reg_0 : std_logic_vector(31 downto 0);
+	signal user_leds : std_logic_vector(2 downto 0);
+	
+	-- PLL/SPI internal mux
+	signal fpga_select : std_logic;
+	signal fpga_source_SCK : std_logic;
+	signal fpga_source_MOSI : std_logic;
+	signal fpga_source_LE : std_logic;
+	signal fpga_LO1_SCK : std_logic;
+	signal fpga_LO1_MOSI : std_logic;
+	signal fpga_LO1_LE : std_logic;
+	signal fpga_miso : std_logic;
 begin
+
+	-- TODO assign proper signals
+	LO1_CE <= '1';
+	SOURCE_CE <= '1';
+	BAND_SELECT <= '0';
+	SWITCHING_SYNC <= 'Z';
+	SDA <= 'Z';
+	SCL <= 'Z';
+
+	-- Reference CLK LED
+	LEDS(0) <= user_leds(2);
+	-- Lock status of PLLs
+	LEDS(1) <= clk_locked;
+	LEDS(2) <= SOURCE_LD;
+	LEDS(3) <= LO1_LD;
+	-- Sweep and active port
+	PORT_SELECT <= sweep_port_select;
+	LEDS(4) <= not (MCU_AUX3 and sweep_port_select);
+	LEDS(5) <= not (MCU_AUX3 and not sweep_port_select);
+	-- Uncommitted LEDs
+	LEDS(7 downto 6) <= user_leds(1 downto 0);	
+
 	MainCLK : PLL
 	port map(
 		-- Clock in ports
@@ -269,7 +313,8 @@ begin
 		-- Clock out ports
 		CLK_OUT1 => clk160,
 		-- Status and control signals
-		RESET  => RESET
+		RESET  => RESET,
+		LOCKED => clk_locked
 	);
 
 	Source: MAX2871
@@ -282,9 +327,9 @@ begin
 		REG1 => source_reg_1,
 		REG0 => source_reg_0,
 		RELOAD => reload_plls,
-		CLK_OUT => SOURCE_CLK,
-		MOSI => SOURCE_MOSI,
-		LE => SOURCE_LE,
+		CLK_OUT => fpga_source_SCK,
+		MOSI => fpga_source_MOSI,
+		LE => fpga_source_LE,
 		DONE => source_reloaded
 	);
 	LO1: MAX2871
@@ -297,9 +342,9 @@ begin
 		REG1 => lo_reg_1,
 		REG0 => lo_reg_0,
 		RELOAD => reload_plls,
-		CLK_OUT => LO1_CLK,
-		MOSI => LO1_MOSI,
-		LE => LO1_LE,
+		CLK_OUT => fpga_LO1_SCK,
+		MOSI => fpga_LO1_MOSI,
+		LE => fpga_LO1_LE,
 		DONE => lo_reloaded
 	);
 	plls_reloaded <= source_reloaded and lo_reloaded;
@@ -378,7 +423,7 @@ begin
 		CONFIG_DATA => sweep_config_data,
 		SAMPLING_DONE => sampling_done,
 		START_SAMPLING => sampling_start,
-		PORT_SELECT => PORT_SELECT,
+		PORT_SELECT => sweep_port_select,
 		MAX2871_DEF_4 => def_reg_4,
 		MAX2871_DEF_3 => def_reg_3,
 		MAX2871_DEF_1 => def_reg_1,
@@ -398,14 +443,34 @@ begin
 		SOURCE_FILTER => source_filter,
 		SETTLING_TIME => settling_time
 	);
+	
+	-- Source filter mapping
+	FILT_IN_C1 <= '0' when source_filter = "00" or source_filter = "10" else '1';
+	FILT_IN_C2 <= '0' when source_filter = "11" or source_filter = "10" else '1';
+	FILT_OUT_C1 <= '0' when source_filter = "00" or source_filter = "10" else '1';
+	FILT_OUT_C2 <= '0' when source_filter = "00" or source_filter = "01" else '1';
+	
+	-- PLL/SPI mux
+	-- only select FPGA SPI slave when both AUX1 and AUX2 are low
+	fpga_select <= MCU_NSS when MCU_AUX1 = '0' and MCU_AUX2 = '0' else '1';
+	-- direct connection between MCU and SOURCE when AUX1 is high
+	SOURCE_CLK <= MCU_SCK when MCU_AUX1 = '1' else fpga_source_SCK;
+	SOURCE_MOSI <= MCU_MOSI when MCU_AUX1 = '1' else fpga_source_MOSI;
+	SOURCE_LE <= MCU_NSS when MCU_AUX1 = '1' else fpga_source_LE;
+	-- direct connection between MCU and LO1 when AUX2 is high
+	LO1_CLK <= MCU_SCK when MCU_AUX2 = '1' else fpga_LO1_SCK;
+	LO1_MOSI <= MCU_MOSI when MCU_AUX2 = '1' else fpga_LO1_MOSI;
+	LO1_LE <= MCU_NSS when MCU_AUX2 = '1' else fpga_LO1_LE;
+	-- select MISO source
+	MCU_MISO <= SOURCE_MUX when MCU_AUX1 = '1' else LO1_MUX when MCU_AUX2 = '1' else fpga_miso;
 
 	SPI: SPICommands PORT MAP(
 		CLK => clk160,
 		RESET => RESET,
 		SCLK => MCU_SCK,
 		MOSI => MCU_MOSI,
-		MISO => MCU_MISO,
-		NSS => MCU_NSS,
+		MISO => fpga_miso,
+		NSS => fpga_select,
 		NEW_SAMPLING_DATA => sampling_done,
 		SAMPLING_RESULT => sampling_result,
 		SOURCE_UNLOCKED => SOURCE_LD, -- TODO invert
@@ -419,6 +484,14 @@ begin
 		SWEEP_WRITE => sweep_config_write,
 		SWEEP_POINTS => sweep_points,
 		NSAMPLES => sampling_samples,
+		SETTLING_TIME => settling_time,
+		PORT1_EN => PORT1_MIX_EN,
+		PORT2_EN => PORT2_MIX_EN,
+		REF_EN => REF_MIX_EN,
+		AMP_SHDN => AMP_PWDN,
+		SOURCE_RF_EN => SOURCE_RF_EN,
+		LO_RF_EN => LO1_RF_EN,
+		LEDS => user_leds,
 		INTERRUPT_ASSERTED => MCU_INTR
 	);
 	
