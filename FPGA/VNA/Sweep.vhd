@@ -112,7 +112,9 @@ begin
 				case state is
 					when TriggerSetup =>
 						RELOAD_PLL_REGS <= '1';
-						state <= SettingUp;
+						if PLL_RELOAD_DONE = '0' then
+							state <= SettingUp;
+						end if;
 					when SettingUp =>
 						RELOAD_PLL_REGS <= '0';
 						if PLL_RELOAD_DONE = '1' and PLL_LOCKED = '1' then

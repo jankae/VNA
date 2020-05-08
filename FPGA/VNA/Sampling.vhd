@@ -196,7 +196,7 @@ begin
 						r_Q <= r_Q + signed(multR_Q);
 						-- advance phase
 						phase <= std_logic_vector(unsigned(phase) + phase_inc);
-						if sample_cnt < unsigned(SAMPLES) - 1 then
+						if sample_cnt < unsigned(SAMPLES) then
 							sample_cnt <= sample_cnt + 1;
 						else
 							-- sampling done

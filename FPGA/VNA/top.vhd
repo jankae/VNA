@@ -313,7 +313,7 @@ begin
 		-- Clock out ports
 		CLK_OUT1 => clk160,
 		-- Status and control signals
-		RESET  => RESET,
+		RESET  => '0',
 		LOCKED => clk_locked
 	);
 
@@ -417,7 +417,7 @@ begin
 
 	SweepModule: Sweep PORT MAP(
 		CLK => clk160,
-		RESET => RESET,
+		RESET => MCU_AUX3,
 		NPOINTS => sweep_points,
 		CONFIG_ADDRESS => sweep_config_address,
 		CONFIG_DATA => sweep_config_data,
