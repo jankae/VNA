@@ -60,6 +60,7 @@ static Protocol::SweepSettings DecodeSweepSettings(uint8_t *buf) {
 
 uint16_t Protocol::DecodeBuffer(uint8_t *buf, uint16_t len, PacketInfo *info) {
     if (!info || !len) {
+        info->type = PacketType::None;
 		return 0;
 	}
 	uint8_t *data = buf;

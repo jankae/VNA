@@ -162,7 +162,7 @@ void Device::ReceiveThread()
                         inputCnt = remaining;
                     }
                     if(packet.type == Protocol::PacketType::Datapoint) {
-                        BOOST_LOG_TRIVIAL(debug) << "Got new datapoint"<< std::flush;
+                        BOOST_LOG_TRIVIAL(debug) << "Got new datapoint: " << packet.datapoint.pointNum << std::flush;
                         emit DatapointReceived(packet.datapoint);
                     }
                 } while (handled_len > 0);

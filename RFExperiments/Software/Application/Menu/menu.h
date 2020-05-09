@@ -27,7 +27,7 @@ private:
         Menu *menu;
         int index;
     };
-    static constexpr int maxWidgets = 8;
+    static constexpr int maxWidgets = 10;
     QVBoxLayout *m_layout;
     Menu *parent;
     QStackedLayout &m_containingLayout;

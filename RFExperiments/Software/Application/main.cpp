@@ -9,6 +9,7 @@
 #include "Menu/menuaction.h"
 #include "Menu/menuvalue.h"
 
+#include <complex>
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
     VNA vna;

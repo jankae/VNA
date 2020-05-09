@@ -16,7 +16,11 @@
 #include "Menu/menuaction.h"
 #include "Menu/menuvalue.h"
 #include <QMessageBox>
+#include <QFileDialog>
+#include <iostream>
+#include <fstream>
 
+using namespace std;
 
 constexpr Protocol::SweepSettings VNA::defaultSweep;
 
@@ -27,10 +31,8 @@ VNA::VNA(QWidget *parent)
     settings = defaultSweep;
     calValid = false;
     calMeasuring = false;
+    calDialog.reset();
     device.Configure(settings);
-    std::function<void(Protocol::Datapoint)> callback = [=](Protocol::Datapoint d) {
-        this->NewDatapoint(d);
-    };
     plots.append(new SmithChart(dataTable, "S11"));
     plots.append(new BodePlot(dataTable, "S21"));
     plots.append(new BodePlot(dataTable, "S12"));
@@ -150,6 +152,12 @@ VNA::VNA(QWidget *parent)
     mCalFullOSLT = new MenuAction("Apply full OSLT");
     mCalibration->addItem(mCalFullOSLT);
     mCalFullOSLT->setDisabled(true);
+
+    auto mCalSave = new MenuAction("Save to file");
+    mCalibration->addItem(mCalSave);
+
+    auto mCalLoad = new MenuAction("Load from file");
+    mCalibration->addItem(mCalLoad);
 
     mCalibration->finalize();
     mMain->addMenu(mCalibration, "Calibration");
@@ -289,6 +297,34 @@ VNA::VNA(QWidget *parent)
         calValid = true;
     });
 
+    connect(mCalSave, &MenuAction::triggered, [=](){
+        auto filename = QFileDialog::getSaveFileName(this, "Save calibration data", "", "Calibration files (*.cal)", nullptr, QFileDialog::DontUseNativeDialog);
+        if(filename.length() > 0) {
+            ofstream file;
+            file.open(filename.toStdString());
+            file << cal;
+            file.close();
+        }
+    });
+
+    connect(mCalLoad, &MenuAction::triggered, [=](){
+        auto filename = QFileDialog::getOpenFileName(this, "Save calibration data", "", "Calibration files (*.cal)", nullptr, QFileDialog::DontUseNativeDialog);
+        if(filename.length() > 0) {
+            ifstream file;
+            file.open(filename.toStdString());
+            file >> cal;
+            file.close();
+            auto msg = new QMessageBox();
+            msg->setText("Calibration loaded");
+            QString calInfo = "The calibration contains ";
+            calInfo.append(QString::number(cal.nPoints()));
+            calInfo.append(" points.");
+            msg->setInformativeText(calInfo);
+            msg->exec();
+            calValid = true;
+        }
+    });
+
     auto mainWidget = new QWidget;
     auto plotWidget = new QWidget;
     auto mainLayout = new QHBoxLayout;
@@ -313,10 +349,9 @@ void VNA::NewDatapoint(Protocol::Datapoint d)
         if(!calWaitFirst || d.pointNum == 0) {
             calWaitFirst = false;
             cal.addMeasurement(calMeasurement, d);
-            calDialog.setValue(d.pointNum + 1);
             if(d.pointNum == settings.points - 1) {
                 calMeasuring = false;
-                // Check is applying calibration is available
+                // Check if applying calibration is available
                 if(cal.calculationPossible(Calibration::Type::Port1OSL)) {
                     mCalOSL1->setEnabled(true);
                 }
@@ -327,6 +362,7 @@ void VNA::NewDatapoint(Protocol::Datapoint d)
                     mCalFullOSLT->setEnabled(true);
                 }
             }
+            calDialog.setValue(d.pointNum + 1);
         }
     }
     if(calValid) {

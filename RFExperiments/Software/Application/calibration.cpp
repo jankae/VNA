@@ -282,6 +282,30 @@ QString Calibration::MeasurementToString(Calibration::Measurement m)
     }
 }
 
+ostream& operator<<(ostream &os, const Calibration &c)
+{
+    os << c.points.size() << "\n";
+    for(auto p : c.points) {
+        os << p;
+    }
+    os << endl;
+    return os;
+}
+
+istream& operator >>(istream &in, Calibration &c)
+{
+    c.clearMeasurements();
+    c.points.clear();
+    int npoints;
+    in >> npoints;
+    for(int i=0;i<npoints;i++) {
+        Calibration::Point p;
+        in >> p;
+        c.points.push_back(p);
+    }
+    return in;
+}
+
 bool Calibration::SanityCheckSamples(std::vector<Calibration::Measurement> &requiredMeasurements)
 {
     // sanity check measurements, all need to be of the same size with the same frequencies (except for isolation which may be empty)

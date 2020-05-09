@@ -5,6 +5,8 @@
 #include <complex>
 #include <vector>
 #include <map>
+#include <iostream>
+#include <iomanip>
 
 class Calibration
 {
@@ -48,6 +50,11 @@ public:
 
     static QString MeasurementToString(Measurement m);
 
+    friend std::ostream& operator<<(std::ostream& os, const Calibration& c);
+    friend std::istream& operator >> (std::istream &in, Calibration& c);
+    int nPoints() {
+        return points.size();
+    }
 private:
     void construct12TermPoints();
     void constructPort1OSL();
@@ -61,6 +68,30 @@ private:
         std::complex<double> fe00, fe11, fe10e01, fe10e32, fe22, fe30;
         // Reverse error terms
         std::complex<double> re33, re11, re23e32, re23e01, re22, re03;
+        friend std::ostream& operator<<(std::ostream& os, const Point& p) {
+            os << std::fixed << std::setprecision(12);
+            os << p.frequency << "\n";
+            os << p.fe00 << "\n" << p.fe11 << "\n" << p.fe10e01 << "\n" << p.fe10e32 << "\n" << p.fe22 << "\n" << p.fe30 << "\n";
+            os << p.re33 << "\n" << p.re11 << "\n" << p.re23e32 << "\n" << p.re23e01 << "\n" << p.re22 << "\n" << p.re03 << std::endl;
+            return os;
+        }
+        friend std::istream & operator >> (std::istream &in, Point& p)
+        {
+            in >> p.frequency;
+            in >> p.fe00;
+            in >> p.fe11;
+            in >> p.fe10e01;
+            in >> p.fe10e32;
+            in >> p.fe22;
+            in >> p.fe30;
+            in >> p.re33;
+            in >> p.re11;
+            in >> p.re23e32;
+            in >> p.re23e01;
+            in >> p.re22;
+            in >> p.re03;
+            return in;
+        }
     };
     Point getCalibrationPoint(Protocol::Datapoint &d);
     void computeOSL(std::complex<double> o_m,
