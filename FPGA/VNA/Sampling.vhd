@@ -153,7 +153,8 @@ begin
 		p => multR_Q
 	);
 		
-	DONE <= result_computed ;
+	DONE <= result_computed;
+	PRE_DONE <= result_computed;
 	
 	process(CLK, RESET)
 	begin

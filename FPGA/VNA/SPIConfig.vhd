@@ -57,6 +57,7 @@ entity SPICommands is
 			  SOURCE_RF_EN : out STD_LOGIC;
 			  LO_RF_EN : out STD_LOGIC;
 			  LEDS : out STD_LOGIC_VECTOR(2 downto 0);
+			  SYNC_SETTING : out STD_LOGIC_VECTOR(1 downto 0);
 			  INTERRUPT_ASSERTED : out STD_LOGIC);
 end SPICommands;
 
@@ -129,6 +130,7 @@ begin
 				SOURCE_RF_EN <= '0';
 				LO_RF_EN <= '0';
 				LEDS <= (others => '1');
+				SYNC_SETTING <= "00";
 				unread_sampling_data <= '0';
 			else
 				if sweep_config_write = '1' then
@@ -175,6 +177,7 @@ begin
 											SOURCE_RF_EN <= spi_buf_out(11);
 											LO_RF_EN <= spi_buf_out(10);
 											LEDS <= not spi_buf_out(9 downto 7);
+											SYNC_SETTING <= spi_buf_out(6 downto 5);
 								when 4 => SETTLING_TIME <= spi_buf_out;
 								
 								when 8 => MAX2871_DEF_0(15 downto 0) <= spi_buf_out;

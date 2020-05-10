@@ -92,6 +92,17 @@ architecture Behavioral of top is
 		LOCKED            : out    std_logic
 		);
 	end component;
+	
+	COMPONENT SwitchingSync
+	Generic (CLK_DIV : integer);
+	PORT(
+		CLK : IN  std_logic;
+		RESET : IN  std_logic;
+		SETTING : IN  std_logic_vector(1 downto 0);
+		SYNC_OUT : OUT  std_logic;
+		SYNC_PULSE_IN : IN  std_logic
+		);
+	END COMPONENT;
 
 	COMPONENT Sweep
 	PORT(
@@ -207,6 +218,7 @@ architecture Behavioral of top is
 		SOURCE_RF_EN : out STD_LOGIC;
 		LO_RF_EN : out STD_LOGIC;
 		LEDS : out STD_LOGIC_VECTOR(2 downto 0);
+		SYNC_SETTING : out STD_LOGIC_VECTOR(1 downto 0);
 		INTERRUPT_ASSERTED : OUT std_logic
 		);
 	END COMPONENT;
@@ -273,6 +285,7 @@ architecture Behavioral of top is
 	signal def_reg_1 : std_logic_vector(31 downto 0);
 	signal def_reg_0 : std_logic_vector(31 downto 0);
 	signal user_leds : std_logic_vector(2 downto 0);
+	signal sync_setting : std_logic_vector(1 downto 0);
 	
 	-- PLL/SPI internal mux
 	signal fpga_select : std_logic;
@@ -289,7 +302,6 @@ begin
 	LO1_CE <= '1';
 	SOURCE_CE <= '1';
 	BAND_SELECT <= '0';
-	SWITCHING_SYNC <= 'Z';
 	SDA <= 'Z';
 	SCL <= 'Z';
 
@@ -315,6 +327,16 @@ begin
 		-- Status and control signals
 		RESET  => '0',
 		LOCKED => clk_locked
+	);
+	
+	Sync: SwitchingSync
+	GENERIC MAP (CLK_DIV => 160)
+	PORT MAP (
+		CLK => clk160,
+		RESET => RESET,
+		SETTING => sync_setting,
+		SYNC_OUT => SWITCHING_SYNC,
+		SYNC_PULSE_IN => '0' -- TODO leave ADCs running and connect to ADC trigger
 	);
 
 	Source: MAX2871
@@ -492,6 +514,7 @@ begin
 		SOURCE_RF_EN => SOURCE_RF_EN,
 		LO_RF_EN => LO1_RF_EN,
 		LEDS => user_leds,
+		SYNC_SETTING => sync_setting,
 		INTERRUPT_ASSERTED => MCU_INTR
 	);
 	

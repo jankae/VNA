@@ -196,7 +196,8 @@ The register contains the number of points per sweep negative one, e.g. set to 1
 \rwbits{6}{1}{RLED}
 \rwbits{7}{1}{LED6}
 \rwbits{8}{1}{LED7}
-\robits{9}{6}{reserved}
+\rwbits{9}{2}{SYNC[1:0]}
+\robits{11}{4}{reserved}
 \rwbits{15}{1}{SPP[16]}
 \end{tikzpicture}
 \end{center}
@@ -210,6 +211,17 @@ The register contains the number of points per sweep negative one, e.g. set to 1
 \item \textbf{RLED:} External frequency LED control
 \item \textbf{LED6:}{User LED 6 control}
 \item \textbf{LED7:}{User LED 7 control}
+\item \textbf{SYNC[1:0]:}{Synchronization control for switching regulator}
+\begin{center}
+\begin{tabular}{ c|c }
+Setting & Functionality\\
+ \hline
+00 & disabled\\
+01 & \SI{1}{\mega\hertz} signal\\
+10 & locked to ADC sampling (slightly less than \SI{1}{\mega\hertz})\\
+11 & disabled\\
+\end{tabular}
+\end{center}
 \end{itemize}
 
 \subsection{Settling Time Register: 0x04}

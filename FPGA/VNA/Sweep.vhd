@@ -89,12 +89,14 @@ begin
 	SOURCE_REG_0 <= MAX2871_DEF_0(31) & CONFIG_DATA(15 downto 0) & CONFIG_DATA(27 downto 16) & "000";
 	SOURCE_REG_1 <= MAX2871_DEF_1(31 downto 15) & CONFIG_DATA(39 downto 28) & "001";
 	SOURCE_REG_3 <= CONFIG_DATA(45 downto 40) & MAX2871_DEF_3(25 downto 3) & "011";
-	SOURCE_REG_4 <= MAX2871_DEF_4(31 downto 23) & CONFIG_DATA(48 downto 46) & MAX2871_DEF_4(19 downto 3) & "100";
+	-- output A enabled at highest power, output B disabled
+	SOURCE_REG_4 <= MAX2871_DEF_4(31 downto 23) & CONFIG_DATA(48 downto 46) & MAX2871_DEF_4(19 downto 9) & "000111100";
 	
 	LO_REG_0 <= MAX2871_DEF_0(31) & CONFIG_DATA(71 downto 56) & CONFIG_DATA(83 downto 72) & "000";
 	LO_REG_1 <= MAX2871_DEF_1(31 downto 15) & CONFIG_DATA(95 downto 84) & "001";
 	LO_REG_3 <= CONFIG_DATA(101 downto 96) & MAX2871_DEF_3(25 downto 3) & "011";
-	LO_REG_4 <= MAX2871_DEF_4(31 downto 23) & CONFIG_DATA(104 downto 102) & MAX2871_DEF_4(19 downto 3) & "100";
+	-- both outputs enabled at +2dbm
+	LO_REG_4 <= MAX2871_DEF_4(31 downto 23) & CONFIG_DATA(104 downto 102) & MAX2871_DEF_4(19 downto 9) & "110110100";
 	
 	ATTENUATOR <= CONFIG_DATA(55 downto 49);
 	SOURCE_FILTER <= CONFIG_DATA(106 downto 105);
