@@ -42,7 +42,11 @@ void SParamTable::addVNAResult(Protocol::Datapoint d)
 
 void SParamTable::clearResults()
 {
-    // TODO set to Nan?
+    for(auto p : params) {
+        for(int i=0;i<maxPoints;i++) {
+            p[i] = nan("");
+        }
+    }
 }
 
 double *SParamTable::ParamArray(int parameter)

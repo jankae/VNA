@@ -8,6 +8,7 @@ HEADERS += \
     calibration.h \
     device.h \
     plot.h \
+    qwtplotpiecewisecurve.h \
     smithchart.h \
     sparam.h \
     sparamtable.h \
@@ -25,6 +26,7 @@ SOURCES += \
     calibration.cpp \
     device.cpp \
     main.cpp \
+    qwtplotpiecewisecurve.cpp \
     smithchart.cpp \
     sparamtable.cpp \
     unit.cpp \

@@ -2,6 +2,7 @@
 #include <QGridLayout>
 #include <QMenu>
 #include <qwt_plot.h>
+#include "qwtplotpiecewisecurve.h"
 
 static const QList<QString> displayableParameters = QList<QString>()
     << "S11"
@@ -66,8 +67,8 @@ BodePlot::BodePlot(SParamTable &datatable, QString parameter, QWidget *parent):
     pal.setColor(QPalette::Window, Qt::white);
     plot->setPalette(pal);
     plot->setAutoFillBackground(true);
-    curve1 = new QwtPlotCurve();
-    curve2 = new QwtPlotCurve();
+    curve1 = new QwtPlotPiecewiseCurve();
+    curve2 = new QwtPlotPiecewiseCurve();
 
     curve1->setPen(QPen(Qt::red));
     curve2->setPen(QPen(Qt::darkGreen));

@@ -1,6 +1,7 @@
 #include "smithchart.h"
 #include <QPainter>
 #include <array>
+#include <math.h>
 
 SmithChart::SmithChart(SParamTable &datatable, QString parameter, QWidget *parent)
     : Plot(datatable, parent),
@@ -43,6 +44,9 @@ void SmithChart::draw(QPainter * painter) {
     for(int i=1;i<nPoints;i++) {
         auto last = std::complex<double>(real[i-1], imag[i-1]);
         auto now = std::complex<double>(real[i], imag[i]);
+        if(isnan(now.real())) {
+            break;
+        }
         // transform into smith diagramm
         last /= ReferenceImpedance;
         now /= ReferenceImpedance;

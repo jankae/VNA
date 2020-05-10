@@ -19,6 +19,7 @@
 #include <QFileDialog>
 #include <iostream>
 #include <fstream>
+#include <QDateTime>
 
 using namespace std;
 
@@ -234,7 +235,7 @@ VNA::VNA(QWidget *parent)
     });
 
     // Calibration connections
-    auto startCalibration = [=](Calibration::Measurement m) {
+    auto startCalibration = [=](Calibration::Measurement m, MenuAction *menu) {
         // Trigger sweep to start from beginning
         SettingsChanged();
         calMeasurement = m;
@@ -254,35 +255,37 @@ VNA::VNA(QWidget *parent)
         calDialog.setWindowModality(Qt::ApplicationModal);
         // always show the dialog
         calDialog.setMinimumDuration(0);
+        menu->AddSubline("Measured at " + QDateTime::currentDateTime().toString("hh:mm:ss"));
         connect(&calDialog, &QProgressDialog::canceled, [=]() {
             // the user aborted the calibration measurement
             calMeasuring = false;
             cal.clearMeasurement(calMeasurement);
+            menu->RemoveSubline();
         });
     };
     connect(mCalPort1Open, &MenuAction::triggered, [=](){
-       startCalibration(Calibration::Measurement::Port1Open);
+       startCalibration(Calibration::Measurement::Port1Open, mCalPort1Open);
     });
     connect(mCalPort1Short, &MenuAction::triggered, [=](){
-       startCalibration(Calibration::Measurement::Port1Short);
+       startCalibration(Calibration::Measurement::Port1Short, mCalPort1Short);
     });
     connect(mCalPort1Load, &MenuAction::triggered, [=](){
-       startCalibration(Calibration::Measurement::Port1Load);
+       startCalibration(Calibration::Measurement::Port1Load, mCalPort1Load);
     });
     connect(mCalPort2Open, &MenuAction::triggered, [=](){
-       startCalibration(Calibration::Measurement::Port2Open);
+       startCalibration(Calibration::Measurement::Port2Open, mCalPort2Open);
     });
     connect(mCalPort2Short, &MenuAction::triggered, [=](){
-       startCalibration(Calibration::Measurement::Port2Short);
+       startCalibration(Calibration::Measurement::Port2Short, mCalPort2Short);
     });
     connect(mCalPort2Load, &MenuAction::triggered, [=](){
-       startCalibration(Calibration::Measurement::Port2Load);
+       startCalibration(Calibration::Measurement::Port2Load, mCalPort2Load);
     });
     connect(mCalThrough, &MenuAction::triggered, [=](){
-       startCalibration(Calibration::Measurement::Through);
+       startCalibration(Calibration::Measurement::Through, mCalThrough);
     });
     connect(mCalIsolation, &MenuAction::triggered, [=](){
-       startCalibration(Calibration::Measurement::Isolation);
+       startCalibration(Calibration::Measurement::Isolation, mCalIsolation);
     });
     connect(mCalOSL1, &MenuAction::triggered, [=](){
         cal.constructErrorTerms(Calibration::Type::Port1OSL);
