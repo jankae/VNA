@@ -19,8 +19,8 @@ HEADERS += \
 SOURCES += \
     ../RFExperiments/Application/Communication/Protocol.cpp \
     Menu/menu.cpp \
+    Menu/menuaction.cpp \
     Menu/menuitem.cpp \
-    Menu/menulabel.cpp \
     Menu/menuvalue.cpp \
     bodeplot.cpp \
     calibration.cpp \

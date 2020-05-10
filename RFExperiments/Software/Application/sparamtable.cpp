@@ -24,13 +24,13 @@ void SParamTable::addVNAResult(Protocol::Datapoint d)
     auto S21 = complex<double>(d.real_S21, d.imag_S21);
     auto S22 = complex<double>(d.real_S22, d.imag_S22);
     params[Frequency][d.pointNum] = d.frequency;
-    params[S11_db][d.pointNum] =  10 * log10(abs(S11));
+    params[S11_db][d.pointNum] =  20 * log10(abs(S11));
     params[S11_phase][d.pointNum] = arg(S11) * 180 / M_PI;
-    params[S12_db][d.pointNum] = 10 * log10(abs(S12));
+    params[S12_db][d.pointNum] = 20 * log10(abs(S12));
     params[S12_phase][d.pointNum] = arg(S12) * 180 / M_PI;
-    params[S21_db][d.pointNum] = 10 * log10(abs(S21));
+    params[S21_db][d.pointNum] = 20 * log10(abs(S21));
     params[S21_phase][d.pointNum] = arg(S21) * 180 / M_PI;
-    params[S22_db][d.pointNum] = 10 * log10(abs(S22));
+    params[S22_db][d.pointNum] = 20 * log10(abs(S22));
     params[S22_phase][d.pointNum] = arg(S22) * 180 / M_PI;
     auto ImpedanceS11 = (1.0 + S11) / (1.0 - S11) * 50.0;
     auto ImpedanceS22 = (1.0 + S22) / (1.0 - S22) * 50.0;

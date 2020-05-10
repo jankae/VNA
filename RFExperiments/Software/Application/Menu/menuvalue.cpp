@@ -6,6 +6,7 @@
 #include <iomanip>
 #include "valueinput.h"
 #include <QMouseEvent>
+#include "unit.h"
 
 using namespace std;
 
@@ -30,33 +31,7 @@ MenuValue::MenuValue(QString name, double defaultValue, QString unit, QString pr
 void MenuValue::setValueQuiet(double value)
 {
     this->value = value;
-    // change label text
-    QString sValue;
-    if(value < 0) {
-        sValue.append('-');
-        value = -value;
-    } else if(value == 0.0) {
-        sValue.append('0');
-    } else {
-        int preDotDigits = log10(value) + 1;
-        int prefixIndex = prefixes.indexOf(' ');
-        while(preDotDigits > 3 && prefixIndex < prefixes.length() - 1) {
-            value /= 1000.0;
-            preDotDigits -= 3;
-            prefixIndex++;
-        }
-        while(preDotDigits<=0 && prefixIndex > 0) {
-            value *= 1000.0;
-            preDotDigits += 3;
-            prefixIndex--;
-        }
-        stringstream ss;
-        ss << std::fixed << std::setprecision(precision) << value;
-        sValue.append(QString::fromStdString(ss.str()));
-        sValue.append(prefixes[prefixIndex]);
-    }
-    sValue.append(unit);
-    lvalue->setText(sValue);
+    lvalue->setText(Unit::ToString(value, unit, prefixes, precision));
 }
 
 void MenuValue::setValue(double value)

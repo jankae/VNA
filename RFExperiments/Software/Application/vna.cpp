@@ -20,6 +20,7 @@
 #include <iostream>
 #include <fstream>
 #include <QDateTime>
+#include "unit.h"
 
 using namespace std;
 
@@ -34,6 +35,74 @@ VNA::VNA(QWidget *parent)
     calMeasuring = false;
     calDialog.reset();
     device.Configure(settings);
+
+    // Create status panel
+    auto statusLayout = new QVBoxLayout();
+    statusLayout->setSpacing(0);
+    QFont statusFont( "Arial", 8);
+    {
+        auto l = new QLabel("Start Frequency:");
+        l->setAlignment(Qt::AlignLeft);
+        l->setFont(statusFont);
+        statusLayout->addWidget(l);
+        lStart.setAlignment(Qt::AlignRight);
+        lStart.setFont(statusFont);
+        statusLayout->addWidget(&lStart);
+
+        l = new QLabel("Center Frequency:");
+        l->setAlignment(Qt::AlignLeft);
+        l->setFont(statusFont);
+        statusLayout->addWidget(l);
+        lCenter.setAlignment(Qt::AlignRight);
+        lCenter.setFont(statusFont);
+        statusLayout->addWidget(&lCenter);
+
+        l = new QLabel("Stop Frequency:");
+        l->setAlignment(Qt::AlignLeft);
+        l->setFont(statusFont);
+        statusLayout->addWidget(l);
+        lStop.setAlignment(Qt::AlignRight);
+        lStop.setFont(statusFont);
+        statusLayout->addWidget(&lStop);
+
+        l = new QLabel("Span:");
+        l->setAlignment(Qt::AlignLeft);
+        l->setFont(statusFont);
+        statusLayout->addWidget(l);
+        lSpan.setAlignment(Qt::AlignRight);
+        lSpan.setFont(statusFont);
+        statusLayout->addWidget(&lSpan);
+
+        statusLayout->addStretch();
+
+        l = new QLabel("Points:");
+        l->setAlignment(Qt::AlignLeft);
+        l->setFont(statusFont);
+        statusLayout->addWidget(l);
+        lPoints.setAlignment(Qt::AlignRight);
+        lPoints.setFont(statusFont);
+        statusLayout->addWidget(&lPoints);
+
+        l = new QLabel("IF Bandwidth:");
+        l->setAlignment(Qt::AlignLeft);
+        l->setFont(statusFont);
+        statusLayout->addWidget(l);
+        lBandwidth.setAlignment(Qt::AlignRight);
+        lBandwidth.setFont(statusFont);
+        statusLayout->addWidget(&lBandwidth);
+
+        statusLayout->addStretch();
+
+        l = new QLabel("Calibration:");
+        l->setAlignment(Qt::AlignLeft);
+        l->setFont(statusFont);
+        statusLayout->addWidget(l);
+        lCalibration.setAlignment(Qt::AlignRight);
+        lCalibration.setFont(statusFont);
+        statusLayout->addWidget(&lCalibration);
+    }
+    statusLayout->addStretch();
+
     plots.append(new SmithChart(dataTable, "S11"));
     plots.append(new BodePlot(dataTable, "S21"));
     plots.append(new BodePlot(dataTable, "S12"));
@@ -329,9 +398,12 @@ VNA::VNA(QWidget *parent)
     });
 
     auto mainWidget = new QWidget;
-    auto plotWidget = new QWidget;
     auto mainLayout = new QHBoxLayout;
     mainWidget->setLayout(mainLayout);
+    auto statusWidget = new QWidget;
+    statusWidget->setLayout(statusLayout);
+    mainLayout->addWidget(statusWidget);
+    auto plotWidget = new QWidget;
     plotWidget->setLayout(&plotLayout);
     mainLayout->addWidget(plotWidget);
     auto menuWidget = new QWidget;
@@ -375,6 +447,31 @@ void VNA::NewDatapoint(Protocol::Datapoint d)
     emit dataChanged();
 }
 
+void VNA::UpdateStatusPanel()
+{
+    lStart.setText(Unit::ToString(settings.f_start, "Hz", " kMG", 4));
+    lCenter.setText(Unit::ToString((settings.f_start + settings.f_stop)/2, "Hz", " kMG", 4));
+    lStop.setText(Unit::ToString(settings.f_stop, "Hz", " kMG", 4));
+    lSpan.setText(Unit::ToString(settings.f_stop - settings.f_start, "Hz", " kMG", 4));
+    lPoints.setText(QString::number(settings.points));
+    lBandwidth.setText(Unit::ToString(settings.if_bandwidth, "Hz", " k", 2));
+    switch(cal.getInterpolation(settings)) {
+    case Calibration::InterpolationType::NoCalibration:
+        lCalibration.setText("Off");
+        break;
+    case Calibration::InterpolationType::Extrapolate:
+        lCalibration.setText("Enabled/Extrapolating");
+        break;
+    case Calibration::InterpolationType::Interpolate:
+        lCalibration.setText("Enabled/Interpolating");
+        break;
+    case Calibration::InterpolationType::Exact:
+    case Calibration::InterpolationType::Unchanged:
+        lCalibration.setText("Enabled");
+        break;
+    }
+}
+
 void VNA::SettingsChanged()
 {
     device.Configure(settings);
@@ -382,4 +479,5 @@ void VNA::SettingsChanged()
     for(auto p : plots) {
         p->setXAxis(settings);
     }
+    UpdateStatusPanel();
 }

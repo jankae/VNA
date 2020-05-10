@@ -184,9 +184,9 @@ void Calibration::constructPort2OSL()
         Point p;
         p.frequency = measurements[Measurement::Port2Open][i].frequency;
         // extract required complex reflection/transmission factors from datapoints
-        auto S22_open = complex<double>(measurements[Measurement::Port2Open][i].real_S11, measurements[Measurement::Port2Open][i].imag_S11);
-        auto S22_short = complex<double>(measurements[Measurement::Port2Short][i].real_S11, measurements[Measurement::Port2Short][i].imag_S11);
-        auto S22_load = complex<double>(measurements[Measurement::Port2Load][i].real_S11, measurements[Measurement::Port2Load][i].imag_S11);
+        auto S22_open = complex<double>(measurements[Measurement::Port2Open][i].real_S22, measurements[Measurement::Port2Open][i].imag_S22);
+        auto S22_short = complex<double>(measurements[Measurement::Port2Short][i].real_S22, measurements[Measurement::Port2Short][i].imag_S22);
+        auto S22_load = complex<double>(measurements[Measurement::Port2Load][i].real_S22, measurements[Measurement::Port2Load][i].imag_S22);
         // OSL port2
         // See page 19 of http://www2.electron.frba.utn.edu.ar/~jcecconi/Bibliografia/04%20-%20Param_S_y_VNA/Network_Analyzer_Error_Models_and_Calibration_Methods.pdf
         computeOSL(S22_open, S22_short, S22_load, p.re33, p.re22, p.re23e32);

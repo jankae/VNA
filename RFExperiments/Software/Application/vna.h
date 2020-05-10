@@ -27,6 +27,7 @@ private:
 private slots:
     void NewDatapoint(Protocol::Datapoint d);
 private:
+    void UpdateStatusPanel();
     Device device;
     Protocol::SweepSettings settings;
     QList<Plot*> plots;
@@ -46,6 +47,10 @@ private:
 
     // Calibration menu
     MenuAction *mCalOSL1, *mCalOSL2, *mCalFullOSLT;
+
+    // Status Labels
+    QLabel lStart, lCenter, lStop, lSpan, lPoints, lBandwidth;
+    QLabel lCalibration;
 signals:
     void dataChanged();
 };
