@@ -31,7 +31,7 @@ public:
 	};
 	bool Init(uint32_t clkin_freq = 0);
 	bool SetPLL(PLL pll, uint32_t frequency, PLLSource src);
-	bool SetCLK(uint8_t clknum, uint32_t frequency, PLL source, DriveStrength strength = DriveStrength::mA2);
+	bool SetCLK(uint8_t clknum, uint32_t frequency, PLL source, DriveStrength strength = DriveStrength::mA2, uint32_t PLLFreqOverride = 0);
 	bool SetCLKtoXTAL(uint8_t clknum);
 	bool SetCLKToCLKIN(uint8_t clknum);
 	bool Enable(uint8_t clknum);

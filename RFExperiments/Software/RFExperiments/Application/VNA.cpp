@@ -38,27 +38,29 @@ bool VNA::Init() {
 	Source.Init(100000000, false, 1, false);
 	LO1.Init(100000000, false, 1, false);
 
-	// Use Si5351 to generate referene frequencies for other PLLs and ADC
-	Si5351.SetPLL(Si5351C::PLL::A, 800000000, Si5351C::PLLSource::XTAL);
+	// Setup clocks before starting PLL to keep phases aligned
 	// Both MAX2871 get a 100MHz reference
-	Si5351.SetCLK(0, 100000000, Si5351C::PLL::A);
+	Si5351.SetCLK(0, 100000000, Si5351C::PLL::A, Si5351C::DriveStrength::mA2, 800000000);
 	Si5351.Enable(0);
-	Si5351.SetCLK(1, 100000000, Si5351C::PLL::A);
+	Si5351.SetCLK(1, 100000000, Si5351C::PLL::A, Si5351C::DriveStrength::mA2, 800000000);
 	Si5351.Enable(1);
 	// Clock for ADC timing
-	Si5351.SetCLK(7, Sampling::ADCClock, Si5351C::PLL::A);
+	Si5351.SetCLK(7, Sampling::ADCClock, Si5351C::PLL::A, Si5351C::DriveStrength::mA2, 800000000);
 	Si5351.Enable(7);
 	// 10 MHz reference clock
-	Si5351.SetCLK(6, 10000000, Si5351C::PLL::A, Si5351C::DriveStrength::mA8);
+	Si5351.SetCLK(6, 10000000, Si5351C::PLL::A, Si5351C::DriveStrength::mA8, 800000000);
 	Si5351.Enable(6);
 
 	// Generate second LO with Si5351
-	Si5351.SetCLK(2, IF1 - IF2, Si5351C::PLL::A);
+	Si5351.SetCLK(2, IF1 - IF2, Si5351C::PLL::A, Si5351C::DriveStrength::mA2, 800000000);
 	Si5351.Enable(2);
-	Si5351.SetCLK(3, IF1 - IF2, Si5351C::PLL::A);
+	Si5351.SetCLK(3, IF1 - IF2, Si5351C::PLL::A, Si5351C::DriveStrength::mA2, 800000000);
 	Si5351.Enable(3);
-	Si5351.SetCLK(4, IF1 - IF2, Si5351C::PLL::A);
+	Si5351.SetCLK(4, IF1 - IF2, Si5351C::PLL::A, Si5351C::DriveStrength::mA2, 800000000);
 	Si5351.Enable(4);
+
+	// Use Si5351 to generate referene frequencies for other PLLs and ADC
+	Si5351.SetPLL(Si5351C::PLL::A, 800000000, Si5351C::PLLSource::XTAL);
 
 	Si5351.Locked(Si5351C::PLL::A);
 
