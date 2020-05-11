@@ -31,6 +31,7 @@ VNA::VNA(QWidget *parent)
       dataTable(10001)
 {
     settings = defaultSweep;
+    averages = 1;
     calValid = false;
     calMeasuring = false;
     calDialog.reset();
@@ -90,6 +91,14 @@ VNA::VNA(QWidget *parent)
         lBandwidth.setAlignment(Qt::AlignRight);
         lBandwidth.setFont(statusFont);
         statusLayout->addWidget(&lBandwidth);
+
+        l = new QLabel("Averages:");
+        l->setAlignment(Qt::AlignLeft);
+        l->setFont(statusFont);
+        statusLayout->addWidget(l);
+        lAverages.setAlignment(Qt::AlignRight);
+        lAverages.setFont(statusFont);
+        statusLayout->addWidget(&lAverages);
 
         statusLayout->addStretch();
 
@@ -184,6 +193,8 @@ VNA::VNA(QWidget *parent)
     mAcquisition->addItem(mPoints);
     auto mBandwidth = new MenuValue("IF Bandwidth", settings.if_bandwidth, "Hz", " k", 2);
     mAcquisition->addItem(mBandwidth);
+    auto mAverages = new MenuValue("Averages", averages);
+    mAcquisition->addItem(mAverages);
     mAcquisition->finalize();
     mMain->addMenu(mAcquisition, "Acquisition");
 
@@ -300,6 +311,11 @@ VNA::VNA(QWidget *parent)
     });
     connect(mBandwidth, &MenuValue::valueChanged, [=](double newval){
        settings.if_bandwidth = newval;
+       SettingsChanged();
+    });
+    connect(mAverages, &MenuValue::valueChanged, [=](double newval){
+       averages = newval;
+       dataTable.setAverages(averages);
        SettingsChanged();
     });
 
@@ -445,6 +461,9 @@ void VNA::NewDatapoint(Protocol::Datapoint d)
     }
     dataTable.addVNAResult(d);
     emit dataChanged();
+    if(d.pointNum == settings.points - 1) {
+        UpdateStatusPanel();
+    }
 }
 
 void VNA::UpdateStatusPanel()
@@ -455,6 +474,7 @@ void VNA::UpdateStatusPanel()
     lSpan.setText(Unit::ToString(settings.f_stop - settings.f_start, "Hz", " kMG", 4));
     lPoints.setText(QString::number(settings.points));
     lBandwidth.setText(Unit::ToString(settings.if_bandwidth, "Hz", " k", 2));
+    lAverages.setText(QString::number(dataTable.getAcquiredAverages()) + "/" + QString::number(averages));
     switch(cal.getInterpolation(settings)) {
     case Calibration::InterpolationType::NoCalibration:
         lCalibration.setText("Off");

@@ -30,6 +30,7 @@ private:
     void UpdateStatusPanel();
     Device device;
     Protocol::SweepSettings settings;
+    unsigned int averages;
     QList<Plot*> plots;
     QGridLayout plotLayout;
     bool fsPlot;
@@ -51,6 +52,7 @@ private:
     // Status Labels
     QLabel lStart, lCenter, lStop, lSpan, lPoints, lBandwidth;
     QLabel lCalibration;
+    QLabel lAverages;
 signals:
     void dataChanged();
 };

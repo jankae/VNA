@@ -1,7 +1,9 @@
 #ifndef SPARAMTABLE_H
 #define SPARAMTABLE_H
 
+#include <complex>
 #include <vector>
+#include <deque>
 #include "device.h"
 
 class SParamTable
@@ -11,6 +13,8 @@ public:
 
     void addVNAResult(Protocol::Datapoint d);
     void clearResults();
+    void setAverages(unsigned int avg);
+    unsigned int getAcquiredAverages();
 
     enum Parameter {
         Frequency = 0,
@@ -33,7 +37,9 @@ public:
 
 private:
     std::vector<double*> params;
+    std::vector<std::deque<std::array<std::complex<double>, 4>>> avg;
     int maxPoints;
+    unsigned int averages;
 };
 
 #endif // SPARAMTABLE_H
