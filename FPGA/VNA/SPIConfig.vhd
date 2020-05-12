@@ -56,6 +56,8 @@ entity SPICommands is
 			  AMP_SHDN : out STD_LOGIC;
 			  SOURCE_RF_EN : out STD_LOGIC;
 			  LO_RF_EN : out STD_LOGIC;
+			  SOURCE_CE_EN : out STD_LOGIC;
+			  LO_CE_EN : out STD_LOGIC;
 			  LEDS : out STD_LOGIC_VECTOR(2 downto 0);
 			  SYNC_SETTING : out STD_LOGIC_VECTOR(1 downto 0);
 			  INTERRUPT_ASSERTED : out STD_LOGIC);
@@ -81,7 +83,7 @@ architecture Behavioral of SPICommands is
 	signal spi_buf_in : std_logic_vector(15 downto 0);
 	signal spi_complete : std_logic;
 	signal word_cnt : integer range 0 to 19;
-	type SPI_states is (Invalid, WriteSweepConfig, ReadResult, WriteRegister);
+	type SPI_states is (Invalid, WriteSweepConfig, ReadResult, WriteRegister, ReadTest);
 	signal state : SPI_states;
 	signal selected_register : integer range 0 to 15;
 	
@@ -129,6 +131,8 @@ begin
 				AMP_SHDN <= '1';
 				SOURCE_RF_EN <= '0';
 				LO_RF_EN <= '0';
+				SOURCE_CE_EN <= '0';
+				LO_CE_EN <= '0';
 				LEDS <= (others => '1');
 				SYNC_SETTING <= "00";
 				unread_sampling_data <= '0';
@@ -160,6 +164,8 @@ begin
 											latched_result <= SAMPLING_RESULT(287 downto 16);
 											spi_buf_in <= SAMPLING_RESULT(15 downto 0);
 											unread_sampling_data <= '0';
+							when "01" => state <= ReadTest;
+											spi_buf_in <= "1111000010100101";
 							when others => state <= Invalid;
 						end case;
 					else
@@ -178,6 +184,8 @@ begin
 											LO_RF_EN <= spi_buf_out(10);
 											LEDS <= not spi_buf_out(9 downto 7);
 											SYNC_SETTING <= spi_buf_out(6 downto 5);
+											SOURCE_CE_EN <= spi_buf_out(4);
+											LO_CE_EN <= spi_buf_out(3);
 								when 4 => SETTLING_TIME <= spi_buf_out;
 								
 								when 8 => MAX2871_DEF_0(15 downto 0) <= spi_buf_out;

@@ -11,15 +11,15 @@ class SmithChart : public Plot
 public:
     SmithChart(SParamTable &datatable, QString parameter = "S11", QWidget *parent = 0);
 
-    virtual void setParameter(QString p);
-    virtual QList<QString> allowedParameters();
-    virtual void setXAxis(Protocol::SweepSettings s);
+    virtual void setParameter(QString p) override;
+    virtual QList<QString> allowedParameters() override;
+    virtual void setXAxis(Protocol::SweepSettings s) override;
 public slots:
     void dataChanged() override {
         update();
     }
 protected:
-    void paintEvent(QPaintEvent *event);
+    void paintEvent(QPaintEvent *event) override;
 
 private:
     static constexpr double ReferenceImpedance = 50.0;
@@ -35,6 +35,7 @@ private:
     /// Path for the thick arcs
     QPainterPath thickArcsPath;
 
+    QString title;
     SParamTable &table;
     int nPoints;
     double *real;

@@ -7111,6 +7111,9 @@ new: Attribute TP_SIGNAL_NAME&lt;br&gt;
 <text x="327.66" y="127" size="1.778" layer="97">Source and 1.LO, up to 350mA</text>
 <text x="30.48" y="53.34" size="1.778" layer="97">Resistor set for 1MHz, can be overwritten by signal at ROSC</text>
 <text x="53.34" y="200.66" size="1.778" layer="97">Regulators on with floating enable</text>
+<text x="27.94" y="157.48" size="1.778" layer="97">Mistake: place compensation R/C in series</text>
+<text x="27.94" y="116.84" size="1.778" layer="97">Mistake: place compensation R/C in series</text>
+<text x="30.48" y="195.58" size="1.778" layer="97">Mistake: place compensation R/C in series</text>
 </plain>
 <instances>
 <instance part="FRAME8" gate="G$1" x="0" y="0" smashed="yes">
@@ -14495,6 +14498,16 @@ current consumption</text>
 <sheet>
 <plain>
 <text x="345.44" y="20.32" size="1.778" layer="94">FPGA + MCU Connections</text>
+<text x="246.38" y="172.72" size="1.778" layer="97">FPGA sets all pins as pullups
+while indirectly programming
+the flash. This disables the power
+supply through the switching_sync
+pin. As this behaviour is caused by
+the xc6slx9_spi.cor (and not
+changable with HSWAPEN), the
+only work-around is to cut the
+switching_sync connection while
+programming the flash.</text>
 </plain>
 <instances>
 <instance part="U2" gate="B2" x="327.66" y="190.5" smashed="yes" rot="MR0">

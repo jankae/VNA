@@ -7,7 +7,7 @@
 #include <complex>
 #include "Exti.hpp"
 
-#define LOG_LEVEL	LOG_LEVEL_WARN
+#define LOG_LEVEL	LOG_LEVEL_DEBUG
 #define LOG_MODULE	"VNA"
 #include "Log.h"
 
@@ -15,8 +15,8 @@ extern I2C_HandleTypeDef hi2c1;
 extern SPI_HandleTypeDef hspi3;
 
 static Si5351C Si5351 = Si5351C(&hi2c1, 26000000);
-static MAX2871 Source = MAX2871(&hspi3, FPGA_CS_GPIO_Port, FPGA_CS_Pin);
-static MAX2871 LO1 = MAX2871(&hspi3, FPGA_CS_GPIO_Port, FPGA_CS_Pin);
+static MAX2871 Source = MAX2871(&hspi3, FPGA_CS_GPIO_Port, FPGA_CS_Pin, nullptr, 0, nullptr, 0, nullptr, 0, GPIOB, GPIO_PIN_4);
+static MAX2871 LO1 = MAX2871(&hspi3, FPGA_CS_GPIO_Port, FPGA_CS_Pin, nullptr, 0, nullptr, 0, nullptr, 0, GPIOB, GPIO_PIN_4);
 
 static constexpr uint32_t IF1 = 60000000;
 static constexpr uint32_t IF2 = 250000;
@@ -63,6 +63,11 @@ static void FPGA_Interrupt(void*) {
 }
 
 bool VNA::Init(Callback cb) {
+	LOG_DEBUG("Initializing...");
+
+	// Wait for FPGA to finish configuration
+	Delay::ms(2000);
+
 	callback = cb;
 	Si5351.Init();
 
@@ -89,10 +94,15 @@ bool VNA::Init(Callback cb) {
 
 	// Use Si5351 to generate reference frequencies for other PLLs and ADC
 	Si5351.SetPLL(Si5351C::PLL::A, 800000000, Si5351C::PLLSource::XTAL);
-	Si5351.Locked(Si5351C::PLL::A);
+	while(!Si5351.Locked(Si5351C::PLL::A));
+
+	LOG_DEBUG("Si5351 locked");
 
 	// FPGA clock is now present, can initialize
-	FPGA::Init();
+	if (!FPGA::Init()) {
+		LOG_ERR("Aborting due to uninitialized FPGA");
+		return false;
+	}
 
 	// Enable new data interrupt
 	FPGA::WriteRegister(FPGA::Reg::InterruptMask, 0x0004);
@@ -100,6 +110,8 @@ bool VNA::Init(Callback cb) {
 	Exti::SetCallback(FPGA_INTR_GPIO_Port, FPGA_INTR_Pin, Exti::EdgeType::Rising, Exti::Pull::Down, FPGA_Interrupt);
 
 	// Initialize PLLs and build VCO maps
+	// enable source synthesizer
+	FPGA::WriteRegister(FPGA::Reg::SystemControl, 0x0010);
 	FPGA::SetMode(FPGA::Mode::SourcePLL);
 	Source.Init(100000000, false, 1, false);
 	Source.SetPowerOutA(MAX2871::Power::p5dbm);
@@ -107,27 +119,36 @@ bool VNA::Init(Callback cb) {
 	Source.SetPowerOutB(MAX2871::Power::n4dbm, false);
 	if(!Source.BuildVCOMap()) {
 		LOG_WARN("Source VCO map failed");
+	} else {
+		LOG_INFO("Source VCO map complete");
 	}
 	Source.SetFrequency(1000000000);
 	Source.UpdateFrequency();
+	// disable source synthesizer/enable LO synthesizer
+	FPGA::SetMode(FPGA::Mode::FPGA);
+	FPGA::WriteRegister(FPGA::Reg::SystemControl, 0x0008);
 	FPGA::SetMode(FPGA::Mode::LOPLL);
 	LO1.Init(100000000, false, 1, false);
 	LO1.SetPowerOutA(MAX2871::Power::p2dbm);
 	LO1.SetPowerOutB(MAX2871::Power::p2dbm);
 	if(!LO1.BuildVCOMap()) {
 		LOG_WARN("LO1 VCO map failed");
+	} else {
+		LOG_INFO("LO1 VCO map complete");
 	}
 	LO1.SetFrequency(1000000000 + IF1);
 	LO1.UpdateFrequency();
 
 	FPGA::SetMode(FPGA::Mode::FPGA);
+	// disable both synthesizers
+	FPGA::WriteRegister(FPGA::Reg::SystemControl, 0x0000);
 	FPGA::WriteMAX2871Default(Source.GetRegisters());
 
 	LOG_INFO("Initialized");
 	return true;
 }
 
-bool ConfigureSweep(Protocol::SweepSettings s) {
+bool VNA::ConfigureSweep(Protocol::SweepSettings s) {
 	settings = s;
 	// Abort possible active sweep first
 	FPGA::AbortSweep();

@@ -197,7 +197,9 @@ The register contains the number of points per sweep negative one, e.g. set to 1
 \rwbits{7}{1}{LED6}
 \rwbits{8}{1}{LED7}
 \rwbits{9}{2}{SYNC[1:0]}
-\robits{11}{4}{reserved}
+\rwbits{11}{1}{SCEN}
+\rwbits{12}{1}{LCEN}
+\robits{13}{2}{reserved}
 \rwbits{15}{1}{SPP[16]}
 \end{tikzpicture}
 \end{center}
@@ -222,6 +224,8 @@ Setting & Functionality\\
 11 & disabled\\
 \end{tabular}
 \end{center}
+\item \textbf{SCEN:} Source chip enable
+\item \textbf{LCEN:} LO chip enable
 \end{itemize}
 
 \subsection{Settling Time Register: 0x04}

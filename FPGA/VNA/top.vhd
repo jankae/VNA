@@ -103,6 +103,15 @@ architecture Behavioral of top is
 		SYNC_PULSE_IN : IN  std_logic
 		);
 	END COMPONENT;
+	
+	COMPONENT ResetDelay
+	GENERIC(CLK_DELAY : integer);
+	PORT(
+		CLK : IN std_logic;
+		IN_RESET : IN std_logic;          
+		OUT_RESET : OUT std_logic
+		);
+	END COMPONENT;
 
 	COMPONENT Sweep
 	PORT(
@@ -217,6 +226,8 @@ architecture Behavioral of top is
 		AMP_SHDN : out STD_LOGIC;
 		SOURCE_RF_EN : out STD_LOGIC;
 		LO_RF_EN : out STD_LOGIC;
+		SOURCE_CE_EN : out STD_LOGIC;
+		LO_CE_EN : out STD_LOGIC;		
 		LEDS : out STD_LOGIC_VECTOR(2 downto 0);
 		SYNC_SETTING : out STD_LOGIC_VECTOR(1 downto 0);
 		INTERRUPT_ASSERTED : OUT std_logic
@@ -238,6 +249,8 @@ architecture Behavioral of top is
 	
 	signal clk160 : std_logic;
 	signal clk_locked : std_logic;
+	signal inv_clk_locked : std_logic;
+	signal int_reset : std_logic;
 	
 	-- PLL signals
 	signal source_reg_4 : std_logic_vector(31 downto 0);
@@ -299,8 +312,6 @@ architecture Behavioral of top is
 begin
 
 	-- TODO assign proper signals
-	LO1_CE <= '1';
-	SOURCE_CE <= '1';
 	BAND_SELECT <= '0';
 	SDA <= 'Z';
 	SCL <= 'Z';
@@ -325,15 +336,25 @@ begin
 		-- Clock out ports
 		CLK_OUT1 => clk160,
 		-- Status and control signals
-		RESET  => '0',
+		RESET  => RESET,
 		LOCKED => clk_locked
+	);
+	
+	inv_clk_locked <= not clk_locked and not RESET;
+	
+	Inst_ResetDelay: ResetDelay
+	GENERIC MAP(CLK_DELAY => 100)
+	PORT MAP(
+		CLK => clk160,
+		IN_RESET => inv_clk_locked,
+		OUT_RESET => int_reset
 	);
 	
 	Sync: SwitchingSync
 	GENERIC MAP (CLK_DIV => 160)
 	PORT MAP (
 		CLK => clk160,
-		RESET => RESET,
+		RESET => int_reset,
 		SETTING => sync_setting,
 		SYNC_OUT => SWITCHING_SYNC,
 		SYNC_PULSE_IN => '0' -- TODO leave ADCs running and connect to ADC trigger
@@ -343,7 +364,7 @@ begin
 	GENERIC MAP(CLK_DIV => 10)
 	PORT MAP(
 		CLK => clk160,
-		RESET => RESET,
+		RESET => int_reset,
 		REG4 => source_reg_4,
 		REG3 => source_reg_3,
 		REG1 => source_reg_1,
@@ -358,7 +379,7 @@ begin
 	GENERIC MAP(CLK_DIV => 10)
 	PORT MAP(
 		CLK => clk160,
-		RESET => RESET,
+		RESET => int_reset,
 		REG4 => lo_reg_4,
 		REG3 => lo_reg_3,
 		REG1 => lo_reg_1,
@@ -377,7 +398,7 @@ begin
 				CONVCYCLES => 114)
 	PORT MAP(
 		CLK => clk160,
-		RESET => RESET,
+		RESET => int_reset,
 		START => adc_trigger_sample,
 		READY => adc_port1_ready,
 		DATA => adc_port1_data,
@@ -390,7 +411,7 @@ begin
 				CONVCYCLES => 114)
 	PORT MAP(
 		CLK => clk160,
-		RESET => RESET,
+		RESET => int_reset,
 		START => adc_trigger_sample,
 		READY => open, -- synchronous ADCs, ready indicated by port 1 ADC
 		DATA => adc_port2_data,
@@ -403,7 +424,7 @@ begin
 				CONVCYCLES => 114)
 	PORT MAP(
 		CLK => clk160,
-		RESET => RESET,
+		RESET => int_reset,
 		START => adc_trigger_sample,
 		READY => open, -- synchronous ADCs, ready indicated by port 1 ADC
 		DATA => adc_ref_data,
@@ -419,7 +440,7 @@ begin
 			CLK_CYCLES_PRE_DONE => 0)
 	PORT MAP(
 		CLK => clk160,
-		RESET => RESET,
+		RESET => int_reset,
 		PORT1 => adc_port1_data,
 		PORT2 => adc_port2_data,
 		REF => adc_ref_data,
@@ -488,7 +509,7 @@ begin
 
 	SPI: SPICommands PORT MAP(
 		CLK => clk160,
-		RESET => RESET,
+		RESET => int_reset,
 		SCLK => MCU_SCK,
 		MOSI => MCU_MOSI,
 		MISO => fpga_miso,
@@ -513,6 +534,8 @@ begin
 		AMP_SHDN => AMP_PWDN,
 		SOURCE_RF_EN => SOURCE_RF_EN,
 		LO_RF_EN => LO1_RF_EN,
+		SOURCE_CE_EN => SOURCE_CE,
+		LO_CE_EN => LO1_CE,
 		LEDS => user_leds,
 		SYNC_SETTING => sync_setting,
 		INTERRUPT_ASSERTED => MCU_INTR

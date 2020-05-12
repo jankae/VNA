@@ -22,7 +22,10 @@ void VNACallback(Protocol::Datapoint res) {
 void App_Start() {
 	Log_Init();
 	LOG_INFO("Start");
-	VNA::Init(VNACallback);
+	if (!VNA::Init(VNACallback)) {
+		LOG_CRIT("Initialization failed, unable to start");
+		return;
+	}
 	while (1) {
 		if (newResult) {
 			Protocol::PacketInfo packet;

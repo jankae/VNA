@@ -3,6 +3,10 @@
 #include "stm.hpp"
 #include "main.h"
 
+#define LOG_LEVEL	LOG_LEVEL_DEBUG
+#define LOG_MODULE	"FPGA"
+#include "Log.h"
+
 extern SPI_HandleTypeDef hspi3;
 
 static inline void Low(GPIO_TypeDef *gpio, uint16_t pin) {
@@ -20,6 +24,19 @@ bool FPGA::Init() {
 	Low(FPGA_RESET_GPIO_Port, FPGA_RESET_Pin);
 	Delay::ms(10);
 
+	// Check if FPGA response is as expected
+	uint16_t cmd[2] = {0x4000, 0x0000};
+	uint16_t recv[2];
+	Low(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
+	HAL_SPI_TransmitReceive(&hspi3, (uint8_t*) cmd, (uint8_t*) recv, 2, 100);
+	High(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
+
+	if(recv[1] != 0xF0A5) {
+		LOG_ERR("Initialization failed");
+		return false;
+	}
+
+	LOG_DEBUG("Initialized");
 	return true;
 }
 
@@ -147,4 +164,5 @@ void FPGA::SetMode(Mode mode) {
 		High(FPGA_AUX2_GPIO_Port, FPGA_AUX2_Pin);
 		break;
 	}
+	Delay::us(1);
 }

@@ -22,6 +22,13 @@ void SmithChart::draw(QPainter * painter) {
     painter->setPen(QPen(0.75));
     painter->setBrush(palette().windowText());
 
+    // Display parameter name
+    QFont font = painter->font();
+    font.setPixelSize(48);
+    font.setBold(true);
+    painter->setFont(font);
+    painter->drawText(-512, -512, title);
+
     // Outer circle
     QRectF rectangle(-512, -512, 1024, 1024);
     painter->drawArc(rectangle, 0, 5760);
@@ -34,11 +41,17 @@ void SmithChart::draw(QPainter * painter) {
         painter->drawArc(rectangle, 0, 5760);
     }
 
-    // TODO
-//    constexpr std::array<double, 5> impedanceLines = {10, 25, 50, 100, 250};
-//    for(auto z : impedanceLines) {
-//        z /= 50;
-//    }
+    constexpr std::array<double, 5> impedanceLines = {10, 25, 50, 100, 250};
+    for(auto z : impedanceLines) {
+        z /= ReferenceImpedance;
+        auto radius = 512.0 * 1/z;
+        double span = M_PI - 2 * atan(radius/512);
+        span *= 5760 / (2 * M_PI);
+        QRectF rectangle(512 - radius, -2*radius, 2 * radius, 2 * radius);
+        painter->drawArc(rectangle, 4320 - span, span);
+        rectangle = QRectF(512 - radius, 0, 2 * radius, 2 * radius);
+        painter->drawArc(rectangle, 1440, span);
+    }
 
     painter->setPen(QPen(Qt::red));
     for(int i=1;i<nPoints;i++) {
@@ -66,9 +79,11 @@ void SmithChart::setParameter(QString p)
     if(p == "S11") {
         real = table.ParamArray(SParamTable::S11_ImpedanceReal);
         imag = table.ParamArray(SParamTable::S11_ImpedanceImag);
+        title = p;
     } else {
         real = table.ParamArray(SParamTable::S22_ImpedanceReal);
         imag = table.ParamArray(SParamTable::S22_ImpedanceImag);
+        title = p;
     }
 }
 
@@ -89,7 +104,7 @@ void SmithChart::paintEvent(QPaintEvent * /* the event */)
     painter.setBackground(QBrush(QColor(255, 255, 255)));
     painter.fillRect(0, 0, width(), height(), QBrush(QColor(255, 255, 255)));
 
-    int side = qMin(width(), height()) * 0.8;
+    int side = qMin(width(), height()) * 0.9;
 
     painter.setViewport((width()-side)/2, (height()-side)/2, side, side);
     painter.setWindow(-512, -512, 1024, 1024);

@@ -2,6 +2,7 @@
 #include <QGridLayout>
 #include <QMenu>
 #include <qwt_plot.h>
+#include <qwt_plot_grid.h>
 #include "qwtplotpiecewisecurve.h"
 
 static const QList<QString> displayableParameters = QList<QString>()
@@ -78,6 +79,10 @@ BodePlot::BodePlot(SParamTable &datatable, QString parameter, QWidget *parent):
     curve1->attach(plot);
     curve2->attach(plot);
     curve2->setYAxis(QwtPlot::yRight);
+
+    QwtPlotGrid *grid = new QwtPlotGrid();
+    grid->setMajorPen(QPen(Qt::DotLine));
+    grid->attach(plot);
 
     auto layout = new QGridLayout;
     layout->addWidget(plot);
