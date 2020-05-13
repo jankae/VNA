@@ -320,11 +320,17 @@ BEGIN
    begin		
       -- hold reset state for 100 ns.
 		RESET <= '1';
-		MCU_AUX3 <= '1';
-      wait for 500 ns;	
+		wait for 1 us;
+		MCU_NSS <= '1';
+		wait for 1 us;
 		RESET <= '0';
-
-      wait for CLK_period*10;
+		wait for 10 us;
+		
+		MCU_NSS <= '0';
+		SPI("1100000000000000");
+		SPI("0000000000000000");
+		MCU_NSS <= '1';
+		wait;
 
       -- insert stimulus here 
 		-- Test direct connection to source/LO

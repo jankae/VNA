@@ -61,6 +61,7 @@ begin
 			if(RESET = '1') then
 				DATA <= (others => '0');
 				new_result <= '0';
+				sclk_phase <= '0';
 				CONVSTART <= '0';
 				conv_cnt <= 0;
 				div_cnt <= 0;

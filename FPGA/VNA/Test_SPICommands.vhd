@@ -81,8 +81,8 @@ ARCHITECTURE behavior OF Test_SPICommands IS
    signal NSS : std_logic := '0';
    signal NEW_SAMPLING_DATA : std_logic := '0';
    signal SAMPLING_RESULT : std_logic_vector(287 downto 0) := (others => '0');
-   signal SOURCE_UNLOCKED : std_logic := '0';
-   signal LO_UNLOCKED : std_logic := '0';
+   signal SOURCE_UNLOCKED : std_logic := '1';
+   signal LO_UNLOCKED : std_logic := '1';
 
  	--Outputs
    signal MISO : std_logic;
@@ -261,7 +261,12 @@ BEGIN
       wait for 100 ns;	
 		RESET <= '0';
       wait for CLK_period*10;
-
+		NSS <= '0';
+		SPI("1100000000000000");
+		SPI("0000000000000000");
+		NSS <= '1';
+		
+		wait for CLK_period*50;
       -- insert stimulus here 
 		-- write number of points
 		NSS <= '0';
@@ -281,7 +286,26 @@ BEGIN
 		SPI("1110111011101110");
 		SPI("1111101111101111");
 		NSS <= '1';
-
+		
+		wait for CLK_period*50;
+		NEW_SAMPLING_DATA <= '1';
+		wait for CLK_period;
+		NEW_SAMPLING_DATA <= '0';
+		wait for CLK_period*20;
+		NSS <= '0';
+		SPI("1100000000000000");
+		NSS <= '1';
+		
+		wait for CLK_period*50;
+		NEW_SAMPLING_DATA <= '1';
+		wait for CLK_period;
+		NEW_SAMPLING_DATA <= '0';
+		wait for CLK_period*20;
+		NSS <= '0';
+		SPI("1100000000000000");
+		NSS <= '1';
+		
+		
       wait;
    end process;
 

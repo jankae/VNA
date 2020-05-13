@@ -149,7 +149,6 @@ begin
 				if NSS = '1' then
 					word_cnt <= 0;
 					spi_buf_in <= interrupt_status;
-					word_cnt <= 0;
 				elsif spi_complete = '1' then
 					word_cnt <= word_cnt + 1;
 					if word_cnt = 0 then

@@ -81,6 +81,7 @@ begin
 					if clk_cnt < (CLK_DIV/2) - 1 then
 						clk_cnt <= clk_cnt + 1;
 					else
+						clk_cnt <= 0;
 						-- advance SPI state machine
 						if bit_cnt < 32 then
 							if sclk = '0' then

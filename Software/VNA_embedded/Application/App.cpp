@@ -4,6 +4,7 @@
 #include "delay.hpp"
 #include "Communication.h"
 #include "main.h"
+#include "Exti.hpp"
 
 #define LOG_LEVEL	LOG_LEVEL_INFO
 #define LOG_MODULE	"App"
@@ -22,16 +23,27 @@ void VNACallback(Protocol::Datapoint res) {
 void App_Start() {
 	Log_Init();
 	LOG_INFO("Start");
+	Exti::Init();
 	if (!VNA::Init(VNACallback)) {
 		LOG_CRIT("Initialization failed, unable to start");
 		return;
 	}
+
+	Protocol::SweepSettings s;
+	s.f_start = 1000000000;
+	s.f_stop = 1000000000;
+	s.if_bandwidth = 10;
+	s.mdbm_excitation = 0;
+	s.points = 1;
+	VNA::ConfigureSweep(s);
+
 	while (1) {
 		if (newResult) {
 			Protocol::PacketInfo packet;
 			packet.type = Protocol::PacketType::Datapoint;
 			packet.datapoint = result;
-			Communication::Send(packet);
+			LOG_INFO("New datapoint S12: %f/%f", result.real_S22, result.imag_S22);
+//			Communication::Send(packet);
 			newResult = false;
 		}
 		if (newSettings) {

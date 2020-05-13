@@ -11696,7 +11696,7 @@ design rules under a new name.</description>
 <wire x1="44.65" y1="33" x2="43.1" y2="33" width="0.3" layer="16"/>
 <wire x1="43.1" y1="33" x2="42.9" y2="32.8" width="0.3" layer="16"/>
 </signal>
-<signal name="FILT_IN_C1">
+<signal name="FILT_IN_C2">
 <contactref element="R100" pad="2"/>
 <wire x1="46.35" y1="31.5" x2="47.5" y2="31.5" width="0.3" layer="16"/>
 <wire x1="47.5" y1="31.5" x2="48.6" y2="32.6" width="0.3" layer="16"/>
@@ -11722,7 +11722,7 @@ design rules under a new name.</description>
 <wire x1="40" y1="39.5" x2="40.4" y2="39.1" width="0.3" layer="16"/>
 <wire x1="40.4" y1="39.1" x2="45.3" y2="39.1" width="0.3" layer="16"/>
 </signal>
-<signal name="FILT_IN_C2">
+<signal name="FILT_IN_C1">
 <contactref element="R99" pad="2"/>
 <wire x1="38.65" y1="31.5" x2="38.1" y2="31.5" width="0.3" layer="16"/>
 <wire x1="36.5" y1="33.1" x2="36.5" y2="45" width="0.3" layer="16"/>

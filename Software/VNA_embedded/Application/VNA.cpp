@@ -31,6 +31,9 @@ static void ReadComplete(FPGA::SamplingResult result) {
 	auto port1 = std::complex<float>(result.P1I, result.P1Q);
 	auto port2 = std::complex<float>(result.P2I, result.P2Q);
 	auto ref = std::complex<float>(result.RefI, result.RefQ);
+	LOG_DEBUG("P1: %f/%f", port1.real(), port1.imag());
+	LOG_DEBUG("P2: %f/%f", port2.real(), port2.imag());
+	LOG_DEBUG("R: %f/%f", ref.real(), ref.imag());
 	port1 /= ref;
 	port2 /= ref;
 	if(excitingPort1) {
@@ -90,7 +93,7 @@ bool VNA::Init(Callback cb) {
 	Si5351.SetCLK(4, IF1 - IF2, Si5351C::PLL::A, Si5351C::DriveStrength::mA2, 800000000);
 	Si5351.Enable(4);
 	Si5351.SetCLK(5, IF1 - IF2, Si5351C::PLL::A, Si5351C::DriveStrength::mA2, 800000000);
-	Si5351.Enable(6);
+	Si5351.Enable(5);
 
 	// Use Si5351 to generate reference frequencies for other PLLs and ADC
 	Si5351.SetPLL(Si5351C::PLL::A, 800000000, Si5351C::PLLSource::XTAL);
@@ -154,12 +157,10 @@ bool VNA::ConfigureSweep(Protocol::SweepSettings s) {
 	FPGA::AbortSweep();
 	uint16_t points = settings.points <= FPGA::MaxPoints ? settings.points : FPGA::MaxPoints;
 	// Configure sweep
-	FPGA::WriteRegister(FPGA::Reg::SweepPoints, points);
-	uint32_t samplesPerPoint = (1000000 / s.if_bandwidth) & 0x0001FFFF;
+	FPGA::WriteRegister(FPGA::Reg::SettlingTime, 8000);
+	FPGA::WriteRegister(FPGA::Reg::SweepPoints, points - 1);
+	uint32_t samplesPerPoint = (1000000 / s.if_bandwidth - 1) & 0x0001FFFF;
 	FPGA::WriteRegister(FPGA::Reg::SamplesPerPoint, samplesPerPoint & 0xFFFF);
-	// Enable mixers/amplifier/PLLs
-	uint16_t ctrlReg = 0xFC00 | (samplesPerPoint >> 16);
-	FPGA::WriteRegister(FPGA::Reg::SystemControl, ctrlReg);
 	// Transfer PLL configuration to FPGA
 	for (uint16_t i = 0; i < points; i++) {
 		uint64_t freq = s.f_start + (s.f_stop - s.f_start) * i / (s.points - 1);
@@ -167,8 +168,11 @@ bool VNA::ConfigureSweep(Protocol::SweepSettings s) {
 		// No mode-switch of FPGA necessary here.
 		Source.SetFrequency(freq);
 		LO1.SetFrequency(freq + IF1);
-		FPGA::WriteSweepConfig(i, Source.GetRegisters(), LO1.GetRegisters(), 60, freq);
+		FPGA::WriteSweepConfig(i, Source.GetRegisters(), LO1.GetRegisters(), 0, freq);
 	}
+	// Enable mixers/amplifier/PLLs
+	uint16_t ctrlReg = 0x0018 | (samplesPerPoint >> 16);
+	FPGA::WriteRegister(FPGA::Reg::SystemControl, ctrlReg);
 	pointCnt = 0;
 	excitingPort1 = true;
 	// Start the sweep

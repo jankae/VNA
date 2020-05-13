@@ -266,6 +266,8 @@ architecture Behavioral of top is
 	signal lo_reloaded : std_logic;
 	signal plls_reloaded : std_logic;
 	signal plls_locked : std_logic;
+	signal source_unlocked : std_logic;
+	signal lo_unlocked : std_logic;
 	
 	-- ADC signals
 	signal adc_trigger_sample : std_logic;
@@ -290,6 +292,8 @@ architecture Behavioral of top is
 	signal sweep_config_write_address : std_logic_vector(12 downto 0);
 	signal sweep_config_write_data : std_logic_vector(111 downto 0);
 	signal sweep_config_write : std_logic_vector(0 downto 0);
+	
+	signal sweep_reset : std_logic;
 	
 	-- Configuration signals
 	signal settling_time : std_logic_vector(15 downto 0);
@@ -324,8 +328,8 @@ begin
 	LEDS(3) <= LO1_LD;
 	-- Sweep and active port
 	PORT_SELECT <= sweep_port_select;
-	LEDS(4) <= not (MCU_AUX3 and sweep_port_select);
-	LEDS(5) <= not (MCU_AUX3 and not sweep_port_select);
+	LEDS(4) <= not (not sweep_reset and sweep_port_select);
+	LEDS(5) <= not (not sweep_reset and not sweep_port_select);
 	-- Uncommitted LEDs
 	LEDS(7 downto 6) <= user_leds(1 downto 0);	
 
@@ -458,9 +462,11 @@ begin
 		REF_Q => sampling_result(47 downto 0)
 	);
 
+	sweep_reset <= not MCU_AUX3;
+
 	SweepModule: Sweep PORT MAP(
 		CLK => clk160,
-		RESET => MCU_AUX3,
+		RESET => sweep_reset,
 		NPOINTS => sweep_points,
 		CONFIG_ADDRESS => sweep_config_address,
 		CONFIG_DATA => sweep_config_data,
@@ -507,6 +513,9 @@ begin
 	-- select MISO source
 	MCU_MISO <= SOURCE_MUX when MCU_AUX1 = '1' else LO1_MUX when MCU_AUX2 = '1' else fpga_miso;
 
+	lo_unlocked <= not LO1_LD;
+	source_unlocked <= not SOURCE_LD;
+
 	SPI: SPICommands PORT MAP(
 		CLK => clk160,
 		RESET => int_reset,
@@ -516,8 +525,8 @@ begin
 		NSS => fpga_select,
 		NEW_SAMPLING_DATA => sampling_done,
 		SAMPLING_RESULT => sampling_result,
-		SOURCE_UNLOCKED => SOURCE_LD, -- TODO invert
-		LO_UNLOCKED => LO1_LD, -- TODO invert
+		SOURCE_UNLOCKED => source_unlocked,
+		LO_UNLOCKED => lo_unlocked,
 		MAX2871_DEF_4 => def_reg_4,
 		MAX2871_DEF_3 => def_reg_3,
 		MAX2871_DEF_1 => def_reg_1,

@@ -24,6 +24,38 @@ bool FPGA::Init() {
 	Low(FPGA_RESET_GPIO_Port, FPGA_RESET_Pin);
 	Delay::ms(10);
 
+//    /**SPI3 GPIO Configuration
+//    PB3 (JTDO-TRACESWO)     ------> SPI3_SCK
+//    PB4 (NJTRST)     ------> SPI3_MISO
+//    PB5     ------> SPI3_MOSI
+//    */
+//	GPIO_InitTypeDef GPIO_InitStruct;
+//    GPIO_InitStruct.Pin = GPIO_PIN_3|GPIO_PIN_5;
+//    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+//    GPIO_InitStruct.Pull = GPIO_NOPULL;
+//    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+//    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_3|GPIO_PIN_5);
+//    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+//
+////
+////    for(uint8_t i=0;i<1;i++) {
+////    	GPIOB->BSRR = GPIO_PIN_3;
+////    	Delay::ms(1);
+////    	GPIOB->BSRR = GPIO_PIN_3 << 16;
+////    	Delay::ms(1);
+////    }
+//
+//    GPIO_InitStruct.Pin = GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5;
+//    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+//    GPIO_InitStruct.Pull = GPIO_NOPULL;
+//    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+//    GPIO_InitStruct.Alternate = GPIO_AF6_SPI3;
+//    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_3|GPIO_PIN_5);
+//    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+//
+//    uint16_t dummy = 0x0000;
+////    HAL_SPI_Transmit(&hspi3, (uint8_t*) &dummy, 1, 100);
+//
 	// Check if FPGA response is as expected
 	uint16_t cmd[2] = {0x4000, 0x0000};
 	uint16_t recv[2];
@@ -32,8 +64,7 @@ bool FPGA::Init() {
 	High(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
 
 	if(recv[1] != 0xF0A5) {
-		LOG_ERR("Initialization failed");
-		return false;
+		LOG_ERR("Initialization failed, got 0x%04x instead of 0xF0A5", recv[1]);
 	}
 
 	LOG_DEBUG("Initialized");
@@ -64,7 +95,7 @@ void FPGA::WriteSweepConfig(uint16_t pointnum, uint32_t *SourceRegs, uint32_t *L
 	// select which point this sweep config is for
 	send[0] = pointnum & 0x1FFF;
 	// assemble sweep config from required fields of PLL registers
-	send[1] = (LORegs[4] & 0x00E00000) >> 14 | (LORegs[3] & 0xFC000000) >> 26;
+	send[1] = (LORegs[4] & 0x00700000) >> 14 | (LORegs[3] & 0xFC000000) >> 26;
 	// Select source LP filter
 	if(frequency >= 3500000000) {
 		send[1] |= 0x0600;
@@ -75,8 +106,8 @@ void FPGA::WriteSweepConfig(uint16_t pointnum, uint32_t *SourceRegs, uint32_t *L
 	}
 	send[2] = (LORegs[1] & 0x00007FF8) << 1 | (LORegs[0] & 0x00007800) >> 11;
 	send[3] = (LORegs[0] & 0x000007F8) << 5 | (LORegs[0] & 0x7F800000) >> 23;
-	send[4] = (LORegs[0] & 0x000007F8) >> 7 | (attenuation & 0x7F) << 1 | (SourceRegs[4] & 0x00800000) >> 22;
-	send[5] = (SourceRegs[4] & 0x006) >> 6 | (SourceRegs[3] & 0xFC000000) >> 18 | (SourceRegs[1] & 0x00007F80) >> 7;
+	send[4] = (LORegs[0] & 0x007F8000) >> 7 | (attenuation & 0x7F) << 1 | (SourceRegs[4] & 0x00400000) >> 22;
+	send[5] = (SourceRegs[4] & 0x00300000) >> 6 | (SourceRegs[3] & 0xFC000000) >> 18 | (SourceRegs[1] & 0x00007F80) >> 7;
 	send[6] = (SourceRegs[1] & 0x00000078) << 9 | (SourceRegs[0] & 0x00007FF8) >> 3;
 	send[7] = (SourceRegs[0] & 0x7FFF8000) >> 15;
 	Low(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
@@ -96,12 +127,18 @@ bool FPGA::InitiateSampleRead(ReadCallback cb) {
 	callback = cb;
 	uint16_t cmd = 0xC000;
 	uint16_t status;
+
+	// Bug in SPI slave implementation: Slave needs clk strobe to reload status register
+	HAL_SPI_TransmitReceive(&hspi3, (uint8_t*) &cmd, (uint8_t*) &status, 1,
+				100);
+
 	Low(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
 	HAL_SPI_TransmitReceive(&hspi3, (uint8_t*) &cmd, (uint8_t*) &status, 1,
 			100);
 	if (!(status & 0x0004)) {
 		// no new data available yet
 		High(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
+		LOG_WARN("ISR without new data, status: 0x%04x", status);
 		return false;
 	}
 	// Start data read
@@ -133,13 +170,13 @@ void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi) {
 }
 
 void FPGA::StartSweep() {
-	High(FPGA_AUX3_GPIO_Port, FPGA_AUX3_Pin);
-	Delay::us(1);
 	Low(FPGA_AUX3_GPIO_Port, FPGA_AUX3_Pin);
+	Delay::us(1);
+	High(FPGA_AUX3_GPIO_Port, FPGA_AUX3_Pin);
 }
 
 void FPGA::AbortSweep() {
-	High(FPGA_AUX3_GPIO_Port, FPGA_AUX3_Pin);
+	Low(FPGA_AUX3_GPIO_Port, FPGA_AUX3_Pin);
 }
 
 void FPGA::SetMode(Mode mode) {

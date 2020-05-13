@@ -9779,14 +9779,14 @@ current consumption</text>
 <junction x="208.28" y="86.36"/>
 </segment>
 </net>
-<net name="FILT_IN_C1" class="0">
+<net name="FILT_IN_C2" class="0">
 <segment>
 <pinref part="R100" gate="G$1" pin="2"/>
 <wire x1="223.52" y1="86.36" x2="226.06" y2="86.36" width="0.1524" layer="91"/>
 <label x="226.06" y="86.36" size="1.778" layer="95" xref="yes"/>
 </segment>
 </net>
-<net name="FILT_IN_C2" class="0">
+<net name="FILT_IN_C1" class="0">
 <segment>
 <pinref part="R99" gate="G$1" pin="2"/>
 <wire x1="223.52" y1="78.74" x2="226.06" y2="78.74" width="0.1524" layer="91"/>
@@ -15764,7 +15764,7 @@ programming the flash.</text>
 <label x="43.18" y="48.26" size="1.778" layer="95" xref="yes"/>
 </segment>
 </net>
-<net name="FILT_IN_C1" class="0">
+<net name="FILT_IN_C2" class="0">
 <segment>
 <pinref part="U2" gate="B3" pin="IO_L43N_GCLK22_IRDY2_3"/>
 <wire x1="38.1" y1="40.64" x2="43.18" y2="40.64" width="0.1524" layer="91"/>
@@ -15891,7 +15891,7 @@ programming the flash.</text>
 <pinref part="R96" gate="G$1" pin="2"/>
 </segment>
 </net>
-<net name="FILT_IN_C2" class="0">
+<net name="FILT_IN_C1" class="0">
 <segment>
 <pinref part="U2" gate="B3" pin="IO_L44P_GCLK21_3"/>
 <wire x1="38.1" y1="38.1" x2="43.18" y2="38.1" width="0.1524" layer="91"/>
