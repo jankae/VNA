@@ -66,6 +66,8 @@ void Error_Handler(void);
 #define FPGA_AUX3_GPIO_Port GPIOA
 #define FPGA_RESET_Pin GPIO_PIN_1
 #define FPGA_RESET_GPIO_Port GPIOA
+#define USB_EN_Pin GPIO_PIN_15
+#define USB_EN_GPIO_Port GPIOA
 #define FPGA_CS_Pin GPIO_PIN_6
 #define FPGA_CS_GPIO_Port GPIOB
 #define FPGA_INTR_Pin GPIO_PIN_7

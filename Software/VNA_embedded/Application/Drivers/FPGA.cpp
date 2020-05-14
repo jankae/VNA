@@ -59,6 +59,9 @@ bool FPGA::Init() {
 	// Check if FPGA response is as expected
 	uint16_t cmd[2] = {0x4000, 0x0000};
 	uint16_t recv[2];
+//	HAL_SPI_TransmitReceive(&hspi3, (uint8_t*) cmd, (uint8_t*) recv, 2, 100);
+
+
 	Low(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
 	HAL_SPI_TransmitReceive(&hspi3, (uint8_t*) cmd, (uint8_t*) recv, 2, 100);
 	High(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
@@ -67,7 +70,7 @@ bool FPGA::Init() {
 		LOG_ERR("Initialization failed, got 0x%04x instead of 0xF0A5", recv[1]);
 	}
 
-	LOG_DEBUG("Initialized");
+	LOG_DEBUG("Initialized, status register: 0x%04x", recv[0]);
 	return true;
 }
 
@@ -139,7 +142,7 @@ bool FPGA::InitiateSampleRead(ReadCallback cb) {
 		// no new data available yet
 		High(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
 		LOG_WARN("ISR without new data, status: 0x%04x", status);
-		return false;
+//		return false;
 	}
 	// Start data read
 	HAL_SPI_Receive_DMA(&hspi3, (uint8_t*) raw, 18);

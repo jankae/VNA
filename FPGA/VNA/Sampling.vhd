@@ -99,9 +99,9 @@ END COMPONENT;
 	signal sampling_done : std_logic;
 	signal result_computed : std_logic;
 begin
---	assert (phase_inc * CLK_FREQ / (4096*CLK_DIV) = IF_FREQ)
---		report "Phase increment not exact"
---		severity FAILURE;
+	assert (phase_inc * CLK_FREQ / (4096*CLK_DIV) = IF_FREQ)
+		report "Phase increment not exact"
+		severity FAILURE;
 		
 	LookupTable : SinCos
 	PORT MAP (
@@ -162,6 +162,7 @@ begin
 			if RESET = '1' then
 				busy <= '0';
 				ADC_START <= '0';
+				result_computed <= '0';
 			else
 				if sampling_done = '1' then
 					sampling_done <= '0';

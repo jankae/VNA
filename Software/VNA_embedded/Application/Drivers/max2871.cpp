@@ -184,7 +184,7 @@ bool MAX2871::SetFrequency(uint64_t f) {
 	LOG_DEBUG("Looking for best fractional match");
 	uint32_t best_deviation = UINT32_MAX;
 	uint16_t best_M = 4095, best_F = 0;
-	for (uint16_t M = 4095; M >= 2; M--) {
+	for (uint16_t M = 4095; M >= 2048; M--) {
 		uint16_t guess_F = (uint64_t) rem_f * M / f_PFD;
 		for (uint16_t F = guess_F; F <= guess_F + 1; F++) {
 			uint32_t f = ((uint64_t) f_PFD * F) / M;

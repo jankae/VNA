@@ -31,9 +31,9 @@ static void ReadComplete(FPGA::SamplingResult result) {
 	auto port1 = std::complex<float>(result.P1I, result.P1Q);
 	auto port2 = std::complex<float>(result.P2I, result.P2Q);
 	auto ref = std::complex<float>(result.RefI, result.RefQ);
-	LOG_DEBUG("P1: %f/%f", port1.real(), port1.imag());
-	LOG_DEBUG("P2: %f/%f", port2.real(), port2.imag());
-	LOG_DEBUG("R: %f/%f", ref.real(), ref.imag());
+//	LOG_DEBUG("P1: %f/%f", port1.real(), port1.imag());
+//	LOG_DEBUG("P2: %f/%f", port2.real(), port2.imag());
+//	LOG_DEBUG("R: %f/%f", ref.real(), ref.imag());
 	port1 /= ref;
 	port2 /= ref;
 	if(excitingPort1) {
@@ -80,8 +80,8 @@ bool VNA::Init(Callback cb) {
 	Si5351.Enable(2);
 	Si5351.SetCLK(3, 100000000, Si5351C::PLL::A, Si5351C::DriveStrength::mA2, 800000000);
 	Si5351.Enable(3);
-	// 50MHz FPGA clock
-	Si5351.SetCLK(7, 50000000, Si5351C::PLL::A, Si5351C::DriveStrength::mA2, 800000000);
+	// 16MHz FPGA clock
+	Si5351.SetCLK(7, 16000000, Si5351C::PLL::A, Si5351C::DriveStrength::mA2, 800000000);
 	Si5351.Enable(7);
 	// 10 MHz external reference clock
 	Si5351.SetCLK(6, 10000000, Si5351C::PLL::A, Si5351C::DriveStrength::mA8, 800000000);
@@ -159,7 +159,11 @@ bool VNA::ConfigureSweep(Protocol::SweepSettings s) {
 	// Configure sweep
 	FPGA::WriteRegister(FPGA::Reg::SettlingTime, 8000);
 	FPGA::WriteRegister(FPGA::Reg::SweepPoints, points - 1);
-	uint32_t samplesPerPoint = (1000000 / s.if_bandwidth - 1) & 0x0001FFFF;
+	uint32_t samplesPerPoint = (1000000 / s.if_bandwidth);
+	// round up to next multiple of 128 (128 samples are spread across 35 IF2 periods)
+	samplesPerPoint = ((uint32_t) ((samplesPerPoint + 127) / 128)) * 128;
+	// has to be one less than actual number of samples
+	samplesPerPoint--;
 	FPGA::WriteRegister(FPGA::Reg::SamplesPerPoint, samplesPerPoint & 0xFFFF);
 	// Transfer PLL configuration to FPGA
 	for (uint16_t i = 0; i < points; i++) {
@@ -171,7 +175,7 @@ bool VNA::ConfigureSweep(Protocol::SweepSettings s) {
 		FPGA::WriteSweepConfig(i, Source.GetRegisters(), LO1.GetRegisters(), 0, freq);
 	}
 	// Enable mixers/amplifier/PLLs
-	uint16_t ctrlReg = 0x0018 | (samplesPerPoint >> 16);
+	uint16_t ctrlReg = 0xFC18 | (samplesPerPoint >> 16);
 	FPGA::WriteRegister(FPGA::Reg::SystemControl, ctrlReg);
 	pointCnt = 0;
 	excitingPort1 = true;

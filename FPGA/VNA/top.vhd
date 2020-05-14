@@ -355,7 +355,7 @@ begin
 	);
 	
 	Sync: SwitchingSync
-	GENERIC MAP (CLK_DIV => 160)
+	GENERIC MAP (CLK_DIV => 100)
 	PORT MAP (
 		CLK => clk160,
 		RESET => int_reset,
@@ -399,7 +399,7 @@ begin
 
 	Port1ADC: MCP33131
 	GENERIC MAP(CLK_DIV => 2,
-				CONVCYCLES => 114)
+				CONVCYCLES => 73)
 	PORT MAP(
 		CLK => clk160,
 		RESET => int_reset,
@@ -412,7 +412,7 @@ begin
 	);
 	Port2ADC: MCP33131
 	GENERIC MAP(CLK_DIV => 2,
-				CONVCYCLES => 114)
+				CONVCYCLES => 73)
 	PORT MAP(
 		CLK => clk160,
 		RESET => int_reset,
@@ -425,7 +425,7 @@ begin
 	);
 	RefADC: MCP33131
 	GENERIC MAP(CLK_DIV => 2,
-				CONVCYCLES => 114)
+				CONVCYCLES => 73)
 	PORT MAP(
 		CLK => clk160,
 		RESET => int_reset,
@@ -438,13 +438,13 @@ begin
 	);
 	
 	Sampler: Sampling
-	GENERIC MAP(CLK_DIV => 165,
-			CLK_FREQ => 160000000,
+	GENERIC MAP(CLK_DIV => 112,
+			CLK_FREQ => 102400000,
 			IF_FREQ => 250000,
 			CLK_CYCLES_PRE_DONE => 0)
 	PORT MAP(
 		CLK => clk160,
-		RESET => int_reset,
+		RESET => sweep_reset,
 		PORT1 => adc_port1_data,
 		PORT2 => adc_port2_data,
 		REF => adc_ref_data,

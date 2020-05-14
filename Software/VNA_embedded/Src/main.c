@@ -393,7 +393,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOC, FPGA_AUX1_Pin|FPGA_AUX2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, FPGA_AUX3_Pin|FPGA_RESET_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, FPGA_AUX3_Pin|FPGA_RESET_Pin|USB_EN_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(FPGA_CS_GPIO_Port, FPGA_CS_Pin, GPIO_PIN_RESET);
@@ -411,6 +411,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : USB_EN_Pin */
+  GPIO_InitStruct.Pin = USB_EN_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(USB_EN_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : FPGA_CS_Pin */
   GPIO_InitStruct.Pin = FPGA_CS_Pin;

@@ -20,8 +20,8 @@ private:
     static constexpr Protocol::SweepSettings defaultSweep = {
         .f_start = 100000000,
         .f_stop = 2000000000,
-        .points = 501,
-        .if_bandwidth = 10000,
+        .points = 101,
+        .if_bandwidth = 1000,
         .mdbm_excitation = 0,
     };
 private slots:

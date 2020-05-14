@@ -28,22 +28,23 @@ void App_Start() {
 		LOG_CRIT("Initialization failed, unable to start");
 		return;
 	}
+	// Allow USB enumeration
+	USB_EN_GPIO_Port->BSRR = USB_EN_Pin;
 
-	Protocol::SweepSettings s;
-	s.f_start = 1000000000;
-	s.f_stop = 1000000000;
-	s.if_bandwidth = 10;
-	s.mdbm_excitation = 0;
-	s.points = 1;
-	VNA::ConfigureSweep(s);
+//	Protocol::SweepSettings s;
+//	s.f_start = 100000000;
+//	s.f_stop = 2000000000;
+//	s.if_bandwidth = 1000;
+//	s.mdbm_excitation = 0;
+//	s.points = 201;
+//	VNA::ConfigureSweep(s);
 
 	while (1) {
 		if (newResult) {
 			Protocol::PacketInfo packet;
 			packet.type = Protocol::PacketType::Datapoint;
 			packet.datapoint = result;
-			LOG_INFO("New datapoint S12: %f/%f", result.real_S22, result.imag_S22);
-//			Communication::Send(packet);
+			Communication::Send(packet);
 			newResult = false;
 		}
 		if (newSettings) {

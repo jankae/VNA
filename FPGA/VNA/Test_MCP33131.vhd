@@ -68,14 +68,14 @@ ARCHITECTURE behavior OF Test_MCP33131 IS
    signal SCLK : std_logic;
 
    -- Clock period definitions
-   constant CLK_period : time := 6.25 ns;
+   constant CLK_period : time := 9.765 ns;
  
 BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
    uut: MCP33131
 	GENERIC MAP(CLK_DIV => 2,
-					CONVCYCLES => 114)
+					CONVCYCLES => 71)
 	PORT MAP (
           CLK => CLK,
           RESET => RESET,
@@ -107,7 +107,7 @@ BEGIN
 		
       -- insert stimulus here
 		while True loop
-			wait for CLK_period*159;
+			wait for CLK_period*105;
 			START <= '1';
 			wait for CLK_period;
 			START <= '0';
