@@ -5,6 +5,7 @@
 #include "Communication.h"
 #include "main.h"
 #include "Exti.hpp"
+#include <complex>
 
 #define LOG_LEVEL	LOG_LEVEL_INFO
 #define LOG_MODULE	"App"
@@ -32,12 +33,15 @@ void App_Start() {
 	USB_EN_GPIO_Port->BSRR = USB_EN_Pin;
 
 //	Protocol::SweepSettings s;
-//	s.f_start = 100000000;
-//	s.f_stop = 2000000000;
+//	s.f_start = 1000000000;
+//	s.f_stop = 1000000000;
 //	s.if_bandwidth = 1000;
 //	s.mdbm_excitation = 0;
-//	s.points = 201;
+//	s.points = 1;
 //	VNA::ConfigureSweep(s);
+
+	uint32_t lastNewPoint = HAL_GetTick();
+	bool sweepActive = false;
 
 	while (1) {
 		if (newResult) {
@@ -46,11 +50,21 @@ void App_Start() {
 			packet.datapoint = result;
 			Communication::Send(packet);
 			newResult = false;
+			lastNewPoint = HAL_GetTick();
 		}
 		if (newSettings) {
 			LOG_INFO("New settings received");
 			newSettings = false;
 			VNA::ConfigureSweep(settings);
+			sweepActive = true;
+			lastNewPoint = HAL_GetTick();
+		}
+		if(sweepActive && HAL_GetTick() - lastNewPoint > 200) {
+			LOG_WARN("Timed out waiting for point, last received point was %d", result.pointNum);
+			// restart the current sweep
+			VNA::ConfigureSweep(settings);
+			sweepActive = true;
+			lastNewPoint = HAL_GetTick();
 		}
 	}
 }

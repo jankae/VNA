@@ -119,6 +119,7 @@ architecture Behavioral of top is
 		RESET : IN std_logic;
 		NPOINTS : IN std_logic_vector(12 downto 0);
 		CONFIG_DATA : IN std_logic_vector(111 downto 0);
+		SAMPLING_BUSY : in STD_LOGIC;
 		SAMPLING_DONE : IN std_logic;
 		MAX2871_DEF_4 : IN std_logic_vector(31 downto 0);
 		MAX2871_DEF_3 : IN std_logic_vector(31 downto 0);
@@ -140,7 +141,9 @@ architecture Behavioral of top is
 		LO_REG_0 : OUT std_logic_vector(31 downto 0);
 		RELOAD_PLL_REGS : OUT std_logic;
 		ATTENUATOR : OUT std_logic_vector(6 downto 0);
-		SOURCE_FILTER : OUT std_logic_vector(1 downto 0)
+		SOURCE_FILTER : OUT std_logic_vector(1 downto 0);
+		SETTLING : out STD_LOGIC;
+		SAMPLING : out STD_LOGIC
 		);
 	END COMPONENT;
 	COMPONENT Sampling
@@ -165,7 +168,8 @@ architecture Behavioral of top is
 		PORT2_I : OUT std_logic_vector(47 downto 0);
 		PORT2_Q : OUT std_logic_vector(47 downto 0);
 		REF_I : OUT std_logic_vector(47 downto 0);
-		REF_Q : OUT std_logic_vector(47 downto 0)
+		REF_Q : OUT std_logic_vector(47 downto 0);
+		ACTIVE : OUT std_logic
 		);
 	END COMPONENT;
 	COMPONENT MCP33131
@@ -277,6 +281,7 @@ architecture Behavioral of top is
 	signal adc_ref_data : std_logic_vector(15 downto 0);
 	
 	-- Sampling signals
+	signal sampling_busy : std_logic;
 	signal sampling_done : std_logic;
 	signal sampling_start : std_logic;
 	signal sampling_samples : std_logic_vector(16 downto 0);
@@ -321,7 +326,8 @@ begin
 	SCL <= 'Z';
 
 	-- Reference CLK LED
-	LEDS(0) <= user_leds(2);
+	--LEDS(0) <= user_leds(2);
+	LEDS(0) <= not sampling_busy;
 	-- Lock status of PLLs
 	LEDS(1) <= clk_locked;
 	LEDS(2) <= SOURCE_LD;
@@ -331,7 +337,7 @@ begin
 	LEDS(4) <= not (not sweep_reset and sweep_port_select);
 	LEDS(5) <= not (not sweep_reset and not sweep_port_select);
 	-- Uncommitted LEDs
-	LEDS(7 downto 6) <= user_leds(1 downto 0);	
+	--LEDS(7 downto 6) <= user_leds(1 downto 0);	
 
 	MainCLK : PLL
 	port map(
@@ -459,7 +465,8 @@ begin
 		PORT2_I => sampling_result(191 downto 144),
 		PORT2_Q => sampling_result(143 downto 96),
 		REF_I => sampling_result(95 downto 48),
-		REF_Q => sampling_result(47 downto 0)
+		REF_Q => sampling_result(47 downto 0),
+		ACTIVE => sampling_busy
 	);
 
 	sweep_reset <= not MCU_AUX3;
@@ -470,6 +477,7 @@ begin
 		NPOINTS => sweep_points,
 		CONFIG_ADDRESS => sweep_config_address,
 		CONFIG_DATA => sweep_config_data,
+		SAMPLING_BUSY => sampling_busy,
 		SAMPLING_DONE => sampling_done,
 		START_SAMPLING => sampling_start,
 		PORT_SELECT => sweep_port_select,
@@ -490,7 +498,9 @@ begin
 		PLL_LOCKED => plls_locked,
 		ATTENUATOR => ATTENUATION,
 		SOURCE_FILTER => source_filter,
-		SETTLING_TIME => settling_time
+		SETTLING_TIME => settling_time,
+		SETTLING => LEDS(6),
+		SAMPLING => LEDS(7)
 	);
 	
 	-- Source filter mapping

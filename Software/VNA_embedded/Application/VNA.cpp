@@ -28,14 +28,14 @@ static bool excitingPort1;
 static Protocol::Datapoint data;
 
 static void ReadComplete(FPGA::SamplingResult result) {
-	auto port1 = std::complex<float>(result.P1I, result.P1Q);
-	auto port2 = std::complex<float>(result.P2I, result.P2Q);
+	auto port1_raw = std::complex<float>(result.P1I, result.P1Q);
+	auto port2_raw = std::complex<float>(result.P2I, result.P2Q);
 	auto ref = std::complex<float>(result.RefI, result.RefQ);
 //	LOG_DEBUG("P1: %f/%f", port1.real(), port1.imag());
 //	LOG_DEBUG("P2: %f/%f", port2.real(), port2.imag());
 //	LOG_DEBUG("R: %f/%f", ref.real(), ref.imag());
-	port1 /= ref;
-	port2 /= ref;
+	auto port1 = port1_raw / ref;
+	auto port2 = port2_raw / ref;
 	if(excitingPort1) {
 		data.pointNum = pointCnt;
 		data.frequency = settings.f_start + (settings.f_stop - settings.f_start) * pointCnt / (settings.points - 1);
@@ -43,6 +43,9 @@ static void ReadComplete(FPGA::SamplingResult result) {
 		data.imag_S11 = port1.imag();
 		data.real_S21 = port2.real();
 		data.imag_S21 = port2.imag();
+		if (abs(port1) < 0.001) {
+			LOG_WARN("S11<60db@%d: P1: %f/%f P2: %f/%f R: %f/%f", pointCnt, port1_raw.real(), port1_raw.imag(), port2_raw.real(), port2_raw.imag(), ref.real(), ref.imag());
+		}
 	} else {
 		data.real_S12 = port1.real();
 		data.imag_S12 = port1.imag();

@@ -326,12 +326,6 @@ BEGIN
 		RESET <= '0';
 		wait for 10 us;
 		
-		MCU_NSS <= '0';
-		SPI("1100000000000000");
-		SPI("0000000000000000");
-		MCU_NSS <= '1';
-		wait;
-
       -- insert stimulus here 
 		-- Test direct connection to source/LO
 		MCU_NSS <= '0';
@@ -365,7 +359,7 @@ BEGIN
 		wait for CLK_period;
 		MCU_NSS <= '0';
 		SPI("1000000000000010");
-		SPI("0000000000000011");
+		SPI("0000000000011111");
 		MCU_NSS <= '1';
 		wait for CLK_period;
 		-- Write default registers
@@ -462,12 +456,16 @@ BEGIN
 		MCU_NSS <= '1';
 		wait for CLK_period;
 		-- Start the sweep
-		MCU_AUX3 <= '0';
-		-- Indicate locked PLLs
-		SOURCE_LD <= '1';
-		LO1_LD <= '1';
-		
-		
+		MCU_AUX3 <= '1';
+		while True loop
+			-- Indicate locked PLLs
+			wait until LO1_LE = '1';
+			SOURCE_LD <= '0';
+			LO1_LD <= '0';
+			wait for 8 us;
+			SOURCE_LD <= '1';
+			LO1_LD <= '1';
+		end loop;
       wait;
    end process;
 

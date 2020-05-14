@@ -35,7 +35,8 @@ entity Sweep is
 			  NPOINTS : in STD_LOGIC_VECTOR (12 downto 0);
            CONFIG_ADDRESS : out  STD_LOGIC_VECTOR (12 downto 0);
            CONFIG_DATA : in  STD_LOGIC_VECTOR (111 downto 0);
-           SAMPLING_DONE : in  STD_LOGIC;
+           SAMPLING_BUSY : in STD_LOGIC;
+			  SAMPLING_DONE : in  STD_LOGIC;
 			  START_SAMPLING : out STD_LOGIC;
 			  PORT_SELECT : out STD_LOGIC;
 			  -- fixed part of source/LO registers
@@ -59,7 +60,12 @@ entity Sweep is
 			  ATTENUATOR : out STD_LOGIC_VECTOR(6 downto 0);
 			  SOURCE_FILTER : out STD_LOGIC_VECTOR(1 downto 0);
 			  
-			  SETTLING_TIME : in STD_LOGIC_VECTOR (15 downto 0));
+			  SETTLING_TIME : in STD_LOGIC_VECTOR (15 downto 0);
+			  
+			  -- Debug signals
+			  SETTLING : out STD_LOGIC;
+			  SAMPLING : out STD_LOGIC
+			  );
 end Sweep;
 
 architecture Behavioral of Sweep is
@@ -89,17 +95,20 @@ begin
 	SOURCE_REG_0 <= MAX2871_DEF_0(31) & CONFIG_DATA(15 downto 0) & CONFIG_DATA(27 downto 16) & "000";
 	SOURCE_REG_1 <= MAX2871_DEF_1(31 downto 15) & CONFIG_DATA(39 downto 28) & "001";
 	SOURCE_REG_3 <= CONFIG_DATA(45 downto 40) & MAX2871_DEF_3(25 downto 3) & "011";
-	-- output A enabled at highest power, output B disabled
-	SOURCE_REG_4 <= MAX2871_DEF_4(31 downto 23) & CONFIG_DATA(48 downto 46) & MAX2871_DEF_4(19 downto 9) & "000111100";
+	-- output A enabled at lowest power, output B disabled
+	SOURCE_REG_4 <= MAX2871_DEF_4(31 downto 23) & CONFIG_DATA(48 downto 46) & MAX2871_DEF_4(19 downto 9) & "000100100";
 	
 	LO_REG_0 <= MAX2871_DEF_0(31) & CONFIG_DATA(71 downto 56) & CONFIG_DATA(83 downto 72) & "000";
 	LO_REG_1 <= MAX2871_DEF_1(31 downto 15) & CONFIG_DATA(95 downto 84) & "001";
 	LO_REG_3 <= CONFIG_DATA(101 downto 96) & MAX2871_DEF_3(25 downto 3) & "011";
-	-- both outputs enabled at +2dbm
-	LO_REG_4 <= MAX2871_DEF_4(31 downto 23) & CONFIG_DATA(104 downto 102) & MAX2871_DEF_4(19 downto 9) & "110110100";
+	-- both outputs enabled at -1dbm
+	LO_REG_4 <= MAX2871_DEF_4(31 downto 23) & CONFIG_DATA(104 downto 102) & MAX2871_DEF_4(19 downto 9) & "101101100";
 	
 	ATTENUATOR <= CONFIG_DATA(55 downto 49);
 	SOURCE_FILTER <= CONFIG_DATA(106 downto 105);
+	
+	SETTLING <= '0' when state = SettlingPort1 or state = SettlingPort2 else '1';
+	SAMPLING <= '0' when state = ExcitingPort1 or state = ExcitingPort2 else '1';
 	
 	process(CLK, RESET)
 	begin
@@ -113,6 +122,7 @@ begin
 			else
 				case state is
 					when TriggerSetup =>
+						PORT_SELECT <= '1';
 						RELOAD_PLL_REGS <= '1';
 						if PLL_RELOAD_DONE = '0' then
 							state <= SettingUp;
@@ -122,20 +132,21 @@ begin
 						if PLL_RELOAD_DONE = '1' and PLL_LOCKED = '1' then
 							state <= SettlingPort1;
 							settling_cnt <= unsigned(SETTLING_TIME);
-							PORT_SELECT <= '1';
 						end if;
 					when SettlingPort1 =>
 						-- wait for settling time to elapse
 						if settling_cnt > 0 then
 							settling_cnt <= settling_cnt - 1;
 						else
-							state <= ExcitingPort1;
 							START_SAMPLING <= '1';
+							if SAMPLING_BUSY = '1' then
+								state <= ExcitingPort1;
+							end if;
 						end if;
 					when ExcitingPort1 =>
 						-- wait for sampling to finish
 						START_SAMPLING <= '0';
-						if SAMPLING_DONE = '1' then
+						if SAMPLING_BUSY = '0' then
 							state <= SettlingPort2;
 							PORT_SELECT <= '0';
 							settling_cnt <= unsigned(SETTLING_TIME);
@@ -145,16 +156,19 @@ begin
 						if settling_cnt > 0 then
 							settling_cnt <= settling_cnt - 1;
 						else
-							state <= ExcitingPort2;
 							START_SAMPLING <= '1';
+							if SAMPLING_BUSY = '1' then
+								state <= ExcitingPort2;
+							end if;
 						end if;
 					when ExcitingPort2 =>
 						-- wait for sampling to finish
 						START_SAMPLING <= '0';
-						if SAMPLING_DONE = '1' then
+						if SAMPLING_BUSY = '0' then
 							if point_cnt < unsigned(NPOINTS) then
 								point_cnt <= point_cnt + 1;
 								state <= TriggerSetup;
+								PORT_SELECT <= '1';
 							else 
 								point_cnt <= (others => '0');
 								state <= Done;
