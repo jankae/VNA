@@ -80,7 +80,6 @@ END COMPONENT;
 	signal r_Q : signed(47 downto 0);
 	signal clk_cnt : integer range 0 to CLK_DIV - 1;
 	signal sample_cnt : integer range 0 to 131071;
-	signal busy : std_logic;
 	
 	constant phase_inc : integer := IF_FREQ * 4096 * CLK_DIV / CLK_FREQ;
 	signal phase : std_logic_vector(11 downto 0);
@@ -94,11 +93,8 @@ END COMPONENT;
 	signal multR_I : std_logic_vector(31 downto 0);
 	signal multR_Q : std_logic_vector(31 downto 0);
 	
-	-- delay line to adjust for mulitplier latency
-	signal mult_delay : std_logic_vector(2 downto 0);
-	
-	signal sampling_done : std_logic;
-	signal result_computed : std_logic;
+	type States is (Idle, Sampling, WaitForMult, Accumulating, Ready);
+	signal state : States;
 begin
 -- Always fails for simulation, comment out
 --	assert (phase_inc * CLK_FREQ / (4096*CLK_DIV) = IF_FREQ)
@@ -155,36 +151,21 @@ begin
 		p => multR_Q
 	);
 		
-	--DONE <= result_computed;
-	PRE_DONE <= result_computed;
-	ACTIVE <= busy;
-	
 	process(CLK, RESET)
 	begin
 		if rising_edge(CLK) then
 			if RESET = '1' then
-				busy <= '0';
+				state <= Idle;
 				ADC_START <= '0';
-				result_computed <= '0';
+				DONE <= '0';
+				PRE_DONE <= '0';
+				ACTIVE <= '0';
+				clk_cnt <= 0;
+				sample_cnt <= 0;
+				phase <= (others => '0');
 			else
-				if sampling_done = '1' then
-					sampling_done <= '0';
-					result_computed <= '1';
-					DONE <= '1';
-					PORT1_I <= std_logic_vector(p1_I);
-					PORT1_Q <= std_logic_vector(p1_Q);
-					PORT2_I <= std_logic_vector(p2_I);
-					PORT2_Q <= std_logic_vector(p2_Q);
-					REF_I <= std_logic_vector(r_I);
-					REF_Q <= std_logic_vector(r_Q);
-				end if;
-				if result_computed = '1' then
-					result_computed <= '0';
-					DONE <= '0';
-				end if;
-				if busy = '1' then
-					mult_delay <= mult_delay(1 downto 0) & NEW_SAMPLE;
-					-- keep track of timing for starting the samples
+				-- when not idle, generate pulses for ADCs
+				if state /= Idle then
 					if clk_cnt = CLK_DIV - 1 then
 						ADC_START <= '1';
 						clk_cnt <= 0;
@@ -192,8 +173,41 @@ begin
 						clk_cnt <= clk_cnt + 1;
 						ADC_START <= '0';
 					end if;
-					-- save completed samples
-					if mult_delay(2) = '1' then
+				else
+					ADC_START <= '0';
+				end if;
+				-- handle state transitions
+				case state is
+					when Idle =>
+						sample_cnt <= 0;
+						DONE <= '0';
+						PRE_DONE <= '0';
+						ACTIVE <= '0';
+						clk_cnt <= 0;
+						phase <= (others => '0');
+						p1_I <= (others => '0');
+						p1_Q <= (others => '0');
+						p2_I <= (others => '0');
+						p2_Q <= (others => '0');
+						r_I <= (others => '0');
+						r_Q <= (others => '0');
+						phase <= (others => '0');
+						if START = '1' then
+							state <= Sampling;
+						end if;
+					when Sampling =>
+						DONE <= '0';
+						PRE_DONE <= '0';
+						ACTIVE <= '1';
+						if NEW_SAMPLE = '1' then
+							state <= WaitForMult;
+						end if;
+					when WaitForMult =>
+						DONE <= '0';
+						PRE_DONE <= '0';
+						ACTIVE <= '1';
+						state <= Accumulating;
+					when Accumulating =>
 						-- multipliers are finished with the sample
 						p1_I <= p1_I + signed(mult1_I);
 						p1_Q <= p1_Q + signed(mult1_Q);
@@ -202,30 +216,28 @@ begin
 						r_I <= r_I + signed(multR_I);
 						r_Q <= r_Q + signed(multR_Q);
 						-- advance phase
+						ACTIVE <= '1';
+						DONE <= '0';
+						PRE_DONE <= '0';
 						phase <= std_logic_vector(unsigned(phase) + phase_inc);
 						if sample_cnt < unsigned(SAMPLES) then
 							sample_cnt <= sample_cnt + 1;
+							state <= Sampling;
 						else
-							-- sampling done
-							busy <= '0';
-							sampling_done <= '1';
+							state <= Ready;
 						end if;
-					end if;
-				elsif START = '1' then
-					busy <= '1';
-					p1_I <= (others => '0');
-					p1_Q <= (others => '0');
-					p2_I <= (others => '0');
-					p2_Q <= (others => '0');
-					r_I <= (others => '0');
-					r_Q <= (others => '0');
-					phase <= (others => '0');
-					sample_cnt <= 0;
-					clk_cnt <= 0;
-					mult_delay <= (others => '0');
-					-- start the acquisition of the first sample
-					ADC_START <= '1';
-				end if;
+					when Ready =>
+						ACTIVE <= '1';
+						DONE <= '1';
+						PRE_DONE <= '1';
+						PORT1_I <= std_logic_vector(p1_I);
+						PORT1_Q <= std_logic_vector(p1_Q);
+						PORT2_I <= std_logic_vector(p2_I);
+						PORT2_Q <= std_logic_vector(p2_Q);
+						REF_I <= std_logic_vector(r_I);
+						REF_Q <= std_logic_vector(r_Q);
+						state <= Idle;
+				end case;
 			end if;
 		end if;
 	end process;

@@ -251,6 +251,15 @@ architecture Behavioral of top is
 		);
 	END COMPONENT;
 	
+	COMPONENT Synchronizer
+	GENERIC(stages : integer);
+	PORT(
+		CLK : IN std_logic;
+		SYNC_IN : IN std_logic;          
+		SYNC_OUT : OUT std_logic
+		);
+	END COMPONENT;
+	
 	signal clk160 : std_logic;
 	signal clk_locked : std_logic;
 	signal inv_clk_locked : std_logic;
@@ -319,6 +328,13 @@ architecture Behavioral of top is
 	signal fpga_LO1_LE : std_logic;
 	signal fpga_miso : std_logic;
 	
+	-- synchronized asynchronous inputs
+	signal aux1_sync : std_logic;
+	signal aux2_sync : std_logic;
+	signal aux3_sync : std_logic;
+	signal lo_ld_sync : std_logic;
+	signal source_ld_sync : std_logic;
+	
 	signal debug : std_logic_vector(11 downto 0);
 	signal intr : std_logic;
 begin
@@ -339,10 +355,10 @@ begin
 	LEDS(4) <= not (not sweep_reset and sweep_port_select);
 	LEDS(5) <= not (not sweep_reset and not sweep_port_select);
 	-- Uncommitted LEDs
-	--LEDS(7 downto 6) <= user_leds(1 downto 0);	
-	LEDS(7) <= '0';
+	LEDS(7 downto 6) <= user_leds(1 downto 0);	
+	--LEDS(7) <= '0';
 	MCU_INTR <= intr;
-	LEDS(6) <= intr;
+	--LEDS(6) <= intr;
 	
 	MainCLK : PLL
 	port map(
@@ -374,6 +390,43 @@ begin
 		SYNC_OUT => SWITCHING_SYNC,
 		SYNC_PULSE_IN => '0' -- TODO leave ADCs running and connect to ADC trigger
 	);
+	
+	Sync_AUX1 : Synchronizer
+	GENERIC MAP(stages => 2)
+	PORT MAP(
+		CLK => clk160,
+		SYNC_IN => MCU_AUX1,
+		SYNC_OUT => aux1_sync
+	);
+	Sync_AUX2 : Synchronizer
+	GENERIC MAP(stages => 2)
+	PORT MAP(
+		CLK => clk160,
+		SYNC_IN => MCU_AUX2,
+		SYNC_OUT => aux2_sync
+	);
+	Sync_AUX3 : Synchronizer
+	GENERIC MAP(stages => 2)
+	PORT MAP(
+		CLK => clk160,
+		SYNC_IN => MCU_AUX3,
+		SYNC_OUT => aux3_sync
+	);
+	Sync_LO_LD : Synchronizer
+	GENERIC MAP(stages => 2)
+	PORT MAP(
+		CLK => clk160,
+		SYNC_IN => LO1_LD,
+		SYNC_OUT => lo_ld_sync
+	);
+	Sync_SOURCE_LD : Synchronizer
+	GENERIC MAP(stages => 2)
+	PORT MAP(
+		CLK => clk160,
+		SYNC_IN => SOURCE_LD,
+		SYNC_OUT => source_ld_sync
+	);	
+	
 
 	Source: MAX2871
 	GENERIC MAP(CLK_DIV => 10)
@@ -406,7 +459,7 @@ begin
 		DONE => lo_reloaded
 	);
 	plls_reloaded <= source_reloaded and lo_reloaded;
-	plls_locked <= SOURCE_LD and LO1_LD;
+	plls_locked <= source_ld_sync and lo_ld_sync;
 
 	Port1ADC: MCP33131
 	GENERIC MAP(CLK_DIV => 2,
@@ -474,7 +527,7 @@ begin
 		ACTIVE => sampling_busy
 	);
 
-	sweep_reset <= not MCU_AUX3;
+	sweep_reset <= not aux3_sync;
 
 	SweepModule: Sweep PORT MAP(
 		CLK => clk160,
@@ -515,20 +568,20 @@ begin
 	
 	-- PLL/SPI mux
 	-- only select FPGA SPI slave when both AUX1 and AUX2 are low
-	fpga_select <= MCU_NSS when MCU_AUX1 = '0' and MCU_AUX2 = '0' else '1';
+	fpga_select <= MCU_NSS when aux1_sync = '0' and aux2_sync = '0' else '1';
 	-- direct connection between MCU and SOURCE when AUX1 is high
-	SOURCE_CLK <= MCU_SCK when MCU_AUX1 = '1' else fpga_source_SCK;
-	SOURCE_MOSI <= MCU_MOSI when MCU_AUX1 = '1' else fpga_source_MOSI;
-	SOURCE_LE <= MCU_NSS when MCU_AUX1 = '1' else fpga_source_LE;
+	SOURCE_CLK <= MCU_SCK when aux1_sync = '1' else fpga_source_SCK;
+	SOURCE_MOSI <= MCU_MOSI when aux1_sync = '1' else fpga_source_MOSI;
+	SOURCE_LE <= MCU_NSS when aux1_sync = '1' else fpga_source_LE;
 	-- direct connection between MCU and LO1 when AUX2 is high
-	LO1_CLK <= MCU_SCK when MCU_AUX2 = '1' else fpga_LO1_SCK;
-	LO1_MOSI <= MCU_MOSI when MCU_AUX2 = '1' else fpga_LO1_MOSI;
-	LO1_LE <= MCU_NSS when MCU_AUX2 = '1' else fpga_LO1_LE;
+	LO1_CLK <= MCU_SCK when aux2_sync = '1' else fpga_LO1_SCK;
+	LO1_MOSI <= MCU_MOSI when aux2_sync = '1' else fpga_LO1_MOSI;
+	LO1_LE <= MCU_NSS when aux2_sync = '1' else fpga_LO1_LE;
 	-- select MISO source
-	MCU_MISO <= SOURCE_MUX when MCU_AUX1 = '1' else LO1_MUX when MCU_AUX2 = '1' else fpga_miso;
+	MCU_MISO <= SOURCE_MUX when aux1_sync = '1' else LO1_MUX when aux2_sync = '1' else fpga_miso;
 
-	lo_unlocked <= not LO1_LD;
-	source_unlocked <= not SOURCE_LD;
+	lo_unlocked <= not lo_ld_sync;
+	source_unlocked <= not source_ld_sync;
 
 	SPI: SPICommands PORT MAP(
 		CLK => clk160,

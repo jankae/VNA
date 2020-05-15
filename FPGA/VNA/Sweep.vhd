@@ -117,6 +117,7 @@ begin
 	DEBUG_STATUS(8) <= PLL_RELOAD_DONE;
 	DEBUG_STATUS(7) <= PLL_RELOAD_DONE and PLL_LOCKED;
 	DEBUG_STATUS(6) <= SAMPLING_BUSY;
+	DEBUG_STATUS(5 downto 0) <= (others => '0');
 	
 	process(CLK, RESET)
 	begin

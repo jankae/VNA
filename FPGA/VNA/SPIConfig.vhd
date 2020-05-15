@@ -137,6 +137,7 @@ begin
 				LEDS <= (others => '1');
 				SYNC_SETTING <= "00";
 				unread_sampling_data <= '0';
+				interrupt_mask <= (others => '0');
 			else
 				if sweep_config_write = '1' then
 					sweep_config_write <= '0';
