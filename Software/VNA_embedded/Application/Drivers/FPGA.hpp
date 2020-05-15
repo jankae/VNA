@@ -34,6 +34,7 @@ void WriteMAX2871Default(uint32_t *DefaultRegs);
 void WriteSweepConfig(uint16_t pointnum, uint32_t *SourceRegs, uint32_t *LORegs, uint8_t attenuation, uint64_t frequency);
 using ReadCallback = void(*)(SamplingResult result);
 bool InitiateSampleRead(ReadCallback cb);
+uint16_t GetStatus();
 
 void StartSweep();
 void AbortSweep();

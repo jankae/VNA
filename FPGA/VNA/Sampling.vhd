@@ -155,7 +155,7 @@ begin
 		p => multR_Q
 	);
 		
-	DONE <= result_computed;
+	--DONE <= result_computed;
 	PRE_DONE <= result_computed;
 	ACTIVE <= busy;
 	
@@ -170,6 +170,7 @@ begin
 				if sampling_done = '1' then
 					sampling_done <= '0';
 					result_computed <= '1';
+					DONE <= '1';
 					PORT1_I <= std_logic_vector(p1_I);
 					PORT1_Q <= std_logic_vector(p1_Q);
 					PORT2_I <= std_logic_vector(p2_I);
@@ -179,6 +180,7 @@ begin
 				end if;
 				if result_computed = '1' then
 					result_computed <= '0';
+					DONE <= '0';
 				end if;
 				if busy = '1' then
 					mult_delay <= mult_delay(1 downto 0) & NEW_SAMPLE;

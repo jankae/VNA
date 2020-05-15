@@ -63,8 +63,7 @@ entity Sweep is
 			  SETTLING_TIME : in STD_LOGIC_VECTOR (15 downto 0);
 			  
 			  -- Debug signals
-			  SETTLING : out STD_LOGIC;
-			  SAMPLING : out STD_LOGIC
+			  DEBUG_STATUS : out STD_LOGIC_VECTOR (11 downto 0)
 			  );
 end Sweep;
 
@@ -107,8 +106,17 @@ begin
 	ATTENUATOR <= CONFIG_DATA(55 downto 49);
 	SOURCE_FILTER <= CONFIG_DATA(106 downto 105);
 	
-	SETTLING <= '0' when state = SettlingPort1 or state = SettlingPort2 else '1';
-	SAMPLING <= '0' when state = ExcitingPort1 or state = ExcitingPort2 else '1';
+	DEBUG_STATUS(11 downto 9) <= "000" when state = TriggerSetup else
+											"001" when state = SettingUp else
+											"010" when state = SettlingPort1 else
+											"011" when state = ExcitingPort1 else
+											"100" when state = SettlingPort2 else
+											"101" when state = ExcitingPort2 else
+											"110" when state = Done else
+											"111";
+	DEBUG_STATUS(8) <= PLL_RELOAD_DONE;
+	DEBUG_STATUS(7) <= PLL_RELOAD_DONE and PLL_LOCKED;
+	DEBUG_STATUS(6) <= SAMPLING_BUSY;
 	
 	process(CLK, RESET)
 	begin

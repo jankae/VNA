@@ -100,17 +100,13 @@ begin
 		if CS = '1' then
 			bit_cnt <= (others => '0');
 			miso_buffer <= BUF_IN;
-		end if;
-		if falling_edge(SPI_CLK) then
---			RISING_TOGGLE <= not RISING_TOGGLE;
-			if CS = '0' then
-				if bit_cnt(W-2) = '0' then
-					bit_cnt <= bit_cnt(W-3 downto 0) & '1';
-					miso_buffer <= miso_buffer(W-2 downto 0) & '0';
-				else
-					bit_cnt <= (others => '0');
-					miso_buffer <= BUF_IN;
-				end if;
+		elsif falling_edge(SPI_CLK) then
+			if bit_cnt(W-2) = '0' then
+				bit_cnt <= bit_cnt(W-3 downto 0) & '1';
+				miso_buffer <= miso_buffer(W-2 downto 0) & '0';
+			else
+				bit_cnt <= (others => '0');
+				miso_buffer <= BUF_IN;
 			end if;
 		end if;
 	end process;

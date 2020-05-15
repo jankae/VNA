@@ -60,7 +60,8 @@ entity SPICommands is
 			  LO_CE_EN : out STD_LOGIC;
 			  LEDS : out STD_LOGIC_VECTOR(2 downto 0);
 			  SYNC_SETTING : out STD_LOGIC_VECTOR(1 downto 0);
-			  INTERRUPT_ASSERTED : out STD_LOGIC);
+			  INTERRUPT_ASSERTED : out STD_LOGIC;
+			  DEBUG_STATUS : in STD_LOGIC_VECTOR(11 downto 0));
 end SPICommands;
 
 architecture Behavioral of SPICommands is
@@ -110,7 +111,7 @@ begin
 		COMPLETE =>spi_complete 
 	);
 	
-	interrupt_status <= "000000000000" & data_overrun & unread_sampling_data & SOURCE_UNLOCKED & LO_UNLOCKED;
+	interrupt_status <= DEBUG_STATUS & data_overrun & unread_sampling_data & SOURCE_UNLOCKED & LO_UNLOCKED;
 	INTERRUPT_ASSERTED <= '1' when (interrupt_status and interrupt_mask) /= "0000000000000000" else
 									'0';
 

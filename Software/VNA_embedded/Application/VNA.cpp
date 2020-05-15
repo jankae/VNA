@@ -43,9 +43,9 @@ static void ReadComplete(FPGA::SamplingResult result) {
 		data.imag_S11 = port1.imag();
 		data.real_S21 = port2.real();
 		data.imag_S21 = port2.imag();
-		if (abs(port1) < 0.001) {
-			LOG_WARN("S11<60db@%d: P1: %f/%f P2: %f/%f R: %f/%f", pointCnt, port1_raw.real(), port1_raw.imag(), port2_raw.real(), port2_raw.imag(), ref.real(), ref.imag());
-		}
+//		if (abs(port1) < 0.001) {
+//			LOG_WARN("S11<60db@%d: P1: %f/%f P2: %f/%f R: %f/%f", pointCnt, port1_raw.real(), port1_raw.imag(), port2_raw.real(), port2_raw.imag(), ref.real(), ref.imag());
+//		}
 	} else {
 		data.real_S12 = port1.real();
 		data.imag_S12 = port1.imag();

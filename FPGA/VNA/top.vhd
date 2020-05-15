@@ -142,8 +142,7 @@ architecture Behavioral of top is
 		RELOAD_PLL_REGS : OUT std_logic;
 		ATTENUATOR : OUT std_logic_vector(6 downto 0);
 		SOURCE_FILTER : OUT std_logic_vector(1 downto 0);
-		SETTLING : out STD_LOGIC;
-		SAMPLING : out STD_LOGIC
+		DEBUG_STATUS : out STD_LOGIC_VECTOR (11 downto 0)
 		);
 	END COMPONENT;
 	COMPONENT Sampling
@@ -234,7 +233,8 @@ architecture Behavioral of top is
 		LO_CE_EN : out STD_LOGIC;		
 		LEDS : out STD_LOGIC_VECTOR(2 downto 0);
 		SYNC_SETTING : out STD_LOGIC_VECTOR(1 downto 0);
-		INTERRUPT_ASSERTED : OUT std_logic
+		INTERRUPT_ASSERTED : OUT std_logic;
+		DEBUG_STATUS : in STD_LOGIC_VECTOR (11 downto 0)
 		);
 	END COMPONENT;
 	
@@ -318,6 +318,9 @@ architecture Behavioral of top is
 	signal fpga_LO1_MOSI : std_logic;
 	signal fpga_LO1_LE : std_logic;
 	signal fpga_miso : std_logic;
+	
+	signal debug : std_logic_vector(11 downto 0);
+	signal intr : std_logic;
 begin
 
 	-- TODO assign proper signals
@@ -326,8 +329,7 @@ begin
 	SCL <= 'Z';
 
 	-- Reference CLK LED
-	--LEDS(0) <= user_leds(2);
-	LEDS(0) <= not sampling_busy;
+	LEDS(0) <= user_leds(2);
 	-- Lock status of PLLs
 	LEDS(1) <= clk_locked;
 	LEDS(2) <= SOURCE_LD;
@@ -338,7 +340,10 @@ begin
 	LEDS(5) <= not (not sweep_reset and not sweep_port_select);
 	-- Uncommitted LEDs
 	--LEDS(7 downto 6) <= user_leds(1 downto 0);	
-
+	LEDS(7) <= '0';
+	MCU_INTR <= intr;
+	LEDS(6) <= intr;
+	
 	MainCLK : PLL
 	port map(
 		-- Clock in ports
@@ -499,8 +504,7 @@ begin
 		ATTENUATOR => ATTENUATION,
 		SOURCE_FILTER => source_filter,
 		SETTLING_TIME => settling_time,
-		SETTLING => LEDS(6),
-		SAMPLING => LEDS(7)
+		DEBUG_STATUS => debug
 	);
 	
 	-- Source filter mapping
@@ -557,7 +561,8 @@ begin
 		LO_CE_EN => LO1_CE,
 		LEDS => user_leds,
 		SYNC_SETTING => sync_setting,
-		INTERRUPT_ASSERTED => MCU_INTR
+		INTERRUPT_ASSERTED => intr,
+		DEBUG_STATUS => debug
 	);
 	
 	ConfigMem : SweepConfigMem

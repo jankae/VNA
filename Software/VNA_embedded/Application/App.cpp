@@ -5,6 +5,7 @@
 #include "Communication.h"
 #include "main.h"
 #include "Exti.hpp"
+#include "FPGA.hpp"
 #include <complex>
 
 #define LOG_LEVEL	LOG_LEVEL_INFO
@@ -61,7 +62,8 @@ void App_Start() {
 		}
 		if(sweepActive && HAL_GetTick() - lastNewPoint > 200) {
 			LOG_WARN("Timed out waiting for point, last received point was %d", result.pointNum);
-			// restart the current sweep
+			LOG_WARN("FPGA status: 0x%04x", FPGA::GetStatus());
+//			// restart the current sweep
 			VNA::ConfigureSweep(settings);
 			sweepActive = true;
 			lastNewPoint = HAL_GetTick();

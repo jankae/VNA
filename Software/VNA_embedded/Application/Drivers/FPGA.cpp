@@ -24,44 +24,9 @@ bool FPGA::Init() {
 	Low(FPGA_RESET_GPIO_Port, FPGA_RESET_Pin);
 	Delay::ms(10);
 
-//    /**SPI3 GPIO Configuration
-//    PB3 (JTDO-TRACESWO)     ------> SPI3_SCK
-//    PB4 (NJTRST)     ------> SPI3_MISO
-//    PB5     ------> SPI3_MOSI
-//    */
-//	GPIO_InitTypeDef GPIO_InitStruct;
-//    GPIO_InitStruct.Pin = GPIO_PIN_3|GPIO_PIN_5;
-//    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-//    GPIO_InitStruct.Pull = GPIO_NOPULL;
-//    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-//    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_3|GPIO_PIN_5);
-//    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-//
-////
-////    for(uint8_t i=0;i<1;i++) {
-////    	GPIOB->BSRR = GPIO_PIN_3;
-////    	Delay::ms(1);
-////    	GPIOB->BSRR = GPIO_PIN_3 << 16;
-////    	Delay::ms(1);
-////    }
-//
-//    GPIO_InitStruct.Pin = GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5;
-//    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-//    GPIO_InitStruct.Pull = GPIO_NOPULL;
-//    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-//    GPIO_InitStruct.Alternate = GPIO_AF6_SPI3;
-//    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_3|GPIO_PIN_5);
-//    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-//
-//    uint16_t dummy = 0x0000;
-////    HAL_SPI_Transmit(&hspi3, (uint8_t*) &dummy, 1, 100);
-//
 	// Check if FPGA response is as expected
 	uint16_t cmd[2] = {0x4000, 0x0000};
 	uint16_t recv[2];
-//	HAL_SPI_TransmitReceive(&hspi3, (uint8_t*) cmd, (uint8_t*) recv, 2, 100);
-
-
 	Low(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
 	HAL_SPI_TransmitReceive(&hspi3, (uint8_t*) cmd, (uint8_t*) recv, 2, 100);
 	High(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
@@ -131,10 +96,6 @@ bool FPGA::InitiateSampleRead(ReadCallback cb) {
 	uint16_t cmd = 0xC000;
 	uint16_t status;
 
-	// Bug in SPI slave implementation: Slave needs clk strobe to reload status register
-	HAL_SPI_TransmitReceive(&hspi3, (uint8_t*) &cmd, (uint8_t*) &status, 1,
-				100);
-
 	Low(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
 	HAL_SPI_TransmitReceive(&hspi3, (uint8_t*) &cmd, (uint8_t*) &status, 1,
 			100);
@@ -142,7 +103,7 @@ bool FPGA::InitiateSampleRead(ReadCallback cb) {
 		// no new data available yet
 		High(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
 		LOG_WARN("ISR without new data, status: 0x%04x", status);
-//		return false;
+		return false;
 	}
 	// Start data read
 	HAL_SPI_Receive_DMA(&hspi3, (uint8_t*) raw, 18);
@@ -205,4 +166,14 @@ void FPGA::SetMode(Mode mode) {
 		break;
 	}
 	Delay::us(1);
+}
+
+uint16_t FPGA::GetStatus() {
+	uint16_t cmd = 0x4000;
+	uint16_t status;
+	Low(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
+	HAL_SPI_TransmitReceive(&hspi3, (uint8_t*) &cmd, (uint8_t*) &status, 1,
+			100);
+	High(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
+	return status;
 }
