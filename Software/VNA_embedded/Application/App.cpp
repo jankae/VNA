@@ -52,6 +52,15 @@ void App_Start() {
 			Communication::Send(packet);
 			newResult = false;
 			lastNewPoint = HAL_GetTick();
+			if(result.pointNum == settings.points - 1) {
+				// end of sweep
+				// read PLL temperatures
+				uint8_t tempSource, tempLO;
+				VNA::GetTemps(&tempSource, &tempLO);
+				LOG_INFO("PLL temperatures: %u/%u", tempSource, tempLO);
+				// Start next sweep
+				FPGA::StartSweep();
+			}
 		}
 		if (newSettings) {
 			LOG_INFO("New settings received");

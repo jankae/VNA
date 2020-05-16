@@ -283,6 +283,12 @@ bool MAX2871::SetReference(uint32_t f_ref, bool doubler, uint16_t r,
 	regs[4] &= ~0x030FF000;
 	regs[4] |= ((BS & 0xFF) << 12);
 	regs[4] |= (((BS >> 8) & 0x03) << 24);
+
+	// update ADC clock
+	uint16_t cdiv = f_PFD/100000;
+	LOG_DEBUG("CDIV set to %u", cdiv);
+	regs[3] &= ~0x00007FF8;
+	regs[3] |= (cdiv & 0xFFF) << 3;
 	return true;
 }
 
@@ -384,4 +390,30 @@ bool MAX2871::BuildVCOMap() {
 	regs[3] |= (1UL << 25);
 	Update();
 	return true;
+}
+
+uint8_t MAX2871::GetTemp() {
+	// select temperature channel and start ADC
+	regs[5] &= ~0x00000078;
+	regs[5] |= 0x00000048;
+	Write(5, regs[5]);
+	Delay::us(100);
+	// set MUX to SPI read
+	regs[2] &= ~(7UL << 26);
+	regs[5] &= ~(1UL << 18);
+	regs[2] |= (4UL << 26);
+	regs[5] |= (1UL << 18);
+	Write(5, regs[5]);
+	Write(2, regs[2]);
+	uint8_t ADC_raw = (Read() >> 16) & 0x7F;
+	LOG_DEBUG("Raw temp ADC: %d", ADC_raw);
+	// Disable ADC
+	regs[5] &= ~0x00000078;
+	// Mux pin back to high impedance
+	regs[2] &= ~(7UL << 26);
+	regs[5] &= ~(1UL << 18);
+	Write(5, regs[5]);
+	Write(2, regs[2]);
+	// convert to celsius and return
+	return 95 - 1.14f * ADC_raw;
 }

@@ -53,6 +53,7 @@ public:
 	void Update();
 	void UpdateFrequency();
 	bool BuildVCOMap();
+	uint8_t GetTemp();
 	uint32_t* GetRegisters() {
 		return regs;
 	}

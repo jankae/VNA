@@ -26,14 +26,12 @@ static Protocol::SweepSettings settings;
 static uint16_t pointCnt;
 static bool excitingPort1;
 static Protocol::Datapoint data;
+static bool sweepActive;
 
 static void ReadComplete(FPGA::SamplingResult result) {
 	auto port1_raw = std::complex<float>(result.P1I, result.P1Q);
 	auto port2_raw = std::complex<float>(result.P2I, result.P2Q);
 	auto ref = std::complex<float>(result.RefI, result.RefQ);
-//	LOG_DEBUG("P1: %f/%f", port1.real(), port1.imag());
-//	LOG_DEBUG("P2: %f/%f", port2.real(), port2.imag());
-//	LOG_DEBUG("R: %f/%f", ref.real(), ref.imag());
 	auto port1 = port1_raw / ref;
 	auto port2 = port2_raw / ref;
 	if(excitingPort1) {
@@ -43,9 +41,6 @@ static void ReadComplete(FPGA::SamplingResult result) {
 		data.imag_S11 = port1.imag();
 		data.real_S21 = port2.real();
 		data.imag_S21 = port2.imag();
-//		if (abs(port1) < 0.001) {
-//			LOG_WARN("S11<60db@%d: P1: %f/%f P2: %f/%f R: %f/%f", pointCnt, port1_raw.real(), port1_raw.imag(), port2_raw.real(), port2_raw.imag(), ref.real(), ref.imag());
-//		}
 	} else {
 		data.real_S12 = port1.real();
 		data.imag_S12 = port1.imag();
@@ -58,7 +53,8 @@ static void ReadComplete(FPGA::SamplingResult result) {
 		if (pointCnt >= settings.points) {
 			// reached end of sweep, start again
 			pointCnt = 0;
-			FPGA::StartSweep();
+			sweepActive = false;
+//			FPGA::StartSweep();
 		}
 	}
 	excitingPort1 = !excitingPort1;
@@ -70,6 +66,7 @@ static void FPGA_Interrupt(void*) {
 
 bool VNA::Init(Callback cb) {
 	LOG_DEBUG("Initializing...");
+	sweepActive = false;
 
 	// Wait for FPGA to finish configuration
 	Delay::ms(2000);
@@ -130,6 +127,7 @@ bool VNA::Init(Callback cb) {
 	}
 	Source.SetFrequency(1000000000);
 	Source.UpdateFrequency();
+	LOG_DEBUG("Source temp: %u", Source.GetTemp());
 	// disable source synthesizer/enable LO synthesizer
 	FPGA::SetMode(FPGA::Mode::FPGA);
 	FPGA::WriteRegister(FPGA::Reg::SystemControl, 0x0008);
@@ -144,6 +142,7 @@ bool VNA::Init(Callback cb) {
 	}
 	LO1.SetFrequency(1000000000 + IF1);
 	LO1.UpdateFrequency();
+	LOG_DEBUG("LO temp: %u", LO1.GetTemp());
 
 	FPGA::SetMode(FPGA::Mode::FPGA);
 	// disable both synthesizers
@@ -183,7 +182,20 @@ bool VNA::ConfigureSweep(Protocol::SweepSettings s) {
 	pointCnt = 0;
 	excitingPort1 = true;
 	// Start the sweep
+	sweepActive = true;
 	FPGA::StartSweep();
 	return true;
 }
 
+bool VNA::GetTemps(uint8_t *source, uint8_t *lo) {
+	if(sweepActive) {
+		LOG_ERR("Can not read temperatures during active sweep");
+		return false;
+	}
+	FPGA::SetMode(FPGA::Mode::SourcePLL);
+	*source = Source.GetTemp();
+	FPGA::SetMode(FPGA::Mode::LOPLL);
+	*lo = LO1.GetTemp();
+	FPGA::SetMode(FPGA::Mode::FPGA);
+	return true;
+}
