@@ -3354,16 +3354,16 @@ design rules under a new name.</description>
 <element name="C156" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="100n" x="35.94141875" y="5.3" smashed="yes" rot="R45">
 <attribute name="VALUE" x="36.839446875" y="3.503946875" size="1.27" layer="27" rot="R45"/>
 </element>
-<element name="C16" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="22n" x="8.25" y="66" smashed="yes">
+<element name="C16" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="330p" x="8.25" y="66" smashed="yes">
 <attribute name="VALUE" x="7.615" y="64.095" size="1.27" layer="27"/>
 </element>
-<element name="C17" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="22n" x="5" y="68" smashed="yes" rot="R270">
+<element name="C17" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="330p" x="5" y="68" smashed="yes" rot="R270">
 <attribute name="VALUE" x="3.095" y="68.635" size="1.27" layer="27" rot="R270"/>
 </element>
 <element name="C18" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="100n" x="5.5" y="46.5" smashed="yes">
 <attribute name="VALUE" x="4.865" y="44.595" size="1.27" layer="27"/>
 </element>
-<element name="C19" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="22n" x="11" y="68.5" smashed="yes" rot="R90">
+<element name="C19" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="330p" x="11" y="68.5" smashed="yes" rot="R90">
 <attribute name="VALUE" x="12.905" y="67.865" size="1.27" layer="27" rot="R90"/>
 </element>
 <element name="C2" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="100n" x="22" y="7" smashed="yes" rot="R180">
@@ -3390,7 +3390,7 @@ design rules under a new name.</description>
 <element name="C26" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="100n" x="12.5" y="57" smashed="yes" rot="R270">
 <attribute name="VALUE" x="10.595" y="57.635" size="1.27" layer="27" rot="R270"/>
 </element>
-<element name="C27" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="4n7" x="8.25" y="63" smashed="yes">
+<element name="C27" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="330p" x="8.25" y="63" smashed="yes">
 <attribute name="VALUE" x="7.615" y="61.095" size="1.27" layer="27"/>
 </element>
 <element name="C29" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="100n" x="5.02" y="73.3" smashed="yes">
@@ -3474,7 +3474,7 @@ design rules under a new name.</description>
 <element name="C52" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="100n" x="92.5" y="57" smashed="yes" rot="R270">
 <attribute name="VALUE" x="90.595" y="57.635" size="1.27" layer="27" rot="R270"/>
 </element>
-<element name="C53" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="4n7" x="88.25" y="63" smashed="yes">
+<element name="C53" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="330p" x="88.25" y="63" smashed="yes">
 <attribute name="VALUE" x="87.615" y="61.095" size="1.27" layer="27"/>
 </element>
 <element name="C54" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="100n" x="92.5" y="60.25" smashed="yes" rot="R270">
@@ -3498,13 +3498,13 @@ design rules under a new name.</description>
 <element name="C6" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="100n" x="6.5" y="25.5" smashed="yes" rot="R90">
 <attribute name="VALUE" x="8.405" y="24.865" size="1.27" layer="27" rot="R90"/>
 </element>
-<element name="C60" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="22n" x="88.25" y="66" smashed="yes">
+<element name="C60" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="330p" x="88.25" y="66" smashed="yes">
 <attribute name="VALUE" x="87.615" y="64.095" size="1.27" layer="27"/>
 </element>
-<element name="C61" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="22n" x="85.15" y="68.3" smashed="yes" rot="R270">
+<element name="C61" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="330p" x="85.15" y="68.3" smashed="yes" rot="R270">
 <attribute name="VALUE" x="83.245" y="68.935" size="1.27" layer="27" rot="R270"/>
 </element>
-<element name="C62" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="22n" x="90.7" y="68.7" smashed="yes" rot="R90">
+<element name="C62" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="330p" x="90.7" y="68.7" smashed="yes" rot="R90">
 <attribute name="VALUE" x="92.605" y="68.065" size="1.27" layer="27" rot="R90"/>
 </element>
 <element name="C64" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="100n" x="85.1" y="73.4" smashed="yes">
@@ -3576,7 +3576,7 @@ design rules under a new name.</description>
 <element name="C84" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="100n" x="75.75" y="58.25" smashed="yes" rot="R270">
 <attribute name="VALUE" x="73.845" y="58.885" size="1.27" layer="27" rot="R270"/>
 </element>
-<element name="C85" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="4n7" x="68" y="64.5" smashed="yes" rot="R90">
+<element name="C85" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="330p" x="68" y="64.5" smashed="yes" rot="R90">
 <attribute name="VALUE" x="69.905" y="63.865" size="1.27" layer="27" rot="R90"/>
 </element>
 <element name="C86" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="100n" x="75.75" y="61.5" smashed="yes" rot="R270">
@@ -3600,13 +3600,13 @@ design rules under a new name.</description>
 <element name="C91" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="100n" x="60.5" y="56.5" smashed="yes">
 <attribute name="VALUE" x="59.865" y="54.595" size="1.27" layer="27"/>
 </element>
-<element name="C92" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="22n" x="63" y="64.5" smashed="yes" rot="R90">
+<element name="C92" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="330p" x="63" y="64.5" smashed="yes" rot="R90">
 <attribute name="VALUE" x="64.905" y="63.865" size="1.27" layer="27" rot="R90"/>
 </element>
-<element name="C93" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="22n" x="60.5" y="61.5" smashed="yes">
+<element name="C93" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="330p" x="60.5" y="61.5" smashed="yes">
 <attribute name="VALUE" x="59.865" y="59.595" size="1.27" layer="27"/>
 </element>
-<element name="C94" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="22n" x="60.5" y="66.5" smashed="yes" rot="R180">
+<element name="C94" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="330p" x="60.5" y="66.5" smashed="yes" rot="R180">
 <attribute name="VALUE" x="61.135" y="68.405" size="1.27" layer="27" rot="R180"/>
 </element>
 <element name="C96" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="100n" x="56.5" y="60.5" smashed="yes" rot="R90">
@@ -3742,13 +3742,13 @@ design rules under a new name.</description>
 <element name="L18" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="330n" x="91.5" y="43" smashed="yes">
 <attribute name="VALUE" x="90.865" y="41.095" size="1.27" layer="27"/>
 </element>
-<element name="L19" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="4u7" x="86" y="65" smashed="yes" rot="R90">
+<element name="L19" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="220Ohm" x="86" y="65" smashed="yes" rot="R90">
 <attribute name="VALUE" x="87.905" y="64.365" size="1.27" layer="27" rot="R90"/>
 </element>
 <element name="L2" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="330n" x="11.5" y="27" smashed="yes" rot="R180">
 <attribute name="VALUE" x="12.135" y="28.905" size="1.27" layer="27" rot="R180"/>
 </element>
-<element name="L20" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="4u7" x="90.5" y="65" smashed="yes" rot="R90">
+<element name="L20" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="220Ohm" x="90.5" y="65" smashed="yes" rot="R90">
 <attribute name="VALUE" x="92.405" y="64.365" size="1.27" layer="27" rot="R90"/>
 </element>
 <element name="L21" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="330n" x="72.5" y="43.5" smashed="yes">
@@ -3775,13 +3775,13 @@ design rules under a new name.</description>
 <element name="L28" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="330n" x="67.47" y="50.19" smashed="yes">
 <attribute name="VALUE" x="66.835" y="48.285" size="1.27" layer="27"/>
 </element>
-<element name="L29" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="4u7" x="65.5" y="63.5" smashed="yes" rot="R180">
+<element name="L29" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="220Ohm" x="65.5" y="63.5" smashed="yes" rot="R180">
 <attribute name="VALUE" x="66.135" y="65.405" size="1.27" layer="27" rot="R180"/>
 </element>
 <element name="L3" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="330n" x="9.75" y="44.5" smashed="yes">
 <attribute name="VALUE" x="9.115" y="42.595" size="1.27" layer="27"/>
 </element>
-<element name="L30" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="4u7" x="65.5" y="65.5" smashed="yes" rot="R180">
+<element name="L30" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="220Ohm" x="65.5" y="65.5" smashed="yes" rot="R180">
 <attribute name="VALUE" x="66.135" y="67.405" size="1.27" layer="27" rot="R180"/>
 </element>
 <element name="L31" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="Ferrite" x="34" y="49.5" smashed="yes" rot="MR0">
@@ -3811,7 +3811,7 @@ design rules under a new name.</description>
 <element name="L39" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="Ferrite" x="29" y="18.5" smashed="yes" rot="MR90">
 <attribute name="VALUE" x="27.095" y="17.865" size="1.27" layer="28" rot="MR90"/>
 </element>
-<element name="L4" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="4u7" x="6" y="65" smashed="yes" rot="R90">
+<element name="L4" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="220Ohm" x="6" y="65" smashed="yes" rot="R90">
 <attribute name="VALUE" x="7.905" y="64.365" size="1.27" layer="27" rot="R90"/>
 </element>
 <element name="L40" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="Ferrite" x="60" y="10" smashed="yes" rot="MR270">
@@ -3835,7 +3835,7 @@ design rules under a new name.</description>
 <element name="L46" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="Ferrite" x="59.24" y="24.95" smashed="yes" rot="MR270">
 <attribute name="VALUE" x="61.145" y="25.585" size="1.27" layer="28" rot="MR270"/>
 </element>
-<element name="L5" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="4u7" x="10.5" y="65" smashed="yes" rot="R90">
+<element name="L5" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="220Ohm" x="10.5" y="65" smashed="yes" rot="R90">
 <attribute name="VALUE" x="12.405" y="64.365" size="1.27" layer="27" rot="R90"/>
 </element>
 <element name="L6" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="330n" x="90.75" y="28.5" smashed="yes" rot="R180">
@@ -3883,19 +3883,19 @@ design rules under a new name.</description>
 <element name="R16" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="200" x="9.25" y="51" smashed="yes">
 <attribute name="VALUE" x="8.615" y="49.095" size="1.27" layer="27"/>
 </element>
-<element name="R17" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="620" x="6" y="58.5" smashed="yes" rot="R90">
+<element name="R17" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="6k8" x="6" y="58.5" smashed="yes" rot="R90">
 <attribute name="VALUE" x="7.905" y="57.865" size="1.27" layer="27" rot="R90"/>
 </element>
-<element name="R18" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="620" x="14" y="58.5" smashed="yes" rot="R270">
+<element name="R18" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="6k8" x="14" y="58.5" smashed="yes" rot="R270">
 <attribute name="VALUE" x="12.095" y="59.135" size="1.27" layer="27" rot="R270"/>
 </element>
-<element name="R19" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="33" x="10.5" y="62" smashed="yes" rot="R270">
+<element name="R19" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="220" x="10.5" y="62" smashed="yes" rot="R270">
 <attribute name="VALUE" x="8.595" y="62.635" size="1.27" layer="27" rot="R270"/>
 </element>
 <element name="R2" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="620" x="20" y="5.6" smashed="yes" rot="R270">
 <attribute name="VALUE" x="18.095" y="6.235" size="1.27" layer="27" rot="R270"/>
 </element>
-<element name="R20" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="33" x="6" y="62" smashed="yes" rot="R270">
+<element name="R20" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="220" x="6" y="62" smashed="yes" rot="R270">
 <attribute name="VALUE" x="4.095" y="62.635" size="1.27" layer="27" rot="R270"/>
 </element>
 <element name="R21" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="620" x="84" y="5.5" smashed="yes" rot="R270">
@@ -3919,19 +3919,19 @@ design rules under a new name.</description>
 <element name="R28" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="200" x="89.25" y="51" smashed="yes">
 <attribute name="VALUE" x="88.615" y="49.095" size="1.27" layer="27"/>
 </element>
-<element name="R29" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="620" x="84.5" y="58.5" smashed="yes" rot="R90">
+<element name="R29" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="6k8" x="84.5" y="58.5" smashed="yes" rot="R90">
 <attribute name="VALUE" x="86.405" y="57.865" size="1.27" layer="27" rot="R90"/>
 </element>
 <element name="R3" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="18" x="18" y="7" smashed="yes">
 <attribute name="VALUE" x="17.365" y="5.095" size="1.27" layer="27"/>
 </element>
-<element name="R30" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="620" x="94" y="58.5" smashed="yes" rot="R270">
+<element name="R30" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="6k8" x="94" y="58.5" smashed="yes" rot="R270">
 <attribute name="VALUE" x="92.095" y="59.135" size="1.27" layer="27" rot="R270"/>
 </element>
-<element name="R31" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="33" x="90.5" y="62" smashed="yes" rot="R270">
+<element name="R31" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="220" x="90.5" y="62" smashed="yes" rot="R270">
 <attribute name="VALUE" x="88.595" y="62.635" size="1.27" layer="27" rot="R270"/>
 </element>
-<element name="R32" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="33" x="86" y="62" smashed="yes" rot="R270">
+<element name="R32" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="220" x="86" y="62" smashed="yes" rot="R270">
 <attribute name="VALUE" x="84.095" y="62.635" size="1.27" layer="27" rot="R270"/>
 </element>
 <element name="R33" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="56" x="9.75" y="39.25" smashed="yes" rot="R180">
@@ -3970,16 +3970,16 @@ design rules under a new name.</description>
 <element name="R44" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="200" x="64.75" y="55.5" smashed="yes">
 <attribute name="VALUE" x="64.115" y="53.595" size="1.27" layer="27"/>
 </element>
-<element name="R45" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="200" x="69" y="60" smashed="yes" rot="R90">
+<element name="R45" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="4k7" x="69" y="60" smashed="yes" rot="R90">
 <attribute name="VALUE" x="70.905" y="59.365" size="1.27" layer="27" rot="R90"/>
 </element>
-<element name="R46" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="200" x="77.5" y="60" smashed="yes" rot="R270">
+<element name="R46" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="4k7" x="77.5" y="60" smashed="yes" rot="R270">
 <attribute name="VALUE" x="75.595" y="60.635" size="1.27" layer="27" rot="R270"/>
 </element>
-<element name="R47" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="33" x="70.5" y="65.5" smashed="yes">
+<element name="R47" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="220" x="70.5" y="65.5" smashed="yes">
 <attribute name="VALUE" x="69.865" y="63.595" size="1.27" layer="27"/>
 </element>
-<element name="R48" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="33" x="70.5" y="63.5" smashed="yes">
+<element name="R48" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="220" x="70.5" y="63.5" smashed="yes">
 <attribute name="VALUE" x="69.865" y="61.595" size="1.27" layer="27"/>
 </element>
 <element name="R49" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="10k" x="29.5" y="39.5" smashed="yes" rot="R90">

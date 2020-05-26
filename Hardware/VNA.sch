@@ -6397,14 +6397,14 @@ new: Attribute TP_SIGNAL_NAME&lt;br&gt;
 <part name="C23" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="100n"/>
 <part name="GND30" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="GND" device=""/>
 <part name="GND31" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="GND" device=""/>
-<part name="R17" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="620"/>
+<part name="R17" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="6k8"/>
 <part name="C24" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="DNP"/>
-<part name="R18" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="620"/>
+<part name="R18" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="6k8"/>
 <part name="C25" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="DNP"/>
 <part name="C26" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="100n"/>
-<part name="R19" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="33"/>
-<part name="R20" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="33"/>
-<part name="C27" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="4n7"/>
+<part name="R19" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="220"/>
+<part name="R20" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="220"/>
+<part name="C27" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="330p"/>
 <part name="GND32" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="GND" device=""/>
 <part name="GND33" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="GND" device=""/>
 <part name="GND34" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="GND" device=""/>
@@ -6423,11 +6423,11 @@ new: Attribute TP_SIGNAL_NAME&lt;br&gt;
 <part name="GND17" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="GND" device=""/>
 <part name="GND18" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="GND" device=""/>
 <part name="C15" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="100n"/>
-<part name="L4" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="INDUCTOR" device="0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="4u7"/>
-<part name="L5" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="INDUCTOR" device="0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="4u7"/>
-<part name="C16" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="22n"/>
-<part name="C17" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="22n"/>
-<part name="C19" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="22n"/>
+<part name="L4" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="INDUCTOR" device="0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="220Ohm"/>
+<part name="L5" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="INDUCTOR" device="0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="220Ohm"/>
+<part name="C16" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="330p"/>
+<part name="C17" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="330p"/>
+<part name="C19" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="330p"/>
 <part name="SUPPLY1" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="+5V/1" device=""/>
 <part name="SUPPLY2" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="+5V/1" device=""/>
 <part name="SUPPLY3" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="+5V/1" device=""/>
@@ -6479,14 +6479,14 @@ new: Attribute TP_SIGNAL_NAME&lt;br&gt;
 <part name="C81" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="100n"/>
 <part name="GND77" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="GND" device=""/>
 <part name="GND78" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="GND" device=""/>
-<part name="R45" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="200"/>
+<part name="R45" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="4k7"/>
 <part name="C82" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="DNP"/>
-<part name="R46" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="200"/>
+<part name="R46" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="4k7"/>
 <part name="C83" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="DNP"/>
 <part name="C84" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="100n"/>
-<part name="R47" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="33"/>
-<part name="R48" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="33"/>
-<part name="C85" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="4n7"/>
+<part name="R47" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="220"/>
+<part name="R48" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="220"/>
+<part name="C85" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="330p"/>
 <part name="GND79" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="GND" device=""/>
 <part name="GND80" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="GND" device=""/>
 <part name="GND81" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="GND" device=""/>
@@ -6505,11 +6505,11 @@ new: Attribute TP_SIGNAL_NAME&lt;br&gt;
 <part name="GND83" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="GND" device=""/>
 <part name="GND84" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="GND" device=""/>
 <part name="C91" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="100n"/>
-<part name="L29" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="INDUCTOR" device="0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="4u7"/>
-<part name="L30" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="INDUCTOR" device="0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="4u7"/>
-<part name="C92" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="22n"/>
-<part name="C93" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="22n"/>
-<part name="C94" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="22n"/>
+<part name="L29" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="INDUCTOR" device="0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="220Ohm"/>
+<part name="L30" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="INDUCTOR" device="0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="220Ohm"/>
+<part name="C92" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="330p"/>
+<part name="C93" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="330p"/>
+<part name="C94" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="330p"/>
 <part name="GND85" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="GND" device=""/>
 <part name="C96" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="100n"/>
 <part name="GND87" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="GND" device=""/>
@@ -6581,14 +6581,14 @@ new: Attribute TP_SIGNAL_NAME&lt;br&gt;
 <part name="C49" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="100n"/>
 <part name="GND48" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="GND" device=""/>
 <part name="GND49" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="GND" device=""/>
-<part name="R29" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="620"/>
+<part name="R29" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="6k8"/>
 <part name="C50" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="DNP"/>
-<part name="R30" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="620"/>
+<part name="R30" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="6k8"/>
 <part name="C51" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="DNP"/>
 <part name="C52" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="100n"/>
-<part name="R31" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="33"/>
-<part name="R32" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="33"/>
-<part name="C53" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="4n7"/>
+<part name="R31" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="220"/>
+<part name="R32" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="220"/>
+<part name="C53" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="330p"/>
 <part name="GND50" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="GND" device=""/>
 <part name="GND51" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="GND" device=""/>
 <part name="GND52" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="GND" device=""/>
@@ -6607,11 +6607,11 @@ new: Attribute TP_SIGNAL_NAME&lt;br&gt;
 <part name="GND54" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="GND" device=""/>
 <part name="GND55" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="GND" device=""/>
 <part name="C59" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="100n"/>
-<part name="L19" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="INDUCTOR" device="0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="4u7"/>
-<part name="L20" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="INDUCTOR" device="0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="4u7"/>
-<part name="C60" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="22n"/>
-<part name="C61" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="22n"/>
-<part name="C62" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="22n"/>
+<part name="L19" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="INDUCTOR" device="0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="220Ohm"/>
+<part name="L20" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="INDUCTOR" device="0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="220Ohm"/>
+<part name="C60" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="330p"/>
+<part name="C61" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="330p"/>
+<part name="C62" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="330p"/>
 <part name="GND56" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="GND" device=""/>
 <part name="C64" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="C-EU*?" device="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="100n"/>
 <part name="GND58" library="VNA" library_urn="urn:adsk.eagle:library:19762030" deviceset="GND" device=""/>
