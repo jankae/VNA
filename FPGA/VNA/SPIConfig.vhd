@@ -38,6 +38,7 @@ entity SPICommands is
            NSS : in  STD_LOGIC;
            NEW_SAMPLING_DATA : in  STD_LOGIC;
            SAMPLING_RESULT : in  STD_LOGIC_VECTOR (287 downto 0);
+			  ADC_MINMAX : in STD_LOGIC_VECTOR(95 downto 0);
            SOURCE_UNLOCKED : in  STD_LOGIC;
            LO_UNLOCKED : in  STD_LOGIC;
            MAX2871_DEF_4 : out  STD_LOGIC_VECTOR (31 downto 0);
@@ -61,7 +62,10 @@ entity SPICommands is
 			  LEDS : out STD_LOGIC_VECTOR(2 downto 0);
 			  SYNC_SETTING : out STD_LOGIC_VECTOR(1 downto 0);
 			  INTERRUPT_ASSERTED : out STD_LOGIC;
-			  DEBUG_STATUS : in STD_LOGIC_VECTOR(11 downto 0));
+			  RESET_MINMAX : out STD_LOGIC;
+			  SWEEP_HALTED : in STD_LOGIC;
+			  SWEEP_RESUME : out STD_LOGIC;
+			  DEBUG_STATUS : in STD_LOGIC_VECTOR(10 downto 0));
 end SPICommands;
 
 architecture Behavioral of SPICommands is
@@ -111,7 +115,7 @@ begin
 		COMPLETE =>spi_complete 
 	);
 	
-	interrupt_status <= DEBUG_STATUS & data_overrun & unread_sampling_data & SOURCE_UNLOCKED & LO_UNLOCKED;
+	interrupt_status <= DEBUG_STATUS & SWEEP_HALTED & data_overrun & unread_sampling_data & SOURCE_UNLOCKED & LO_UNLOCKED;
 	INTERRUPT_ASSERTED <= '1' when (interrupt_status and interrupt_mask) /= "0000000000000000" else
 									'0';
 
@@ -138,6 +142,7 @@ begin
 				SYNC_SETTING <= "00";
 				unread_sampling_data <= '0';
 				interrupt_mask <= (others => '0');
+				RESET_MINMAX <= '0';
 			else
 				if sweep_config_write = '1' then
 					sweep_config_write <= '0';
@@ -151,22 +156,31 @@ begin
 				if NSS = '1' then
 					word_cnt <= 0;
 					spi_buf_in <= interrupt_status;
+					RESET_MINMAX <= '0';
+					SWEEP_RESUME <= '0';
 				elsif spi_complete = '1' then
 					word_cnt <= word_cnt + 1;
 					if word_cnt = 0 then
 						-- initial word determines action
-						case spi_buf_out(15 downto 14) is
-							when "10" => state <= WriteRegister;
-											selected_register <= to_integer(unsigned(spi_buf_out(3 downto 0)));
-							when "00" => state <= WriteSweepConfig;
+						case spi_buf_out(15 downto 13) is
+							when "000" => state <= WriteSweepConfig;
 											-- also extract the point number
 											SWEEP_ADDRESS <= spi_buf_out(12 downto 0);
-							when "11" => state <= ReadResult;
+							when "001" => state <= Invalid;
+											SWEEP_RESUME <= '1';
+							when "010" => state <= ReadTest;
+											spi_buf_in <= "1111000010100101";
+							when "011" => state <= Invalid;
+											RESET_MINMAX <= '1';
+							when "100" => state <= WriteRegister;
+											selected_register <= to_integer(unsigned(spi_buf_out(3 downto 0)));
+							when "110" => state <= ReadResult;
 											latched_result <= SAMPLING_RESULT(287 downto 16);
 											spi_buf_in <= SAMPLING_RESULT(15 downto 0);
 											unread_sampling_data <= '0';
-							when "01" => state <= ReadTest;
-											spi_buf_in <= "1111000010100101";
+							when "111" => state <= ReadResult; -- can use same state as read result, but the latched data will contain the min/max ADC values
+											latched_result(79 downto 0) <= ADC_MINMAX(95 downto 16);
+											spi_buf_in <= ADC_MINMAX(15 downto 0);
 							when others => state <= Invalid;
 						end case;
 					else

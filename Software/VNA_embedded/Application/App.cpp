@@ -58,6 +58,12 @@ void App_Start() {
 				uint8_t tempSource, tempLO;
 				VNA::GetTemps(&tempSource, &tempLO);
 				LOG_INFO("PLL temperatures: %u/%u", tempSource, tempLO);
+				// Read ADC min/max
+				auto limits = FPGA::GetADCLimits();
+				FPGA::ResetADCLimits();
+				LOG_INFO("ADC limits: P1: %d/%d P2: %d/%d R: %d/%d",
+						limits.P1min, limits.P1max, limits.P2min, limits.P2max,
+						limits.Rmin, limits.Rmax);
 				// Start next sweep
 				FPGA::StartSweep();
 			}
@@ -69,7 +75,7 @@ void App_Start() {
 			sweepActive = true;
 			lastNewPoint = HAL_GetTick();
 		}
-		if(sweepActive && HAL_GetTick() - lastNewPoint > 200) {
+		if(sweepActive && HAL_GetTick() - lastNewPoint > 1000) {
 			LOG_WARN("Timed out waiting for point, last received point was %d", result.pointNum);
 			LOG_WARN("FPGA status: 0x%04x", FPGA::GetStatus());
 //			// restart the current sweep

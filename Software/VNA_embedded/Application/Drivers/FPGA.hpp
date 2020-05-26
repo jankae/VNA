@@ -28,12 +28,23 @@ using SamplingResult = struct _samplingresult {
 	int64_t RefI, RefQ;
 };
 
-bool Init();
+using ADCLimits = struct _adclimits {
+	int16_t P1min, P1max;
+	int16_t P2min, P2max;
+	int16_t Rmin, Rmax;
+};
+
+using HaltedCallback = void(*)(void);
+bool Init(HaltedCallback cb = nullptr);
 void WriteRegister(Reg reg, uint16_t value);
 void WriteMAX2871Default(uint32_t *DefaultRegs);
-void WriteSweepConfig(uint16_t pointnum, uint32_t *SourceRegs, uint32_t *LORegs, uint8_t attenuation, uint64_t frequency);
+void WriteSweepConfig(uint16_t pointnum, uint32_t *SourceRegs, uint32_t *LORegs,
+		uint8_t attenuation, uint64_t frequency, bool halt = false);
 using ReadCallback = void(*)(SamplingResult result);
 bool InitiateSampleRead(ReadCallback cb);
+ADCLimits GetADCLimits();
+void ResetADCLimits();
+void ResumeHaltedSweep();
 uint16_t GetStatus();
 
 void StartSweep();

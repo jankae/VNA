@@ -48,6 +48,9 @@ ARCHITECTURE behavior OF Test_MCP33131 IS
          START : IN  std_logic;
          READY : OUT  std_logic;
          DATA : OUT  std_logic_vector(15 downto 0);
+			MIN : out STD_LOGIC_VECTOR (15 downto 0);
+			MAX : out STD_LOGIC_VECTOR (15 downto 0);
+			RESET_MINMAX : in STD_LOGIC;
          SDO : IN  std_logic;
          CONVSTART : OUT  std_logic;
          SCLK : OUT  std_logic
@@ -60,6 +63,7 @@ ARCHITECTURE behavior OF Test_MCP33131 IS
    signal RESET : std_logic := '0';
    signal START : std_logic := '0';
    signal SDO : std_logic := '0';
+	signal RESET_MINMAX : STD_LOGIC := '0';
 
  	--Outputs
    signal READY : std_logic;
@@ -82,6 +86,7 @@ BEGIN
           START => START,
           READY => READY,
           DATA => DATA,
+			 RESET_MINMAX => RESET_MINMAX,
           SDO => SDO,
           CONVSTART => CONVSTART,
           SCLK => SCLK

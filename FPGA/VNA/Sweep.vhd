@@ -56,6 +56,8 @@ entity Sweep is
 			  RELOAD_PLL_REGS : out STD_LOGIC;
 			  PLL_RELOAD_DONE : in STD_LOGIC;
 			  PLL_LOCKED : in STD_LOGIC;
+			  SWEEP_HALTED : out STD_LOGIC;
+			  SWEEP_RESUME : in STD_LOGIC;
 			  
 			  ATTENUATOR : out STD_LOGIC_VECTOR(6 downto 0);
 			  SOURCE_FILTER : out STD_LOGIC_VECTOR(1 downto 0);
@@ -63,7 +65,7 @@ entity Sweep is
 			  SETTLING_TIME : in STD_LOGIC_VECTOR (15 downto 0);
 			  
 			  -- Debug signals
-			  DEBUG_STATUS : out STD_LOGIC_VECTOR (11 downto 0)
+			  DEBUG_STATUS : out STD_LOGIC_VECTOR (10 downto 0)
 			  );
 end Sweep;
 
@@ -94,8 +96,8 @@ begin
 	SOURCE_REG_0 <= MAX2871_DEF_0(31) & CONFIG_DATA(15 downto 0) & CONFIG_DATA(27 downto 16) & "000";
 	SOURCE_REG_1 <= MAX2871_DEF_1(31 downto 15) & CONFIG_DATA(39 downto 28) & "001";
 	SOURCE_REG_3 <= CONFIG_DATA(45 downto 40) & MAX2871_DEF_3(25 downto 3) & "011";
-	-- output A enabled at lowest power, output B disabled
-	SOURCE_REG_4 <= MAX2871_DEF_4(31 downto 23) & CONFIG_DATA(48 downto 46) & MAX2871_DEF_4(19 downto 9) & "000100100";
+	-- output power A passed on from default registers, output B disabled
+	SOURCE_REG_4 <= MAX2871_DEF_4(31 downto 23) & CONFIG_DATA(48 downto 46) & MAX2871_DEF_4(19 downto 9) & "000" & MAX2871_DEF_4(5 downto 3) & "100";
 	
 	LO_REG_0 <= MAX2871_DEF_0(31) & CONFIG_DATA(71 downto 56) & CONFIG_DATA(83 downto 72) & "000";
 	LO_REG_1 <= MAX2871_DEF_1(31 downto 15) & CONFIG_DATA(95 downto 84) & "001";
@@ -106,7 +108,7 @@ begin
 	ATTENUATOR <= CONFIG_DATA(55 downto 49);
 	SOURCE_FILTER <= CONFIG_DATA(106 downto 105);
 	
-	DEBUG_STATUS(11 downto 9) <= "000" when state = TriggerSetup else
+	DEBUG_STATUS(10 downto 8) <= "000" when state = TriggerSetup else
 											"001" when state = SettingUp else
 											"010" when state = SettlingPort1 else
 											"011" when state = ExcitingPort1 else
@@ -114,10 +116,10 @@ begin
 											"101" when state = ExcitingPort2 else
 											"110" when state = Done else
 											"111";
-	DEBUG_STATUS(8) <= PLL_RELOAD_DONE;
-	DEBUG_STATUS(7) <= PLL_RELOAD_DONE and PLL_LOCKED;
-	DEBUG_STATUS(6) <= SAMPLING_BUSY;
-	DEBUG_STATUS(5 downto 0) <= (others => '0');
+	DEBUG_STATUS(7) <= PLL_RELOAD_DONE;
+	DEBUG_STATUS(6) <= PLL_RELOAD_DONE and PLL_LOCKED;
+	DEBUG_STATUS(5) <= SAMPLING_BUSY;
+	DEBUG_STATUS(4 downto 0) <= (others => '0');
 	
 	process(CLK, RESET)
 	begin
@@ -137,10 +139,16 @@ begin
 							state <= SettingUp;
 						end if;
 					when SettingUp =>
+						-- highest bit in CONFIG_DATA determines whether the sweep should be halted prior to sampling
+						SWEEP_HALTED <= CONFIG_DATA(111);
 						RELOAD_PLL_REGS <= '0';
 						if PLL_RELOAD_DONE = '1' and PLL_LOCKED = '1' then
-							state <= SettlingPort1;
-							settling_cnt <= unsigned(SETTLING_TIME);
+							-- check if halted sweep is resumed
+							if CONFIG_DATA(111) = '0' or SWEEP_RESUME = '1' then
+								SWEEP_HALTED <= '0';
+								state <= SettlingPort1;
+								settling_cnt <= unsigned(SETTLING_TIME);
+							end if;
 						end if;
 					when SettlingPort1 =>
 						-- wait for settling time to elapse

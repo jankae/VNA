@@ -26,7 +26,11 @@ static Protocol::SweepSettings settings;
 static uint16_t pointCnt;
 static bool excitingPort1;
 static Protocol::Datapoint data;
-static bool sweepActive;
+
+static void HaltedCallback() {
+	LOG_INFO("Halted before point %d", pointCnt);
+	FPGA::ResumeHaltedSweep();
+}
 
 static void ReadComplete(FPGA::SamplingResult result) {
 	auto port1_raw = std::complex<float>(result.P1I, result.P1Q);
@@ -53,7 +57,6 @@ static void ReadComplete(FPGA::SamplingResult result) {
 		if (pointCnt >= settings.points) {
 			// reached end of sweep, start again
 			pointCnt = 0;
-			sweepActive = false;
 //			FPGA::StartSweep();
 		}
 	}
@@ -66,7 +69,6 @@ static void FPGA_Interrupt(void*) {
 
 bool VNA::Init(Callback cb) {
 	LOG_DEBUG("Initializing...");
-	sweepActive = false;
 
 	// Wait for FPGA to finish configuration
 	Delay::ms(2000);
@@ -102,13 +104,13 @@ bool VNA::Init(Callback cb) {
 	LOG_DEBUG("Si5351 locked");
 
 	// FPGA clock is now present, can initialize
-	if (!FPGA::Init()) {
+	if (!FPGA::Init(HaltedCallback)) {
 		LOG_ERR("Aborting due to uninitialized FPGA");
 		return false;
 	}
 
-	// Enable new data interrupt
-	FPGA::WriteRegister(FPGA::Reg::InterruptMask, 0x0004);
+	// Enable new data and sweep halt interrupt
+	FPGA::WriteRegister(FPGA::Reg::InterruptMask, 0x0014);
 
 	Exti::SetCallback(FPGA_INTR_GPIO_Port, FPGA_INTR_Pin, Exti::EdgeType::Rising, Exti::Pull::Down, FPGA_Interrupt);
 
@@ -117,7 +119,7 @@ bool VNA::Init(Callback cb) {
 	FPGA::WriteRegister(FPGA::Reg::SystemControl, 0x0010);
 	FPGA::SetMode(FPGA::Mode::SourcePLL);
 	Source.Init(100000000, false, 1, false);
-	Source.SetPowerOutA(MAX2871::Power::p5dbm);
+	Source.SetPowerOutA(MAX2871::Power::n4dbm);
 	// output B is not used
 	Source.SetPowerOutB(MAX2871::Power::n4dbm, false);
 	if(!Source.BuildVCOMap()) {
@@ -146,7 +148,7 @@ bool VNA::Init(Callback cb) {
 
 	FPGA::SetMode(FPGA::Mode::FPGA);
 	// disable both synthesizers
-	FPGA::WriteRegister(FPGA::Reg::SystemControl, 0x0000);
+	FPGA::WriteRegister(FPGA::Reg::SystemControl, 0x0100);
 	FPGA::WriteMAX2871Default(Source.GetRegisters());
 
 	LOG_INFO("Initialized");
@@ -177,21 +179,16 @@ bool VNA::ConfigureSweep(Protocol::SweepSettings s) {
 		FPGA::WriteSweepConfig(i, Source.GetRegisters(), LO1.GetRegisters(), 0, freq);
 	}
 	// Enable mixers/amplifier/PLLs
-	uint16_t ctrlReg = 0xFC18 | (samplesPerPoint >> 16);
+	uint16_t ctrlReg = 0xFD18 | (samplesPerPoint >> 16);
 	FPGA::WriteRegister(FPGA::Reg::SystemControl, ctrlReg);
 	pointCnt = 0;
 	excitingPort1 = true;
 	// Start the sweep
-	sweepActive = true;
 	FPGA::StartSweep();
 	return true;
 }
 
 bool VNA::GetTemps(uint8_t *source, uint8_t *lo) {
-	if(sweepActive) {
-		LOG_ERR("Can not read temperatures during active sweep");
-		return false;
-	}
 	FPGA::SetMode(FPGA::Mode::SourcePLL);
 	*source = Source.GetTemp();
 	FPGA::SetMode(FPGA::Mode::LOPLL);

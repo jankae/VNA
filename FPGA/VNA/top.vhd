@@ -140,9 +140,11 @@ architecture Behavioral of top is
 		LO_REG_1 : OUT std_logic_vector(31 downto 0);
 		LO_REG_0 : OUT std_logic_vector(31 downto 0);
 		RELOAD_PLL_REGS : OUT std_logic;
+		SWEEP_HALTED : out STD_LOGIC;
+		SWEEP_RESUME : in STD_LOGIC;
 		ATTENUATOR : OUT std_logic_vector(6 downto 0);
 		SOURCE_FILTER : OUT std_logic_vector(1 downto 0);
-		DEBUG_STATUS : out STD_LOGIC_VECTOR (11 downto 0)
+		DEBUG_STATUS : out STD_LOGIC_VECTOR (10 downto 0)
 		);
 	END COMPONENT;
 	COMPONENT Sampling
@@ -181,6 +183,9 @@ architecture Behavioral of top is
 		SDO : IN std_logic;          
 		READY : OUT std_logic;
 		DATA : OUT std_logic_vector(15 downto 0);
+		MIN : out STD_LOGIC_VECTOR (15 downto 0);
+		MAX : out STD_LOGIC_VECTOR (15 downto 0);
+		RESET_MINMAX : in STD_LOGIC;
 		CONVSTART : OUT std_logic;
 		SCLK : OUT std_logic
 		);
@@ -210,6 +215,7 @@ architecture Behavioral of top is
 		NSS : IN std_logic;
 		NEW_SAMPLING_DATA : IN std_logic;
 		SAMPLING_RESULT : IN std_logic_vector(287 downto 0);
+		ADC_MINMAX : in STD_LOGIC_VECTOR(95 downto 0);
 		SOURCE_UNLOCKED : IN std_logic;
 		LO_UNLOCKED : IN std_logic;          
 		MISO : OUT std_logic;
@@ -234,7 +240,10 @@ architecture Behavioral of top is
 		LEDS : out STD_LOGIC_VECTOR(2 downto 0);
 		SYNC_SETTING : out STD_LOGIC_VECTOR(1 downto 0);
 		INTERRUPT_ASSERTED : OUT std_logic;
-		DEBUG_STATUS : in STD_LOGIC_VECTOR (11 downto 0)
+		RESET_MINMAX : out STD_LOGIC;
+		SWEEP_HALTED : in STD_LOGIC;
+		SWEEP_RESUME : out STD_LOGIC;
+		DEBUG_STATUS : in STD_LOGIC_VECTOR (10 downto 0)
 		);
 	END COMPONENT;
 	
@@ -288,6 +297,8 @@ architecture Behavioral of top is
 	signal adc_port1_data : std_logic_vector(15 downto 0);
 	signal adc_port2_data : std_logic_vector(15 downto 0);
 	signal adc_ref_data : std_logic_vector(15 downto 0);
+	signal adc_minmax : std_logic_vector(95 downto 0);
+	signal adc_reset_minmax : std_logic;
 	
 	-- Sampling signals
 	signal sampling_busy : std_logic;
@@ -308,6 +319,8 @@ architecture Behavioral of top is
 	signal sweep_config_write : std_logic_vector(0 downto 0);
 	
 	signal sweep_reset : std_logic;
+	signal sweep_halted : std_logic;
+	signal sweep_resume : std_logic;
 	
 	-- Configuration signals
 	signal settling_time : std_logic_vector(15 downto 0);
@@ -335,7 +348,7 @@ architecture Behavioral of top is
 	signal lo_ld_sync : std_logic;
 	signal source_ld_sync : std_logic;
 	
-	signal debug : std_logic_vector(11 downto 0);
+	signal debug : std_logic_vector(10 downto 0);
 	signal intr : std_logic;
 begin
 
@@ -470,6 +483,9 @@ begin
 		START => adc_trigger_sample,
 		READY => adc_port1_ready,
 		DATA => adc_port1_data,
+		MIN => adc_minmax(15 downto 0),
+		MAX => adc_minmax(31 downto 16),
+		RESET_MINMAX => adc_reset_minmax,
 		SDO => PORT1_SDO,
 		CONVSTART => PORT1_CONVSTART,
 		SCLK => PORT1_SCLK
@@ -483,6 +499,9 @@ begin
 		START => adc_trigger_sample,
 		READY => open, -- synchronous ADCs, ready indicated by port 1 ADC
 		DATA => adc_port2_data,
+		MIN => adc_minmax(47 downto 32),
+		MAX => adc_minmax(63 downto 48),
+		RESET_MINMAX => adc_reset_minmax,
 		SDO => PORT2_SDO,
 		CONVSTART => PORT2_CONVSTART,
 		SCLK => PORT2_SCLK
@@ -496,6 +515,9 @@ begin
 		START => adc_trigger_sample,
 		READY => open, -- synchronous ADCs, ready indicated by port 1 ADC
 		DATA => adc_ref_data,
+		MIN => adc_minmax(79 downto 64),
+		MAX => adc_minmax(95 downto 80),
+		RESET_MINMAX => adc_reset_minmax,
 		SDO => REF_SDO,
 		CONVSTART => REF_CONVSTART,
 		SCLK => REF_SCLK
@@ -554,6 +576,8 @@ begin
 		RELOAD_PLL_REGS => reload_plls,
 		PLL_RELOAD_DONE => plls_reloaded,
 		PLL_LOCKED => plls_locked,
+		SWEEP_HALTED => sweep_halted,
+		SWEEP_RESUME => sweep_resume,
 		ATTENUATOR => ATTENUATION,
 		SOURCE_FILTER => source_filter,
 		SETTLING_TIME => settling_time,
@@ -592,6 +616,7 @@ begin
 		NSS => fpga_select,
 		NEW_SAMPLING_DATA => sampling_done,
 		SAMPLING_RESULT => sampling_result,
+		ADC_MINMAX => adc_minmax,
 		SOURCE_UNLOCKED => source_unlocked,
 		LO_UNLOCKED => lo_unlocked,
 		MAX2871_DEF_4 => def_reg_4,
@@ -615,6 +640,9 @@ begin
 		LEDS => user_leds,
 		SYNC_SETTING => sync_setting,
 		INTERRUPT_ASSERTED => intr,
+		RESET_MINMAX => adc_reset_minmax,
+		SWEEP_HALTED => sweep_halted,
+		SWEEP_RESUME => sweep_resume,
 		DEBUG_STATUS => debug
 	);
 	

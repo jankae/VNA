@@ -16,7 +16,10 @@ static inline void High(GPIO_TypeDef *gpio, uint16_t pin) {
 	gpio->BSRR = pin;
 }
 
-bool FPGA::Init() {
+static FPGA::HaltedCallback halted_cb;
+
+bool FPGA::Init(HaltedCallback cb) {
+	halted_cb = cb;
 	// Reset FPGA
 	High(FPGA_RESET_GPIO_Port, FPGA_RESET_Pin);
 	SetMode(Mode::FPGA);
@@ -58,12 +61,15 @@ void FPGA::WriteMAX2871Default(uint32_t *DefaultRegs) {
 }
 
 void FPGA::WriteSweepConfig(uint16_t pointnum, uint32_t *SourceRegs, uint32_t *LORegs,
-		uint8_t attenuation, uint64_t frequency) {
+		uint8_t attenuation, uint64_t frequency, bool halt) {
 	uint16_t send[8];
 	// select which point this sweep config is for
 	send[0] = pointnum & 0x1FFF;
 	// assemble sweep config from required fields of PLL registers
 	send[1] = (LORegs[4] & 0x00700000) >> 14 | (LORegs[3] & 0xFC000000) >> 26;
+	if (halt) {
+		send[1] |= 0x8000;
+	}
 	// Select source LP filter
 	if(frequency >= 3500000000) {
 		send[1] |= 0x0600;
@@ -90,6 +96,7 @@ static inline int64_t sign_extend_64(int64_t x, uint16_t bits) {
 
 static FPGA::ReadCallback callback;
 static uint16_t raw[18];
+static bool halted;
 
 bool FPGA::InitiateSampleRead(ReadCallback cb) {
 	callback = cb;
@@ -99,12 +106,27 @@ bool FPGA::InitiateSampleRead(ReadCallback cb) {
 	Low(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
 	HAL_SPI_TransmitReceive(&hspi3, (uint8_t*) &cmd, (uint8_t*) &status, 1,
 			100);
+
+	if (status & 0x0010) {
+		halted = true;
+	} else {
+		halted = false;
+	}
+
 	if (!(status & 0x0004)) {
 		// no new data available yet
 		High(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
-		LOG_WARN("ISR without new data, status: 0x%04x", status);
+
+		if (halted) {
+			if (halted_cb) {
+				halted_cb();
+			}
+		} else {
+			LOG_WARN("ISR without new data, status: 0x%04x", status);
+		}
 		return false;
 	}
+
 	// Start data read
 	HAL_SPI_Receive_DMA(&hspi3, (uint8_t*) raw, 18);
 	return true;
@@ -129,6 +151,9 @@ void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi) {
 			(uint64_t) raw[2] << 32 | (uint32_t) raw[1] << 16 | raw[0], 48);
 	if (callback) {
 		callback(result);
+	}
+	if (halted && halted_cb) {
+		halted_cb();
 	}
 }
 }
@@ -176,4 +201,28 @@ uint16_t FPGA::GetStatus() {
 			100);
 	High(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
 	return status;
+}
+
+FPGA::ADCLimits FPGA::GetADCLimits() {
+	uint16_t cmd = 0xE000;
+	Low(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
+	HAL_SPI_Transmit(&hspi3, (uint8_t*) &cmd, 1, 100);
+	ADCLimits limits;
+	HAL_SPI_Receive(&hspi3, (uint8_t*) &limits, 6, 100);
+	High(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
+	return limits;
+}
+
+void FPGA::ResetADCLimits() {
+	uint16_t cmd = 0x6000;
+	Low(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
+	HAL_SPI_Transmit(&hspi3, (uint8_t*) &cmd, 1, 100);
+	High(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
+}
+
+void FPGA::ResumeHaltedSweep() {
+	uint16_t cmd = 0x2000;
+	Low(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
+	HAL_SPI_Transmit(&hspi3, (uint8_t*) &cmd, 1, 100);
+	High(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
 }

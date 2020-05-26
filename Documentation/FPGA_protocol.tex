@@ -89,7 +89,8 @@ The word received while transmitting the command word is the interrupt status re
 \begin{center}
 \begin{tikzpicture}
 \bitrect{16}{16-\bit}
-\robits{0}{12}{reserved}
+\robits{0}{11}{reserved}
+\rwbits{11}{1}{SH}
 \rwbits{12}{1}{OR}
 \rwbits{13}{1}{ND}
 \rwbits{14}{1}{SU}
@@ -97,6 +98,7 @@ The word received while transmitting the command word is the interrupt status re
 \end{tikzpicture}
 \end{center}
 \begin{itemize}
+\item \textbf{OR:} Sweep halted due to halt bit set. Sweep will be resumed once the resume command is issued.
 \item \textbf{OR:} Data overrun occured (only cleared by resetting the FPGA)
 \item \textbf{ND:} New data available
 \item \textbf{SU:} Source unlocked
@@ -109,7 +111,8 @@ Writing a register requires the transfer of two words: First the control word se
 \bitrect{16}{16-\bit}
 \rwbits{0}{1}{1}
 \rwbits{1}{1}{0}
-\robits{2}{10}{reserved}
+\rwbits{2}{1}{0}
+\robits{3}{9}{reserved}
 \rwbits{12}{4}{Register Address}
 \end{tikzpicture}
 \begin{tikzpicture}
@@ -124,6 +127,7 @@ Initiate the sweep config transfer by sending the command word:
 \bitrect{16}{16-\bit}
 \rwbits{0}{1}{0}
 \rwbits{1}{1}{0}
+\rwbits{2}{1}{0}
 \rwbits{3}{13}{Sweep point}
 \end{tikzpicture}
 \end{center}
@@ -138,10 +142,77 @@ Initiate the reading of sampling data by sending the command word:
 \bitrect{16}{16-\bit}
 \rwbits{0}{1}{1}
 \rwbits{1}{1}{1}
-\rwbits{2}{14}{reserved}
+\rwbits{2}{1}{0}
+\robits{3}{13}{reserved}
 \end{tikzpicture}
 \end{center}
 Afterwards, read 18 words before setting NSS high. These 18 words will contain the sampling result (see section~\ref{result}), transmitted with the least significant word first.
+
+\subsection{Resuming a halted sweep}
+When the halt bit is set in the SweepConfig, the FPGA will configure the Source and LO as requested but will not start the settling timer (and subsequently the sampling process) until this resume command is issued. The halted sweep is indicated by the sweep halted bit in the status register.
+\begin{center}
+\begin{tikzpicture}
+\bitrect{16}{16-\bit}
+\rwbits{0}{1}{0}
+\rwbits{1}{1}{0}
+\rwbits{2}{1}{1}
+\robits{3}{13}{reserved}
+\end{tikzpicture}
+\end{center}
+
+\subsection{Reading ADC limits}
+The FPGA keeps track of the highest and lowest sample of each ADC to detect saturation and verify signal levels.
+
+Initiate the reading of ADC limit data by sending the command word:
+\begin{center}
+\begin{tikzpicture}
+\bitrect{16}{16-\bit}
+\rwbits{0}{1}{1}
+\rwbits{1}{1}{1}
+\rwbits{2}{1}{1}
+\robits{3}{13}{reserved}
+\end{tikzpicture}
+\end{center}
+Afterwards, read 6 words before setting NSS high. These 6 words will contain the sampling result:
+
+\begin{center}
+\begin{tikzpicture}
+\bitrect{16}{96-\bit}
+\rwbits{0}{16}{Port 1 minimum}
+\end{tikzpicture}
+\begin{tikzpicture}
+\bitrect{16}{80-\bit}
+\rwbits{0}{16}{Port 1 maximum}
+\end{tikzpicture}
+\begin{tikzpicture}
+\bitrect{16}{64-\bit}
+\rwbits{0}{16}{Port 2 minimum}
+\end{tikzpicture}
+\begin{tikzpicture}
+\bitrect{16}{48-\bit}
+\rwbits{0}{16}{Port 2 maximum}
+\end{tikzpicture}
+\begin{tikzpicture}
+\bitrect{16}{32-\bit}
+\rwbits{0}{16}{Reference minimum}
+\end{tikzpicture}
+\begin{tikzpicture}
+\bitrect{16}{16-\bit}
+\rwbits{0}{16}{Reference maximum}
+\end{tikzpicture}
+\end{center}
+
+\subsection{Resetting the ADC limit}
+Issuing this command result in all minimum values set to 32767 and all maximum values set to -32768.
+\begin{center}
+\begin{tikzpicture}
+\bitrect{16}{16-\bit}
+\rwbits{0}{1}{0}
+\rwbits{1}{1}{1}
+\rwbits{2}{1}{1}
+\robits{3}{13}{reserved}
+\end{tikzpicture}
+\end{center}
 
 \section{Registers}
 \subsection{Interrupt Mask Register: 0x00}
@@ -283,7 +354,8 @@ The SweepConfig contains data for the source and LO1 PLL as well as the attenuat
 \begin{center}
 \begin{tikzpicture}
 \bitrect{16}{112-\bit}
-\robits{0}{5}{reserved}
+\rwbits{0}{1}{HS}
+\robits{1}{4}{reserved}
 \rwbits{5}{2}{SourceFilter}
 \rwbits{7}{3}{LO DIV\_A[2:0]}
 \rwbits{10}{6]}{LO VCO[5:0]}
@@ -321,6 +393,7 @@ The SweepConfig contains data for the source and LO1 PLL as well as the attenuat
 \end{tikzpicture}
 \end{center}
 \begin{itemize}
+\item \textbf{HS: Halt sweep.} If set, settling and sampling of this sweep point will be postponed until the sweep resume command is issued.
 \item \textbf{SourceFilter:} Low pass filter selection for source signal
 \begin{center}
 \begin{tabular}{ c|c }
@@ -414,19 +487,6 @@ Each point in the sweep generates two sampling results. The first one contains t
 \end{tikzpicture}
 \begin{tikzpicture}
 \bitrect{16}{16-\bit}
-\rwbits{0}{16}{Reference Signal Q[15:0]}
-\end{tikzpicture}
-
-\begin{tikzpicture}
-\bitrect{16}{240-\bit}
-\rwbits{0}{16}{Reference Signal Q[47:32]}
-\end{tikzpicture}
-\begin{tikzpicture}
-\bitrect{16}{224-\bit}
-\rwbits{0}{16}{Reference Signal Q[31:16]}
-\end{tikzpicture}
-\begin{tikzpicture}
-\bitrect{16}{208-\bit}
 \rwbits{0}{16}{Reference Signal Q[15:0]}
 \end{tikzpicture}
 \end{center}
