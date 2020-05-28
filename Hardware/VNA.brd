@@ -4084,13 +4084,13 @@ design rules under a new name.</description>
 <element name="X2" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="J502-ND-142-0711-821/826" package3d_urn="urn:adsk.eagle:package:19762116/2" value="RLB DUT/RF IN" x="10" y="0" smashed="yes" rot="R90">
 <attribute name="VALUE" x="18.89" y="1.27" size="1.778" layer="27" rot="R90"/>
 </element>
-<element name="R73" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="TBD" x="36.5" y="48" smashed="yes">
+<element name="R73" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="100" x="36.5" y="48" smashed="yes">
 <attribute name="VALUE" x="35.865" y="46.095" size="1.27" layer="27"/>
 </element>
-<element name="R74" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="TBD" x="35.5" y="50.5" smashed="yes" rot="R90">
+<element name="R74" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="62" x="35.5" y="50.5" smashed="yes" rot="R90">
 <attribute name="VALUE" x="37.405" y="49.865" size="1.27" layer="27" rot="R90"/>
 </element>
-<element name="R75" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="TBD" x="37.5" y="50.5" smashed="yes" rot="R90">
+<element name="R75" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="R0603" package3d_urn="urn:adsk.eagle:package:19762122/2" value="100" x="37.5" y="50.5" smashed="yes" rot="R90">
 <attribute name="VALUE" x="39.405" y="49.865" size="1.27" layer="27" rot="R90"/>
 </element>
 <element name="C157" library="VNA" library_urn="urn:adsk.eagle:library:19762030" package="C0603" package3d_urn="urn:adsk.eagle:package:19762124/2" value="100n" x="41.5" y="51.5" smashed="yes" rot="R180">

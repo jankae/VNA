@@ -17,6 +17,15 @@ static inline void High(GPIO_TypeDef *gpio, uint16_t pin) {
 }
 
 static FPGA::HaltedCallback halted_cb;
+static uint16_t SysCtrlReg = 0x0000;
+static uint16_t ISRMaskReg = 0x0000;
+
+void WriteRegister(FPGA::Reg reg, uint16_t value) {
+	uint16_t cmd[2] = {(uint16_t) (0x8000 | (uint16_t) reg), value};
+	Low(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
+	HAL_SPI_Transmit(&hspi3, (uint8_t*) cmd, 2, 100);
+	High(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
+}
 
 bool FPGA::Init(HaltedCallback cb) {
 	halted_cb = cb;
@@ -42,11 +51,50 @@ bool FPGA::Init(HaltedCallback cb) {
 	return true;
 }
 
-void FPGA::WriteRegister(Reg reg, uint16_t value) {
-	uint16_t cmd[2] = {(uint16_t) (0x8000 | (uint16_t) reg), value};
-	Low(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
-	HAL_SPI_Transmit(&hspi3, (uint8_t*) cmd, 2, 100);
-	High(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
+void FPGA::SetNumberOfPoints(uint16_t npoints) {
+	// register has to be set to number of points - 1
+	npoints--;
+	WriteRegister(Reg::SweepPoints, npoints);
+}
+
+void FPGA::SetSamplesPerPoint(uint32_t nsamples) {
+	// register has to be set to number of nsamples - 1
+	nsamples--;
+	// constrain to maximum value
+	nsamples &= 0x1FFFF;
+	// highest bit is located at the system control register
+	SysCtrlReg &= ~0x0001;
+	SysCtrlReg |= nsamples >> 16;
+	WriteRegister(Reg::SystemControl, SysCtrlReg);
+	WriteRegister(Reg::SamplesPerPoint, nsamples & 0xFFFF);
+}
+
+void FPGA::SetSettlingTime(uint16_t us) {
+	if (us > 639) {
+		us = 639;
+	}
+	uint16_t regval = (uint32_t) us * 1024 / 10;
+	WriteRegister(Reg::SettlingTime, regval);
+}
+
+void FPGA::Enable(Periphery p) {
+	SysCtrlReg |= (uint16_t) p;
+	WriteRegister(Reg::SystemControl, SysCtrlReg);
+}
+
+void FPGA::Disable(Periphery p) {
+	SysCtrlReg &= ~(uint16_t) p;
+	WriteRegister(Reg::SystemControl, SysCtrlReg);
+}
+
+void FPGA::EnableInterrupt(Interrupt i) {
+	ISRMaskReg |= (uint16_t) i;
+	WriteRegister(Reg::InterruptMask, ISRMaskReg);
+}
+
+void FPGA::DisableInterrupt(Interrupt i) {
+	ISRMaskReg &= ~(uint16_t) i;
+	WriteRegister(Reg::InterruptMask, ISRMaskReg);
 }
 
 void FPGA::WriteMAX2871Default(uint32_t *DefaultRegs) {
@@ -60,7 +108,7 @@ void FPGA::WriteMAX2871Default(uint32_t *DefaultRegs) {
 	WriteRegister(Reg::MAX2871Def4MSB, DefaultRegs[4] >> 16);
 }
 
-void FPGA::WriteSweepConfig(uint16_t pointnum, uint32_t *SourceRegs, uint32_t *LORegs,
+void FPGA::WriteSweepConfig(uint16_t pointnum, bool lowband, uint32_t *SourceRegs, uint32_t *LORegs,
 		uint8_t attenuation, uint64_t frequency, bool halt) {
 	uint16_t send[8];
 	// select which point this sweep config is for
@@ -69,6 +117,9 @@ void FPGA::WriteSweepConfig(uint16_t pointnum, uint32_t *SourceRegs, uint32_t *L
 	send[1] = (LORegs[4] & 0x00700000) >> 14 | (LORegs[3] & 0xFC000000) >> 26;
 	if (halt) {
 		send[1] |= 0x8000;
+	}
+	if (lowband) {
+		send[1] |= 0x4000;
 	}
 	// Select source LP filter
 	if(frequency >= 3500000000) {
@@ -226,3 +277,4 @@ void FPGA::ResumeHaltedSweep() {
 	HAL_SPI_Transmit(&hspi3, (uint8_t*) &cmd, 1, 100);
 	High(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
 }
+

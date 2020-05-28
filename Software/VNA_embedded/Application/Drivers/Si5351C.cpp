@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-#define LOG_LEVEL	LOG_LEVEL_DEBUG
+#define LOG_LEVEL	LOG_LEVEL_INFO
 #define LOG_MODULE	"SI5351"
 #include "Log.h"
 
@@ -89,8 +89,11 @@ bool Si5351C::SetCLK(uint8_t clknum, uint32_t frequency, PLL source, DriveStreng
 		}
 		div &= 0xFE;
 		uint32_t actualFreq = pllFreq / div;
-		LOG_DEBUG("Optimal divider for %luHz/%luHz is: %u (%luHz deviation)",
-				pllFreq, frequency, div, abs(frequency - actualFreq));
+		uint32_t deviation = abs(frequency - actualFreq);
+		if (deviation > 0) {
+			LOG_WARN("Optimal divider for %luHz/%luHz is: %u (%luHz deviation)",
+					pllFreq, frequency, div, abs(frequency - actualFreq));
+		}
 		c.P1 = div;
 	} else {
 		while (pllFreq / (frequency * c.RDiv) >= 2048
@@ -104,7 +107,7 @@ bool Si5351C::SetCLK(uint8_t clknum, uint32_t frequency, PLL source, DriveStreng
 		}
 		FindOptimalDivider(pllFreq, frequency * c.RDiv, c.P1, c.P2, c.P3);
 	}
-	LOG_INFO("Setting CLK%d to %luHz", clknum, frequency);
+	LOG_DEBUG("Setting CLK%d to %luHz", clknum, frequency);
 	return WriteClkConfig(c, clknum);
 }
 
@@ -270,13 +273,22 @@ bool Si5351C::ClearBits(Reg reg, uint8_t bits) {
 	return WriteRegister(reg, value);
 }
 
-bool Si5351C::WriteRegisterRange(Reg start, uint8_t *data, uint8_t len) {
+bool Si5351C::WriteRegisterRange(Reg start, const uint8_t *data, uint8_t len) {
 	return HAL_I2C_Mem_Write(i2c, address, (int) start,
+	I2C_MEMADD_SIZE_8BIT, (uint8_t*) data, len, 100) == HAL_OK;
+}
+
+bool Si5351C::ReadRegisterRange(Reg start, uint8_t *data, uint8_t len) {
+	return HAL_I2C_Mem_Read(i2c, address, (int) start,
 	I2C_MEMADD_SIZE_8BIT, data, len, 100) == HAL_OK;
 }
 
-bool Si5351C::ResetPLLs() {
-	return SetBits(Reg::PLLReset, 0xA0);
+bool Si5351C::ResetPLL(PLL pll) {
+	if (pll == PLL::A) {
+		return SetBits(Reg::PLLReset, 0x20);
+	} else {
+		return SetBits(Reg::PLLReset, 0x80);
+	}
 }
 
 void Si5351C::FindOptimalDivider(uint32_t f_pll, uint32_t f, uint32_t &P1,
@@ -313,4 +325,16 @@ void Si5351C::FindOptimalDivider(uint32_t f_pll, uint32_t f, uint32_t &P1,
 	P2 = 128 * best_b - best_c * floor;
 	P3 = best_c;
 	LOG_DEBUG("P1=%lu, P2=%lu, P3=%lu", P1, P2, P3);
+}
+
+bool Si5351C::WriteRawCLKConfig(uint8_t clknum, const uint8_t *config) {
+	// Calculate address of register control block
+	auto reg = (Reg) ((int) Reg::MS0_CONFIG + 8 * clknum);
+	return WriteRegisterRange(reg, config, 8);
+}
+
+bool Si5351C::ReadRawCLKConfig(uint8_t clknum, uint8_t *config) {
+	// Calculate address of register control block
+	auto reg = (Reg) ((int) Reg::MS0_CONFIG + 8 * clknum);
+	return ReadRegisterRange(reg, config, 8);
 }

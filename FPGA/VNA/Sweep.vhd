@@ -39,6 +39,7 @@ entity Sweep is
 			  SAMPLING_DONE : in  STD_LOGIC;
 			  START_SAMPLING : out STD_LOGIC;
 			  PORT_SELECT : out STD_LOGIC;
+			  BAND_SELECT : out STD_LOGIC;
 			  -- fixed part of source/LO registers
            MAX2871_DEF_4 : in  STD_LOGIC_VECTOR (31 downto 0);
            MAX2871_DEF_3 : in  STD_LOGIC_VECTOR (31 downto 0);
@@ -107,6 +108,7 @@ begin
 	
 	ATTENUATOR <= CONFIG_DATA(55 downto 49);
 	SOURCE_FILTER <= CONFIG_DATA(106 downto 105);
+	BAND_SELECT <= CONFIG_DATA(110);
 	
 	DEBUG_STATUS(10 downto 8) <= "000" when state = TriggerSetup else
 											"001" when state = SettingUp else

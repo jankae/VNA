@@ -98,7 +98,7 @@ The word received while transmitting the command word is the interrupt status re
 \end{tikzpicture}
 \end{center}
 \begin{itemize}
-\item \textbf{OR:} Sweep halted due to halt bit set. Sweep will be resumed once the resume command is issued.
+\item \textbf{SH:} Sweep halted due to halt bit set. Sweep will be resumed once the resume command is issued.
 \item \textbf{OR:} Data overrun occured (only cleared by resetting the FPGA)
 \item \textbf{ND:} New data available
 \item \textbf{SU:} Source unlocked
@@ -219,7 +219,8 @@ Issuing this command result in all minimum values set to 32767 and all maximum v
 \begin{center}
 \begin{tikzpicture}
 \bitrect{16}{16-\bit}
-\robits{0}{12}{reserved}
+\robits{0}{11}{reserved}
+\rwbits{11}{1}{SHIE}
 \rwbits{12}{1}{ORIE}
 \rwbits{13}{1}{NDIE}
 \rwbits{14}{1}{SUIE}
@@ -227,6 +228,7 @@ Issuing this command result in all minimum values set to 32767 and all maximum v
 \end{tikzpicture}
 \end{center}
 \begin{itemize}
+\item \textbf{SHIE:} Sweep halted interrupt enable
 \item \textbf{ORIE:} Data overrun interrupt enable 
 \item \textbf{NDIE:} New data interrupt enable
 \item \textbf{SUIE:} Source unlocked interrupt enable
@@ -307,7 +309,7 @@ Setting & Functionality\\
 \end{tikzpicture}
 \end{center}
 \begin{itemize}
-\item \textbf{SETT[15:0]:} Number of CLK cycles between locking of PLLs and sampling of the ADCs. One CLK cycle is equivalent to \SI{6.25}{\nano\second}
+\item \textbf{SETT[15:0]:} Number of CLK cycles between locking of PLLs and sampling of the ADCs. One CLK cycle is equivalent to $\frac{1}{\SI{102.4}{\mega\hertz}}$, approximately \SI{9.77}{\nano\second}
 \end{itemize}
 
 \subsection{MAX2871 Default Values Registers: 0x08-0x0F}
@@ -355,7 +357,8 @@ The SweepConfig contains data for the source and LO1 PLL as well as the attenuat
 \begin{tikzpicture}
 \bitrect{16}{112-\bit}
 \rwbits{0}{1}{HS}
-\robits{1}{4}{reserved}
+\rwbits{1}{1}{BS}
+\robits{2}{3}{reserved}
 \rwbits{5}{2}{SourceFilter}
 \rwbits{7}{3}{LO DIV\_A[2:0]}
 \rwbits{10}{6]}{LO VCO[5:0]}
@@ -394,6 +397,7 @@ The SweepConfig contains data for the source and LO1 PLL as well as the attenuat
 \end{center}
 \begin{itemize}
 \item \textbf{HS: Halt sweep.} If set, settling and sampling of this sweep point will be postponed until the sweep resume command is issued.
+\item \textbf{BS: Band select.} Set to 0 for highband, set to 1 for lowband.
 \item \textbf{SourceFilter:} Low pass filter selection for source signal
 \begin{center}
 \begin{tabular}{ c|c }

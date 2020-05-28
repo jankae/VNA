@@ -131,6 +131,7 @@ architecture Behavioral of top is
 		CONFIG_ADDRESS : OUT std_logic_vector(12 downto 0);
 		START_SAMPLING : OUT std_logic;
 		PORT_SELECT : OUT std_logic;
+		BAND_SELECT : out STD_LOGIC;
 		SOURCE_REG_4 : OUT std_logic_vector(31 downto 0);
 		SOURCE_REG_3 : OUT std_logic_vector(31 downto 0);
 		SOURCE_REG_1 : OUT std_logic_vector(31 downto 0);
@@ -353,7 +354,6 @@ architecture Behavioral of top is
 begin
 
 	-- TODO assign proper signals
-	BAND_SELECT <= '0';
 	SDA <= 'Z';
 	SCL <= 'Z';
 
@@ -561,6 +561,7 @@ begin
 		SAMPLING_DONE => sampling_done,
 		START_SAMPLING => sampling_start,
 		PORT_SELECT => sweep_port_select,
+		BAND_SELECT => BAND_SELECT,
 		MAX2871_DEF_4 => def_reg_4,
 		MAX2871_DEF_3 => def_reg_3,
 		MAX2871_DEF_1 => def_reg_1,

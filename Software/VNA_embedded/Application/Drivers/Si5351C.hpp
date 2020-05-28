@@ -37,7 +37,12 @@ public:
 	bool Enable(uint8_t clknum);
 	bool Disable(uint8_t clknum);
 	bool Locked(PLL pll);
-	bool ResetPLLs();
+	bool ResetPLL(PLL pll);
+
+	// Direct register access of clk configuration registers
+	// config has to point to a buffer containing at least 8 bytes
+	bool WriteRawCLKConfig(uint8_t clknum, const uint8_t *config);
+	bool ReadRawCLKConfig(uint8_t clknum, uint8_t *config);
 private:
 	void FindOptimalDivider(uint32_t f_pll, uint32_t f, uint32_t &P1, uint32_t &P2, uint32_t &P3);
 	enum class Reg : uint8_t {
@@ -104,7 +109,8 @@ private:
 	bool ReadRegister(Reg reg, uint8_t *data);
 	bool SetBits(Reg reg, uint8_t bits);
 	bool ClearBits(Reg reg, uint8_t bits);
-	bool WriteRegisterRange(Reg start, uint8_t *data, uint8_t len);
+	bool WriteRegisterRange(Reg start, const uint8_t *data, uint8_t len);
+	bool ReadRegisterRange(Reg start, uint8_t *data, uint8_t len);
 	I2C_HandleTypeDef *i2c;
 	GPIO_InitTypeDef *intr_gpio;
 	uint16_t intr_pin;

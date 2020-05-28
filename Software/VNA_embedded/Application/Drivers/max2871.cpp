@@ -1,5 +1,6 @@
 #include "max2871.hpp"
 #include <string.h>
+#include <algorithm.hpp>
 
 #include "delay.hpp"
 #include <cmath>
@@ -129,7 +130,7 @@ void MAX2871::SetCPCurrent(uint8_t mA) {
 }
 
 bool MAX2871::SetFrequency(uint64_t f) {
-	if (f < 23500000 || f > 6000000000ULL) {
+	if (f < 23500000 || f > MaxFreq) {
 		LOG_ERR("Frequency must be between 23.5MHz and 6GHz");
 		return false;
 	}
@@ -182,40 +183,26 @@ bool MAX2871::SetFrequency(uint64_t f) {
 	uint32_t rem_f = f_vco - N * f_PFD;
 	LOG_DEBUG("Remaining fractional frequency: %lu", rem_f);
 	LOG_DEBUG("Looking for best fractional match");
-	uint32_t best_deviation = UINT32_MAX;
-	uint16_t best_M = 4095, best_F = 0;
-	for (uint16_t M = 4095; M >= 2048; M--) {
-		uint16_t guess_F = (uint64_t) rem_f * M / f_PFD;
-		for (uint16_t F = guess_F; F <= guess_F + 1; F++) {
-			uint32_t f = ((uint64_t) f_PFD * F) / M;
-			uint32_t deviation = abs(f - rem_f);
-			if (deviation < best_deviation) {
-				best_deviation = deviation;
-				best_M = M;
-				best_F = F;
-				if (deviation == 0) {
-					break;
-				}
-			}
-		}
-		if (best_deviation == 0) {
-			break;
-		}
-	}
-	if (best_deviation > 0) {
+	float fraction = (float) rem_f / f_PFD;
+
+	auto approx = Algorithm::BestRationalApproximation(fraction, 4095);
+
+	int32_t rem_approx = ((uint64_t) f_PFD * approx.num) / approx.denom;
+	if(rem_approx != rem_f) {
 		LOG_WARN("Best match is F=%u/M=%u, deviation of %luHz",
-				best_F, best_M, best_deviation);
+				approx.num, approx.denom, abs(rem_f - rem_approx));
 	}
-	uint64_t f_set = (uint64_t) N * f_PFD + (f_PFD * best_F) / best_M;
+
+	uint64_t f_set = (uint64_t) N * f_PFD + (f_PFD * approx.num) / approx.denom;
 	f_set /= (1UL << div);
 
 	// write values to registers
 	regs[4] &= ~0x00700000;
 	regs[4] |= ((uint32_t) div << 20);
 	regs[0] &= ~0x7FFFFFF8;
-	regs[0] |= ((uint32_t) N << 15) | ((uint32_t) best_F << 3);
+	regs[0] |= ((uint32_t) N << 15) | ((uint32_t) approx.num << 3);
 	regs[1] &= ~0x00007FF8;
-	regs[1] |= ((uint32_t) best_M << 3);
+	regs[1] |= ((uint32_t) approx.denom << 3);
 
 	LOG_DEBUG("Set frequency to %lu%06luHz...",
 			(uint32_t ) (f_set / 1000000), (uint32_t ) (f_set % 1000000));
@@ -341,7 +328,7 @@ bool MAX2871::BuildVCOMap() {
 	// save output frequency
 	uint64_t oldFreq = outputFrequency;
 	constexpr uint32_t step = 10000000;
-	for (uint64_t freq = 3000000000; freq <= 6000000000; freq += step) {
+	for (uint64_t freq = 3000000000; freq <= MaxFreq; freq += step) {
 		SetFrequency(freq);
 		UpdateFrequency();
 		uint32_t start = HAL_GetTick();
@@ -354,7 +341,9 @@ bool MAX2871::BuildVCOMap() {
 		while (!(MUX->IDR & MUXpin)) {
 			if (HAL_GetTick() - start > 100) {
 				LOG_ERR(
-						"Failed to lock during VCO map build process, aborting");
+						"Failed to lock during VCO map build process, aborting (f=%lu%06luHz)",
+						(uint32_t )(freq / 1000000),
+						(uint32_t ) (freq % 1000000));
 				gotVCOMap = false;
 				// revert back to previous frequency
 				SetFrequency(oldFreq);

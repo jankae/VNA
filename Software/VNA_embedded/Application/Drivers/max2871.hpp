@@ -58,6 +58,8 @@ public:
 		return regs;
 	}
 private:
+	static constexpr uint64_t MaxFreq = 6100000000; // 6GHz according to datasheet, but slight overclocking is possible
+
 	uint32_t Read();
 	void Write(uint8_t reg, uint32_t val);
 	uint32_t regs[6];
