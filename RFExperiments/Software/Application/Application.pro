@@ -6,6 +6,8 @@ HEADERS += \
     Menu/menuvalue.h \
     bodeplot.h \
     calibration.h \
+    calkit.h \
+    calkitdialog.h \
     device.h \
     plot.h \
     qwtplotpiecewisecurve.h \
@@ -24,6 +26,8 @@ SOURCES += \
     Menu/menuvalue.cpp \
     bodeplot.cpp \
     calibration.cpp \
+    calkit.cpp \
+    calkitdialog.cpp \
     device.cpp \
     main.cpp \
     qwtplotpiecewisecurve.cpp \
@@ -40,7 +44,8 @@ LIBS += -L/usr/lib/ -lqwt-qt5
 
 QT += widgets charts
 
-FORMS +=
+FORMS += \
+    calkitdialog.ui
 
 DISTFILES +=
 

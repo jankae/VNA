@@ -40,6 +40,7 @@ private:
 
     // Calibration
     Calibration cal;
+    Calkit calkit;
     bool calValid;
     Calibration::Measurement calMeasurement;
     bool calMeasuring;

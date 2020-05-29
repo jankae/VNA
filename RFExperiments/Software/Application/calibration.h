@@ -7,6 +7,7 @@
 #include <map>
 #include <iostream>
 #include <iomanip>
+#include "calkit.h"
 
 class Calibration
 {
@@ -34,7 +35,7 @@ public:
     };
 
     bool calculationPossible(Type type);
-    bool constructErrorTerms(Type type);
+    bool constructErrorTerms(Type type, Calkit c);
 
     void correctMeasurement(Protocol::Datapoint &d);
 
@@ -56,9 +57,9 @@ public:
         return points.size();
     }
 private:
-    void construct12TermPoints();
-    void constructPort1OSL();
-    void constructPort2OSL();
+    void construct12TermPoints(Calkit c);
+    void constructPort1OSL(Calkit c);
+    void constructPort2OSL(Calkit c);
     bool SanityCheckSamples(std::vector<Measurement> &requiredMeasurements);
     class Point
     {
@@ -94,12 +95,21 @@ private:
         }
     };
     Point getCalibrationPoint(Protocol::Datapoint &d);
+    /*
+     * Constructs directivity, match and tracking correction factors from measurements of three distinct impedances
+     * Normally, an open, short and load are used (with ideal reflection coefficients of 1, -1 and 0 respectively).
+     * The actual reflection coefficients can be passed on as optional arguments to take into account the non-ideal
+     * calibration kit.
+     */
     void computeOSL(std::complex<double> o_m,
                     std::complex<double> s_m,
                     std::complex<double> l_m,
                     std::complex<double> &directivity,
                     std::complex<double> &match,
-                    std::complex<double> &tracking);
+                    std::complex<double> &tracking,
+                    std::complex<double> o_c = std::complex<double>(1.0, 0),
+                    std::complex<double> s_c = std::complex<double>(-1.0, 0),
+                    std::complex<double> l_c = std::complex<double>(0, 0));
     std::complex<double> correctOSL(std::complex<double> measured,
                                     std::complex<double> directivity,
                                     std::complex<double> match,

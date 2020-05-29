@@ -60,26 +60,26 @@ bool Calibration::calculationPossible(Calibration::Type type)
     return SanityCheckSamples(requiredMeasurements);
 }
 
-bool Calibration::constructErrorTerms(Calibration::Type type)
+bool Calibration::constructErrorTerms(Calibration::Type type, Calkit c)
 {
     if(!calculationPossible(type)) {
         return false;
     }
     switch(type) {
     case Type::Port1OSL:
-        constructPort1OSL();
+        constructPort1OSL(c);
         break;
     case Type::Port2OSL:
-        constructPort2OSL();
+        constructPort2OSL(c);
         break;
     case Type::FullOSLT:
-        construct12TermPoints();
+        construct12TermPoints(c);
         break;
     }
     return true;
 }
 
-void Calibration::construct12TermPoints()
+void Calibration::construct12TermPoints(Calkit c)
 {
     std::vector<Measurement> requiredMeasurements;
     requiredMeasurements.push_back(Measurement::Port1Open);
@@ -117,14 +117,19 @@ void Calibration::construct12TermPoints()
         auto S21_through = complex<double>(measurements[Measurement::Through][i].real_S21, measurements[Measurement::Through][i].imag_S21);
         auto S22_through = complex<double>(measurements[Measurement::Through][i].real_S22, measurements[Measurement::Through][i].imag_S22);
         auto S12_through = complex<double>(measurements[Measurement::Through][i].real_S12, measurements[Measurement::Through][i].imag_S12);
+
+        auto actual = c.toReflection(p.frequency);
+        S21_through -= actual.Through;
+        S12_through -= actual.Through;
+
         // Forward calibration
         // See page 19 of http://www2.electron.frba.utn.edu.ar/~jcecconi/Bibliografia/04%20-%20Param_S_y_VNA/Network_Analyzer_Error_Models_and_Calibration_Methods.pdf
-        computeOSL(S11_open, S11_short, S11_load, p.fe00, p.fe11, p.fe10e01);
+        computeOSL(S11_open, S11_short, S11_load, p.fe00, p.fe11, p.fe10e01, actual.Open, actual.Short, actual.Load);
         p.fe30 = S21_isolation;
         p.fe22 = correctOSL(S11_through, p.fe00, p.fe11, p.fe10e01);
         p.fe10e32 = (S21_through - p.fe30)*(complex<double>(1,0) - p.fe11*p.fe22);
         // Reverse calibration
-        computeOSL(S22_open, S22_short, S22_load, p.re33, p.re22, p.re23e32);
+        computeOSL(S22_open, S22_short, S22_load, p.re33, p.re22, p.re23e32, actual.Open, actual.Short, actual.Load);
         p.re03 = S12_isolation;
         p.re11 = correctOSL(S22_through, p.re33, p.re22, p.re23e32);
         p.re23e01 = (S12_through - p.re03)*(complex<double>(1,0) - p.re22*p.re11);
@@ -132,7 +137,7 @@ void Calibration::construct12TermPoints()
     }
 }
 
-void Calibration::constructPort1OSL()
+void Calibration::constructPort1OSL(Calkit c)
 {
     std::vector<Measurement> requiredMeasurements;
     requiredMeasurements.push_back(Measurement::Port1Open);
@@ -152,8 +157,9 @@ void Calibration::constructPort1OSL()
         auto S11_short = complex<double>(measurements[Measurement::Port1Short][i].real_S11, measurements[Measurement::Port1Short][i].imag_S11);
         auto S11_load = complex<double>(measurements[Measurement::Port1Load][i].real_S11, measurements[Measurement::Port1Load][i].imag_S11);
         // OSL port1
+        auto actual = c.toReflection(p.frequency);
         // See page 19 of http://www2.electron.frba.utn.edu.ar/~jcecconi/Bibliografia/04%20-%20Param_S_y_VNA/Network_Analyzer_Error_Models_and_Calibration_Methods.pdf
-        computeOSL(S11_open, S11_short, S11_load, p.fe00, p.fe11, p.fe10e01);
+        computeOSL(S11_open, S11_short, S11_load, p.fe00, p.fe11, p.fe10e01, actual.Open, actual.Short, actual.Load);
         // All other calibration coefficients to ideal values
         p.fe30 = 0.0;
         p.fe22 = 0.0;
@@ -168,7 +174,7 @@ void Calibration::constructPort1OSL()
     }
 }
 
-void Calibration::constructPort2OSL()
+void Calibration::constructPort2OSL(Calkit c)
 {
     std::vector<Measurement> requiredMeasurements;
     requiredMeasurements.push_back(Measurement::Port2Open);
@@ -188,8 +194,9 @@ void Calibration::constructPort2OSL()
         auto S22_short = complex<double>(measurements[Measurement::Port2Short][i].real_S22, measurements[Measurement::Port2Short][i].imag_S22);
         auto S22_load = complex<double>(measurements[Measurement::Port2Load][i].real_S22, measurements[Measurement::Port2Load][i].imag_S22);
         // OSL port2
+        auto actual = c.toReflection(p.frequency);
         // See page 19 of http://www2.electron.frba.utn.edu.ar/~jcecconi/Bibliografia/04%20-%20Param_S_y_VNA/Network_Analyzer_Error_Models_and_Calibration_Methods.pdf
-        computeOSL(S22_open, S22_short, S22_load, p.re33, p.re22, p.re23e32);
+        computeOSL(S22_open, S22_short, S22_load, p.re33, p.re22, p.re23e32, actual.Open, actual.Short, actual.Load);
         // All other calibration coefficients to ideal values
         p.fe30 = 0.0;
         p.fe22 = 0.0;
@@ -378,13 +385,16 @@ Calibration::Point Calibration::getCalibrationPoint(Protocol::Datapoint &d)
     return ret;
 }
 
-void Calibration::computeOSL(std::complex<double> o_m, std::complex<double> s_m, std::complex<double> l_m, std::complex<double> &directivity, std::complex<double> &match, std::complex<double> &tracking)
+void Calibration::computeOSL(std::complex<double> o_m, std::complex<double> s_m, std::complex<double> l_m,
+                             std::complex<double> &directivity, std::complex<double> &match, std::complex<double> &tracking,
+                             std::complex<double> o_c, std::complex<double> s_c, std::complex<double> l_c)
 {
     // equations from page 13 of http://www2.electron.frba.utn.edu.ar/~jcecconi/Bibliografia/04%20-%20Param_S_y_VNA/Network_Analyzer_Error_Models_and_Calibration_Methods.pdf
-    // solved while assuming ideal o/s/l standards (Gamma_o=1.0, Gamma_s=-1.0, Gamma_l=0.0)
-    directivity = l_m;
-    match = (s_m - l_m * 2.0 + o_m) / (o_m - s_m);
-    auto delta = (o_m * s_m * 2.0 - l_m * s_m - l_m * o_m) / (o_m - s_m);
+    // solved while taking non ideal o/s/l standards into account
+    auto denom = l_c * o_c * (o_m - l_m) + l_c * s_c * (l_m - s_m) + o_c * s_c * (s_m - o_m);
+    directivity = (l_c * o_m * (s_m * (o_c - s_c) + l_m * s_c) - l_c * o_c * l_m * s_m + o_c * l_m * s_c * (s_m - o_m)) / denom;
+    match = (l_c * (o_m - s_m) + o_c * (s_m - l_m) + s_c * (l_m - o_m)) / denom;
+    auto delta = (l_c * l_m * (o_m - s_m) + o_c * o_m * (s_m - l_m) + s_c * s_m * (l_m - o_m)) / denom;
     tracking = directivity * match - delta;
 }
 

@@ -9,6 +9,8 @@
 #include "Menu/menuaction.h"
 #include "Menu/menuvalue.h"
 
+#include "calkit.h"
+
 #include <complex>
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
@@ -16,6 +18,8 @@ int main(int argc, char *argv[]) {
     vna.resize(1280, 800);
     vna.show();
 
+//    Calkit c;
+//    c.edit();
 //    QStackedLayout menuLayout;
 //    Menu mMain(menuLayout);
 //    Menu mFrequency(menuLayout);

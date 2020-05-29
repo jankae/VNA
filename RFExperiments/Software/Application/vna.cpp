@@ -240,6 +240,9 @@ VNA::VNA(QWidget *parent)
     auto mCalLoad = new MenuAction("Load from file");
     mCalibration->addItem(mCalLoad);
 
+    auto mEditKit = new MenuAction("Edit CalKit");
+    mCalibration->addItem(mEditKit);
+
     mCalibration->finalize();
     mMain->addMenu(mCalibration, "Calibration");
 
@@ -373,15 +376,15 @@ VNA::VNA(QWidget *parent)
        startCalibration(Calibration::Measurement::Isolation, mCalIsolation);
     });
     connect(mCalOSL1, &MenuAction::triggered, [=](){
-        cal.constructErrorTerms(Calibration::Type::Port1OSL);
+        cal.constructErrorTerms(Calibration::Type::Port1OSL, calkit);
         calValid = true;
     });
     connect(mCalOSL2, &MenuAction::triggered, [=](){
-        cal.constructErrorTerms(Calibration::Type::Port2OSL);
+        cal.constructErrorTerms(Calibration::Type::Port2OSL, calkit);
         calValid = true;
     });
     connect(mCalFullOSLT, &MenuAction::triggered, [=](){
-        cal.constructErrorTerms(Calibration::Type::FullOSLT);
+        cal.constructErrorTerms(Calibration::Type::FullOSLT, calkit);
         calValid = true;
     });
 
@@ -411,6 +414,10 @@ VNA::VNA(QWidget *parent)
             msg->exec();
             calValid = true;
         }
+    });
+
+    connect(mEditKit, &MenuAction::triggered, [=](){
+        calkit.edit();
     });
 
     auto mainWidget = new QWidget;
