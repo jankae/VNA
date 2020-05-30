@@ -58,7 +58,7 @@ static void HaltedCallback() {
 	if (frequency < BandSwitchFrequency) {
 		// need the Si5351 as Source
 		Si5351.SetCLK(0, frequency, Si5351C::PLL::B,
-				Si5351C::DriveStrength::mA4);
+				Si5351C::DriveStrength::mA2);
 		if (pointCnt == 0) {
 			// First point in sweep, enable CLK
 			Si5351.Enable(0);
@@ -138,11 +138,11 @@ bool VNA::Init(Callback cb) {
 	Si5351.Enable(6);
 
 	// Generate second LO with Si5351
-	Si5351.SetCLK(1, IF1 + IF2, Si5351C::PLL::B, Si5351C::DriveStrength::mA2);
+	Si5351.SetCLK(1, IF1 - IF2, Si5351C::PLL::B, Si5351C::DriveStrength::mA2);
 	Si5351.Enable(1);
-	Si5351.SetCLK(4, IF1 + IF2, Si5351C::PLL::B, Si5351C::DriveStrength::mA2);
+	Si5351.SetCLK(4, IF1 - IF2, Si5351C::PLL::B, Si5351C::DriveStrength::mA2);
 	Si5351.Enable(4);
-	Si5351.SetCLK(5, IF1 + IF2, Si5351C::PLL::B, Si5351C::DriveStrength::mA2);
+	Si5351.SetCLK(5, IF1 - IF2, Si5351C::PLL::B, Si5351C::DriveStrength::mA2);
 	Si5351.Enable(5);
 
 	// PLL reset appears to realign phases of clock signals
@@ -167,7 +167,7 @@ bool VNA::Init(Callback cb) {
 	FPGA::Enable(FPGA::Periphery::SourceChip);
 	FPGA::SetMode(FPGA::Mode::SourcePLL);
 	Source.Init(100000000, false, 1, false);
-	Source.SetPowerOutA(MAX2871::Power::n1dbm);
+	Source.SetPowerOutA(MAX2871::Power::n4dbm);
 	// output B is not used
 	Source.SetPowerOutB(MAX2871::Power::n4dbm, false);
 	if(!Source.BuildVCOMap()) {
