@@ -24,8 +24,10 @@ private:
     void updateEntries();
     Ui::CalkitDialog *ui;
 
-    Calkit ownCoefficients;
-    Calkit &editCoefficients;
+    bool open_ok, short_ok, load_ok, through_ok;
+
+    Calkit ownKit;
+    Calkit &editKit;
 };
 
 #endif // CALKITDIALOG_H

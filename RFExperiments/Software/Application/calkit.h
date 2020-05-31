@@ -22,6 +22,15 @@ public:
     double load_Z0;
     double through_Z0, through_delay, through_loss;
 
+    // coefficients/measurement file switch
+    bool open_measurements;
+    bool short_measurements;
+    bool load_measurements;
+    bool through_measurements;
+
+    std::string open_file, short_file, load_file, through_file;
+    int open_Sparam, short_Sparam, load_Sparam, through_Sparam;
+
     void toFile(std::string filename);
     static Calkit fromFile(std::string filename);
     void edit();

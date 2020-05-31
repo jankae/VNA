@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>887</width>
-    <height>302</height>
+    <width>1121</width>
+    <height>345</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -28,143 +28,375 @@
   <property name="sizeGripEnabled">
    <bool>false</bool>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_5">
+  <layout class="QVBoxLayout" name="verticalLayout_9">
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout_4">
+    <layout class="QHBoxLayout" name="horizontalLayout_17">
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="1,0">
+      <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <widget class="QLabel" name="label_7">
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Open</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout">
+          <widget class="QRadioButton" name="open_coefficients">
+           <property name="text">
+            <string>Coefficients</string>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">OpenType</string>
+           </attribute>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="open_measurement">
+           <property name="text">
+            <string>Measurement file</string>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">OpenType</string>
+           </attribute>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QStackedWidget" name="open_stack">
+         <property name="currentIndex">
+          <number>1</number>
+         </property>
+         <widget class="QWidget" name="page">
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
            <item>
-            <layout class="QVBoxLayout" name="verticalLayout">
-             <item>
-              <widget class="QLabel" name="label_7">
-               <property name="font">
-                <font>
-                 <pointsize>16</pointsize>
-                </font>
-               </property>
+            <layout class="QFormLayout" name="formLayout">
+             <item row="1" column="0">
+              <widget class="QLabel" name="label">
                <property name="text">
-                <string>Open</string>
+                <string>Offset delay [ps]:</string>
                </property>
-               <property name="alignment">
-                <set>Qt::AlignCenter</set>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QLineEdit" name="open_delay"/>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_2">
+               <property name="text">
+                <string>Offset loss [GΩ/s]: </string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QLineEdit" name="open_loss"/>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_3">
+               <property name="text">
+                <string>C0 [10&lt;sup&gt;-15&lt;/sup&gt;F]:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QLineEdit" name="open_C0"/>
+             </item>
+             <item row="4" column="0">
+              <widget class="QLabel" name="label_4">
+               <property name="text">
+                <string>C1 [10&lt;sup&gt;-27&lt;/sup&gt;F/Hz]:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="QLineEdit" name="open_C1"/>
+             </item>
+             <item row="5" column="0">
+              <widget class="QLabel" name="label_5">
+               <property name="text">
+                <string>C2 [10&lt;sup&gt;-36&lt;/sup&gt;F/Hz&lt;sup&gt;2&lt;/sup&gt;]:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="1">
+              <widget class="QLineEdit" name="open_C2"/>
+             </item>
+             <item row="6" column="0">
+              <widget class="QLabel" name="label_6">
+               <property name="text">
+                <string>C0 [10&lt;sup&gt;-45&lt;/sup&gt;F/Hz&lt;sup&gt;3&lt;/sup&gt;]:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="1">
+              <widget class="QLineEdit" name="open_C3"/>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLineEdit" name="open_Z0"/>
+             </item>
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_15">
+               <property name="text">
+                <string>Z0 [Ω]:</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="page_2">
+          <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0,1">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <item>
+              <widget class="QLineEdit" name="open_file">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Maximum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
                </property>
               </widget>
              </item>
              <item>
-              <layout class="QFormLayout" name="formLayout">
-               <item row="0" column="0">
-                <widget class="QLabel" name="label_15">
-                 <property name="text">
-                  <string>Z0 [Ω]:</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="1">
-                <widget class="QLineEdit" name="open_Z0"/>
-               </item>
-               <item row="1" column="0">
-                <widget class="QLabel" name="label">
-                 <property name="text">
-                  <string>Offset delay [ps]:</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="1">
-                <widget class="QLineEdit" name="open_delay"/>
-               </item>
-               <item row="2" column="0">
-                <widget class="QLabel" name="label_2">
-                 <property name="text">
-                  <string>Offset loss [GΩ/s]: </string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="1">
-                <widget class="QLineEdit" name="open_loss"/>
-               </item>
-               <item row="3" column="0">
-                <widget class="QLabel" name="label_3">
-                 <property name="text">
-                  <string>C0 [10&lt;sup&gt;-15&lt;/sup&gt;F]:</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="1">
-                <widget class="QLineEdit" name="open_C0"/>
-               </item>
-               <item row="4" column="0">
-                <widget class="QLabel" name="label_4">
-                 <property name="text">
-                  <string>C1 [10&lt;sup&gt;-27&lt;/sup&gt;F/Hz]:</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="1">
-                <widget class="QLineEdit" name="open_C1"/>
-               </item>
-               <item row="5" column="1">
-                <widget class="QLineEdit" name="open_C2"/>
-               </item>
-               <item row="6" column="0">
-                <widget class="QLabel" name="label_6">
-                 <property name="text">
-                  <string>C0 [10&lt;sup&gt;-45&lt;/sup&gt;F/Hz&lt;sup&gt;3&lt;/sup&gt;]:</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="6" column="1">
-                <widget class="QLineEdit" name="open_C3"/>
-               </item>
-               <item row="5" column="0">
-                <widget class="QLabel" name="label_5">
-                 <property name="text">
-                  <string>C2 [10&lt;sup&gt;-36&lt;/sup&gt;F/Hz&lt;sup&gt;2&lt;/sup&gt;]:</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
+              <widget class="QPushButton" name="open_browse">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>20</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>...</string>
+               </property>
+              </widget>
              </item>
             </layout>
            </item>
            <item>
-            <widget class="Line" name="line">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QVBoxLayout" name="verticalLayout_2">
-           <property name="sizeConstraint">
-            <enum>QLayout::SetDefaultConstraint</enum>
-           </property>
-           <item>
-            <widget class="QLabel" name="label_8">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>16</pointsize>
-              </font>
+            <widget class="QLabel" name="open_status">
+             <property name="palette">
+              <palette>
+               <active>
+                <colorrole role="WindowText">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="255">
+                   <red>239</red>
+                   <green>41</green>
+                   <blue>41</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+               </active>
+               <inactive>
+                <colorrole role="WindowText">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="255">
+                   <red>239</red>
+                   <green>41</green>
+                   <blue>41</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+               </inactive>
+               <disabled>
+                <colorrole role="WindowText">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="255">
+                   <red>190</red>
+                   <green>190</green>
+                   <blue>190</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+               </disabled>
+              </palette>
              </property>
              <property name="text">
-              <string>Short</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <string/>
              </property>
             </widget>
            </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <item>
+              <widget class="QRadioButton" name="open_S11">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>S11</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">openSparam</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="open_S22">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>S22</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">openSparam</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="open_S33">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>S33</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">openSparam</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="open_S44">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>S44</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">openSparam</string>
+               </attribute>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QFormLayout" name="formLayout_6">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_17">
+               <property name="text">
+                <string>Points:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLineEdit" name="open_points">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_24">
+               <property name="text">
+                <string>Lower Frequency:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QLineEdit" name="open_lower">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_25">
+               <property name="text">
+                <string>Upper Frequency:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QLineEdit" name="open_upper">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="Line" name="line">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QLabel" name="label_8">
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Short</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <item>
+          <widget class="QRadioButton" name="short_coefficients">
+           <property name="text">
+            <string>Coefficients</string>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">ShortType</string>
+           </attribute>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="short_measurement">
+           <property name="text">
+            <string>Measurement file</string>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">ShortType</string>
+           </attribute>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QStackedWidget" name="short_stack">
+         <property name="currentIndex">
+          <number>1</number>
+         </property>
+         <widget class="QWidget" name="page_3">
+          <layout class="QHBoxLayout" name="horizontalLayout_6">
            <item>
             <layout class="QFormLayout" name="formLayout_2">
              <item row="1" column="0">
@@ -190,7 +422,7 @@
              <item row="3" column="0">
               <widget class="QLabel" name="label_11">
                <property name="text">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;L0 [10&lt;span style=&quot; vertical-align:super;&quot;&gt;-12&lt;/span&gt;H]:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;L0 [10&lt;span style=&quot; vertical-align:super;&quot;&gt;-12&lt;/span&gt;F]:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
              </item>
@@ -200,7 +432,7 @@
              <item row="4" column="0">
               <widget class="QLabel" name="label_12">
                <property name="text">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;L1 [10&lt;span style=&quot; vertical-align:super;&quot;&gt;-24&lt;/span&gt;H/Hz]:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;L1 [10&lt;span style=&quot; vertical-align:super;&quot;&gt;-24&lt;/span&gt;F/Hz]:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
              </item>
@@ -210,7 +442,7 @@
              <item row="5" column="0">
               <widget class="QLabel" name="label_13">
                <property name="text">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;L2 [10&lt;span style=&quot; vertical-align:super;&quot;&gt;-33&lt;/span&gt;H/Hz&lt;span style=&quot; vertical-align:super;&quot;&gt;2&lt;/span&gt;]:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;L2 [10&lt;span style=&quot; vertical-align:super;&quot;&gt;-33&lt;/span&gt;F/Hz&lt;span style=&quot; vertical-align:super;&quot;&gt;2&lt;/span&gt;]:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
              </item>
@@ -220,12 +452,15 @@
              <item row="6" column="0">
               <widget class="QLabel" name="label_14">
                <property name="text">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;L3 [10&lt;span style=&quot; vertical-align:super;&quot;&gt;-42&lt;/span&gt;H/Hz&lt;span style=&quot; vertical-align:super;&quot;&gt;3&lt;/span&gt;]:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;L3 [10&lt;span style=&quot; vertical-align:super;&quot;&gt;-42&lt;/span&gt;F/Hz&lt;span style=&quot; vertical-align:super;&quot;&gt;3&lt;/span&gt;]:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
              </item>
              <item row="6" column="1">
               <widget class="QLineEdit" name="short_L3"/>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLineEdit" name="short_Z0"/>
              </item>
              <item row="0" column="0">
               <widget class="QLabel" name="label_16">
@@ -234,152 +469,909 @@
                </property>
               </widget>
              </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="page_4">
+          <layout class="QVBoxLayout" name="verticalLayout_5" stretch="0,0,0,1">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_7">
+             <item>
+              <widget class="QLineEdit" name="short_file">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Maximum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="short_browse">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>20</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>...</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QLabel" name="short_status">
+             <property name="palette">
+              <palette>
+               <active>
+                <colorrole role="WindowText">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="255">
+                   <red>239</red>
+                   <green>41</green>
+                   <blue>41</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+                <colorrole role="Text">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="255">
+                   <red>0</red>
+                   <green>0</green>
+                   <blue>0</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+                <colorrole role="PlaceholderText">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="128">
+                   <red>239</red>
+                   <green>41</green>
+                   <blue>41</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+               </active>
+               <inactive>
+                <colorrole role="WindowText">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="255">
+                   <red>239</red>
+                   <green>41</green>
+                   <blue>41</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+                <colorrole role="Text">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="255">
+                   <red>0</red>
+                   <green>0</green>
+                   <blue>0</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+                <colorrole role="PlaceholderText">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="128">
+                   <red>239</red>
+                   <green>41</green>
+                   <blue>41</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+               </inactive>
+               <disabled>
+                <colorrole role="WindowText">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="255">
+                   <red>190</red>
+                   <green>190</green>
+                   <blue>190</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+                <colorrole role="Text">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="255">
+                   <red>190</red>
+                   <green>190</green>
+                   <blue>190</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+                <colorrole role="PlaceholderText">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="128">
+                   <red>0</red>
+                   <green>0</green>
+                   <blue>0</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+               </disabled>
+              </palette>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_8">
+             <item>
+              <widget class="QRadioButton" name="short_S11">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>S11</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">shortSparam</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="short_S22">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>S22</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">shortSparam</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="short_S33">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>S33</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">shortSparam</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="short_S44">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>S44</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">shortSparam</string>
+               </attribute>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QFormLayout" name="formLayout_7">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_18">
+               <property name="text">
+                <string>Points:</string>
+               </property>
+              </widget>
+             </item>
              <item row="0" column="1">
-              <widget class="QLineEdit" name="short_Z0"/>
+              <widget class="QLineEdit" name="short_points">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_26">
+               <property name="text">
+                <string>Lower Frequency:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QLineEdit" name="short_lower">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_27">
+               <property name="text">
+                <string>Upper Frequency:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QLineEdit" name="short_upper">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+              </widget>
              </item>
             </layout>
            </item>
           </layout>
+         </widget>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="Line" name="line_2">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QLabel" name="label_19">
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Load</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_9">
+         <item>
+          <widget class="QRadioButton" name="load_coefficients">
+           <property name="text">
+            <string>Coefficients</string>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">LoadType</string>
+           </attribute>
+          </widget>
          </item>
          <item>
-          <widget class="Line" name="line_2">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
+          <widget class="QRadioButton" name="load_measurement">
+           <property name="text">
+            <string>Measurement file</string>
            </property>
+           <attribute name="buttonGroup">
+            <string notr="true">LoadType</string>
+           </attribute>
           </widget>
          </item>
         </layout>
        </item>
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout_3">
-         <item>
-          <widget class="QLabel" name="label_18">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="font">
-            <font>
-             <pointsize>16</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Load</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <layout class="QFormLayout" name="formLayout_3">
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_19">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>Z0 [Ω]:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QLineEdit" name="load_Z0">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-            </widget>
+        <widget class="QStackedWidget" name="load_stack">
+         <property name="currentIndex">
+          <number>1</number>
+         </property>
+         <widget class="QWidget" name="page_5">
+          <layout class="QHBoxLayout" name="horizontalLayout_10">
+           <item>
+            <layout class="QFormLayout" name="formLayout_3">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_30">
+               <property name="text">
+                <string>Z0 [Ω]:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLineEdit" name="load_Z0"/>
+             </item>
+            </layout>
            </item>
           </layout>
-         </item>
-         <item>
-          <widget class="Line" name="line_3">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_20">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="font">
-            <font>
-             <pointsize>16</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Through</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <layout class="QFormLayout" name="formLayout_4">
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_21">
+         </widget>
+         <widget class="QWidget" name="page_6">
+          <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0,0,0,1">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_11">
+             <item>
+              <widget class="QLineEdit" name="load_file">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Maximum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="load_browse">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>20</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>...</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QLabel" name="load_status">
+             <property name="palette">
+              <palette>
+               <active>
+                <colorrole role="WindowText">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="255">
+                   <red>239</red>
+                   <green>41</green>
+                   <blue>41</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+                <colorrole role="Text">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="255">
+                   <red>0</red>
+                   <green>0</green>
+                   <blue>0</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+                <colorrole role="PlaceholderText">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="128">
+                   <red>239</red>
+                   <green>41</green>
+                   <blue>41</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+               </active>
+               <inactive>
+                <colorrole role="WindowText">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="255">
+                   <red>239</red>
+                   <green>41</green>
+                   <blue>41</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+                <colorrole role="Text">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="255">
+                   <red>0</red>
+                   <green>0</green>
+                   <blue>0</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+                <colorrole role="PlaceholderText">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="128">
+                   <red>239</red>
+                   <green>41</green>
+                   <blue>41</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+               </inactive>
+               <disabled>
+                <colorrole role="WindowText">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="255">
+                   <red>190</red>
+                   <green>190</green>
+                   <blue>190</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+                <colorrole role="Text">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="255">
+                   <red>190</red>
+                   <green>190</green>
+                   <blue>190</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+                <colorrole role="PlaceholderText">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="128">
+                   <red>0</red>
+                   <green>0</green>
+                   <blue>0</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+               </disabled>
+              </palette>
+             </property>
              <property name="text">
-              <string>Z0 [Ω]:</string>
+              <string/>
              </property>
             </widget>
            </item>
-           <item row="0" column="1">
-            <widget class="QLineEdit" name="through_Z0"/>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_12">
+             <item>
+              <widget class="QRadioButton" name="load_S11">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>S11</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">loadSparam</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="load_S22">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>S22</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">loadSparam</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="load_S33">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>S33</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">loadSparam</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="load_S44">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>S44</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">loadSparam</string>
+               </attribute>
+              </widget>
+             </item>
+            </layout>
            </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_22">
-             <property name="text">
-              <string>Offset delay [ps]:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QLineEdit" name="through_delay"/>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_23">
-             <property name="text">
-              <string>Offset loss [GΩ/s]: </string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QLineEdit" name="through_loss"/>
+           <item>
+            <layout class="QFormLayout" name="formLayout_8">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_31">
+               <property name="text">
+                <string>Points:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLineEdit" name="load_points">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_32">
+               <property name="text">
+                <string>Lower Frequency:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QLineEdit" name="load_lower">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_33">
+               <property name="text">
+                <string>Upper Frequency:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QLineEdit" name="load_upper">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
           </layout>
-         </item>
-        </layout>
+         </widget>
+        </widget>
        </item>
       </layout>
      </item>
      <item>
-      <widget class="QDialogButtonBox" name="buttonBox">
+      <widget class="Line" name="line_3">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="standardButtons">
-        <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok|QDialogButtonBox::Open|QDialogButtonBox::Save</set>
-       </property>
-       <property name="centerButtons">
-        <bool>false</bool>
+        <enum>Qt::Vertical</enum>
        </property>
       </widget>
      </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_7">
+       <item>
+        <widget class="QLabel" name="label_20">
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Through</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_13">
+         <item>
+          <widget class="QRadioButton" name="through_coefficients">
+           <property name="text">
+            <string>Coefficients</string>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">ThroughType</string>
+           </attribute>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="through_measurement">
+           <property name="text">
+            <string>Measurement file</string>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">ThroughType</string>
+           </attribute>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QStackedWidget" name="through_stack">
+         <property name="currentIndex">
+          <number>1</number>
+         </property>
+         <widget class="QWidget" name="page_7">
+          <layout class="QHBoxLayout" name="horizontalLayout_14">
+           <item>
+            <layout class="QFormLayout" name="formLayout_4">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_35">
+               <property name="text">
+                <string>Z0 [Ω]:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLineEdit" name="through_Z0"/>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_21">
+               <property name="text">
+                <string>Offset delay [ps]:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QLineEdit" name="through_delay"/>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_22">
+               <property name="text">
+                <string>Offset loss [GΩ/s]: </string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QLineEdit" name="through_loss"/>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="page_8">
+          <layout class="QVBoxLayout" name="verticalLayout_8" stretch="0,0,0,1">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_15">
+             <item>
+              <widget class="QLineEdit" name="through_file">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Maximum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="through_browse">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>20</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>...</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QLabel" name="through_status">
+             <property name="palette">
+              <palette>
+               <active>
+                <colorrole role="WindowText">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="255">
+                   <red>239</red>
+                   <green>41</green>
+                   <blue>41</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+                <colorrole role="Text">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="255">
+                   <red>0</red>
+                   <green>0</green>
+                   <blue>0</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+                <colorrole role="PlaceholderText">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="128">
+                   <red>239</red>
+                   <green>41</green>
+                   <blue>41</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+               </active>
+               <inactive>
+                <colorrole role="WindowText">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="255">
+                   <red>239</red>
+                   <green>41</green>
+                   <blue>41</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+                <colorrole role="Text">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="255">
+                   <red>0</red>
+                   <green>0</green>
+                   <blue>0</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+                <colorrole role="PlaceholderText">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="128">
+                   <red>239</red>
+                   <green>41</green>
+                   <blue>41</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+               </inactive>
+               <disabled>
+                <colorrole role="WindowText">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="255">
+                   <red>190</red>
+                   <green>190</green>
+                   <blue>190</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+                <colorrole role="Text">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="255">
+                   <red>190</red>
+                   <green>190</green>
+                   <blue>190</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+                <colorrole role="PlaceholderText">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="128">
+                   <red>0</red>
+                   <green>0</green>
+                   <blue>0</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+               </disabled>
+              </palette>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_16">
+             <item>
+              <widget class="QRadioButton" name="through_S11">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>S11</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">throughSparam</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="through_S22">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>S22</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">throughSparam</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="through_S33">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>S33</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">throughSparam</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="through_S44">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>S44</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">throughSparam</string>
+               </attribute>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QFormLayout" name="formLayout_9">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_36">
+               <property name="text">
+                <string>Points:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLineEdit" name="through_points">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_37">
+               <property name="text">
+                <string>Lower Frequency:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QLineEdit" name="through_lower">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_38">
+               <property name="text">
+                <string>Upper Frequency:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QLineEdit" name="through_upper">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
+      </layout>
+     </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok|QDialogButtonBox::Open|QDialogButtonBox::Save</set>
+     </property>
+     <property name="centerButtons">
+      <bool>false</bool>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
@@ -390,19 +1382,17 @@
   <tabstop>open_C0</tabstop>
   <tabstop>open_C1</tabstop>
   <tabstop>open_C2</tabstop>
-  <tabstop>open_C3</tabstop>
-  <tabstop>short_Z0</tabstop>
-  <tabstop>short_delay</tabstop>
-  <tabstop>short_loss</tabstop>
-  <tabstop>short_L0</tabstop>
-  <tabstop>short_L1</tabstop>
-  <tabstop>short_L2</tabstop>
-  <tabstop>short_L3</tabstop>
-  <tabstop>load_Z0</tabstop>
-  <tabstop>through_Z0</tabstop>
-  <tabstop>through_delay</tabstop>
-  <tabstop>through_loss</tabstop>
  </tabstops>
  <resources/>
  <connections/>
+ <buttongroups>
+  <buttongroup name="OpenType"/>
+  <buttongroup name="ShortType"/>
+  <buttongroup name="LoadType"/>
+  <buttongroup name="loadSparam"/>
+  <buttongroup name="shortSparam"/>
+  <buttongroup name="openSparam"/>
+  <buttongroup name="throughSparam"/>
+  <buttongroup name="ThroughType"/>
+ </buttongroups>
 </ui>

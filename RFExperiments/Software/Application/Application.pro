@@ -14,6 +14,7 @@ HEADERS += \
     smithchart.h \
     sparam.h \
     sparamtable.h \
+    touchstone.h \
     unit.h \
     valueinput.h \
     vna.h
@@ -33,6 +34,7 @@ SOURCES += \
     qwtplotpiecewisecurve.cpp \
     smithchart.cpp \
     sparamtable.cpp \
+    touchstone.cpp \
     unit.cpp \
     valueinput.cpp \
     vna.cpp

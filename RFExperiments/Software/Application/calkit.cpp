@@ -30,6 +30,21 @@ Calkit::Calkit()
     through_Z0 = 50.0;
     through_delay = 0.0;
     through_loss = 0.0;
+
+    open_measurements = false;
+    short_measurements = false;
+    load_measurements = false;
+    through_measurements = false;
+
+    open_file = "";
+    short_file = "";
+    load_file = "";
+    through_file = "";
+
+    open_Sparam = 0;
+    short_Sparam = 0;
+    load_Sparam = 0;
+    through_Sparam = 0;
 }
 
 void Calkit::toFile(std::string filename)
@@ -37,10 +52,23 @@ void Calkit::toFile(std::string filename)
     ofstream file;
     file.open(filename);
     file << std::fixed << std::setprecision(12);
+    file << open_measurements << "\n" << short_measurements << "\n" << load_measurements << "\n" << through_measurements << "\n";
     file << open_Z0 << "\n" << open_delay << "\n" << open_loss << "\n" << open_C0 << "\n" << open_C1 << "\n" << open_C2 << "\n" << open_C3 << "\n";
     file << short_Z0 << "\n" << short_delay << "\n" << short_loss << "\n" << short_L0 << "\n" << short_L1 << "\n" << short_L2 << "\n" << short_L3 << "\n";
     file << load_Z0 << "\n";
     file << through_Z0 << "\n" << through_delay << "\n" << through_loss << "\n";
+    if(open_measurements) {
+        file << open_file << "\n" << open_Sparam << "\n";
+    }
+    if(short_measurements) {
+        file << short_file << "\n" << short_Sparam << "\n";
+    }
+    if(load_measurements) {
+        file << load_file << "\n" << load_Sparam << "\n";
+    }
+    if(through_measurements) {
+        file << through_file << "\n" << through_Sparam << "\n";
+    }
     file.close();
 }
 
@@ -49,6 +77,10 @@ Calkit Calkit::fromFile(std::string filename)
     Calkit c;
     ifstream file;
     file.open(filename);
+    file >> c.open_measurements;
+    file >> c.short_measurements;
+    file >> c.load_measurements;
+    file >> c.through_measurements;
     file >> c.open_Z0;
     file >> c.open_delay;
     file >> c.open_loss;
@@ -67,6 +99,22 @@ Calkit Calkit::fromFile(std::string filename)
     file >> c.through_Z0;
     file >> c.through_delay;
     file >> c.through_loss;
+    if(c.open_measurements) {
+        file >> c.open_file;
+        file >> c.open_Sparam;
+    }
+    if(c.short_measurements) {
+        file >> c.short_file;
+        file >> c.short_Sparam;
+    }
+    if(c.load_measurements) {
+        file >> c.load_file;
+        file >> c.load_Sparam;
+    }
+    if(c.through_measurements) {
+        file >> c.through_file;
+        file >> c.through_Sparam;
+    }
     file.close();
     return c;
 }
