@@ -3,6 +3,7 @@
 
 #include "menuitem.h"
 #include <QLabel>
+#include <QLineEdit>
 
 class MenuValue : public MenuItem
 {
@@ -20,11 +21,13 @@ public slots:
     void userSelected() override;
 protected:
     void keyPressEvent(QKeyEvent *event) override;
+    bool eventFilter(QObject *obj, QEvent *event) override;
 private:
+    void parseNewValue(double factor);
     void startInputDialog(QString initialInput = QString());
     double value;
     double increment;
-    QLabel *lvalue;
+    QLineEdit *lvalue;
     const QString unit, name, prefixes;
     const int precision;
 };

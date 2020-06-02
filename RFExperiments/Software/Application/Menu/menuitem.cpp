@@ -5,9 +5,9 @@
 MenuItem::MenuItem() : QFrame()
 {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    setStyleSheet("*:focus {background: lightblue}");
+    //setStyleSheet("*:focus {background: lightblue}");
     setFocusPolicy(Qt::StrongFocus);
-    setFrameShape(QFrame::Box);
+    setFrameStyle(QFrame::Raised | QFrame::Panel);
 }
 
 void MenuItem::mouseReleaseEvent(QMouseEvent *me)

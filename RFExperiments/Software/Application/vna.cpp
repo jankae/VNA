@@ -166,7 +166,7 @@ VNA::VNA(QWidget *parent)
     auto menuLayout = new QStackedLayout;
     auto mMain = new Menu(*menuLayout);
 
-    auto mFrequency = new Menu(*menuLayout);
+    auto mFrequency = new Menu(*menuLayout, "Frequency");
     auto mCenter = new MenuValue("Center Frequency", (settings.f_start + settings.f_stop)/2, "Hz", " kMG", 6);
     mFrequency->addItem(mCenter);
     auto mStart = new MenuValue("Start Frequency", settings.f_start, "Hz", " kMG", 6);
@@ -174,9 +174,9 @@ VNA::VNA(QWidget *parent)
     auto mStop = new MenuValue("Stop Frequency", settings.f_stop, "Hz", " kMG", 6);
     mFrequency->addItem(mStop);
     mFrequency->finalize();
-    mMain->addMenu(mFrequency, "Frequency");
+    mMain->addMenu(mFrequency);
 
-    auto mSpan = new Menu(*menuLayout);
+    auto mSpan = new Menu(*menuLayout, "Span");
     auto mSpanWidth = new MenuValue("Span", settings.f_stop - settings.f_start, "Hz", " kMG", 6);
     mSpan->addItem(mSpanWidth);
     auto mSpanZoomIn = new MenuAction("Zoom in");
@@ -186,9 +186,9 @@ VNA::VNA(QWidget *parent)
     auto mSpanFull = new MenuAction("Full span");
     mSpan->addItem(mSpanFull);
     mSpan->finalize();
-    mMain->addMenu(mSpan, "Span");
+    mMain->addMenu(mSpan);
 
-    auto mAcquisition = new Menu(*menuLayout);
+    auto mAcquisition = new Menu(*menuLayout, "Acquisition");
     auto mPoints = new MenuValue("Points", settings.points, "", " ");
     mAcquisition->addItem(mPoints);
     auto mBandwidth = new MenuValue("IF Bandwidth", settings.if_bandwidth, "Hz", " k", 2);
@@ -196,10 +196,10 @@ VNA::VNA(QWidget *parent)
     auto mAverages = new MenuValue("Averages", averages);
     mAcquisition->addItem(mAverages);
     mAcquisition->finalize();
-    mMain->addMenu(mAcquisition, "Acquisition");
+    mMain->addMenu(mAcquisition);
 
-    auto mCalibration = new Menu(*menuLayout);
-    auto mCalPort1 = new Menu(*menuLayout);
+    auto mCalibration = new Menu(*menuLayout, "Calibration");
+    auto mCalPort1 = new Menu(*menuLayout, "Port 1");
     auto mCalPort1Open = new MenuAction("Port 1 Open");
     auto mCalPort1Short = new MenuAction("Port 1 Short");
     auto mCalPort1Load = new MenuAction("Port 1 Load");
@@ -207,8 +207,8 @@ VNA::VNA(QWidget *parent)
     mCalPort1->addItem(mCalPort1Short);
     mCalPort1->addItem(mCalPort1Load);
     mCalPort1->finalize();
-    mCalibration->addMenu(mCalPort1, "Port 1");
-    auto mCalPort2 = new Menu(*menuLayout);
+    mCalibration->addMenu(mCalPort1);
+    auto mCalPort2 = new Menu(*menuLayout, "Port 2");
     auto mCalPort2Open = new MenuAction("Port 2 Open");
     auto mCalPort2Short = new MenuAction("Port 2 Short");
     auto mCalPort2Load = new MenuAction("Port 2 Load");
@@ -216,7 +216,7 @@ VNA::VNA(QWidget *parent)
     mCalPort2->addItem(mCalPort2Short);
     mCalPort2->addItem(mCalPort2Load);
     mCalPort2->finalize();
-    mCalibration->addMenu(mCalPort2, "Port 2");
+    mCalibration->addMenu(mCalPort2);
     auto mCalThrough = new MenuAction("Through");
     auto mCalIsolation = new MenuAction("Isolation");
     mCalibration->addItem(mCalThrough);
@@ -244,11 +244,17 @@ VNA::VNA(QWidget *parent)
     mCalibration->addItem(mEditKit);
 
     mCalibration->finalize();
-    mMain->addMenu(mCalibration, "Calibration");
+    mMain->addMenu(mCalibration);
 
     mMain->finalize();
 
     auto updateMenuValues = [=]() {
+        if(settings.f_stop > 6000000000) {
+            settings.f_stop = 6000000000;
+        }
+        if(settings.f_start > settings.f_stop) {
+            settings.f_start = settings.f_stop;
+        }
         mStart->setValueQuiet(settings.f_start);
         mStop->setValueQuiet(settings.f_stop);
         mSpanWidth->setValueQuiet(settings.f_stop - settings.f_start);
@@ -258,8 +264,13 @@ VNA::VNA(QWidget *parent)
     // Frequency and span connections
     connect(mCenter, &MenuValue::valueChanged, [=](double newval){
         auto old_span = settings.f_stop - settings.f_start;
-        settings.f_start = newval - old_span / 2;
-        settings.f_stop = newval + old_span / 2;
+        if (newval > old_span / 2) {
+            settings.f_start = newval - old_span / 2;
+            settings.f_stop = newval + old_span / 2;
+        } else {
+            settings.f_start = 0;
+            settings.f_stop = 2 * newval;
+        }
         updateMenuValues();
         SettingsChanged();
     });
@@ -281,7 +292,11 @@ VNA::VNA(QWidget *parent)
     });
     connect(mSpanWidth, &MenuValue::valueChanged, [=](double newval){
         auto old_center = (settings.f_start + settings.f_stop) / 2;
-        settings.f_start = old_center - newval / 2;
+        if(old_center > newval / 2) {
+            settings.f_start = old_center - newval / 2;
+        } else {
+            settings.f_start = 0;
+        }
         settings.f_stop = old_center + newval / 2;
         updateMenuValues();
         SettingsChanged();
@@ -297,7 +312,11 @@ VNA::VNA(QWidget *parent)
     connect(mSpanZoomOut, &MenuAction::triggered, [=](){
         auto center = (settings.f_start + settings.f_stop) / 2;
         auto old_span = settings.f_stop - settings.f_start;
-        settings.f_start = center - old_span;
+        if(center > old_span) {
+            settings.f_start = center - old_span;
+        } else {
+            settings.f_start = 0;
+        }
         settings.f_stop = center + old_span;
         updateMenuValues();
         SettingsChanged();

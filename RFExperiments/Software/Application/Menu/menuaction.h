@@ -9,7 +9,13 @@ class MenuAction : public MenuItem
 {
     Q_OBJECT
 public:
-    MenuAction(const QString &l);
+    enum class ArrowType {
+        None,
+        Left,
+        Right,
+    };
+
+    MenuAction(const QString &l, ArrowType arrow = ArrowType::None);
     void AddSubline(const QString &l);
     void RemoveSubline();
 signals:
@@ -19,6 +25,9 @@ public slots:
 private:
     QVBoxLayout layout;
     QLabel *subline;
+protected:
+    void mouseReleaseEvent(QMouseEvent *me) override;
+    void mousePressEvent(QMouseEvent *me) override;
 };
 
 #endif // MENULABEL_H

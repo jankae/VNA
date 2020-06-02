@@ -5,8 +5,9 @@
 
 using namespace std;
 
-Menu::Menu(QStackedLayout &layout)
-    : m_containingLayout(layout)
+Menu::Menu(QStackedLayout &layout, QString name)
+    : m_containingLayout(layout),
+      name(name)
 {
     m_layout = new QVBoxLayout;
     setLayout(m_layout);
@@ -14,6 +15,12 @@ Menu::Menu(QStackedLayout &layout)
     setFixedSize(180, 800);
     parent = nullptr;
     layout.addWidget(this);
+    if(name.length() > 0) {
+        auto back = new MenuAction(name, MenuAction::ArrowType::Left);
+        back->setStyleSheet("background-color:lightblue;");
+        connect(back, &MenuAction::triggered, this, &Menu::leave);
+        addItem(back);
+    }
 }
 
 void Menu::addItem(MenuItem *i)
@@ -26,9 +33,9 @@ void Menu::addItem(MenuItem *i)
     m_widgetCount++;
 }
 
-void Menu::addMenu(Menu *m, QString name)
+void Menu::addMenu(Menu *m)
 {
-    auto menuLabel = new MenuAction(name);
+    auto menuLabel = new MenuAction(m->name, MenuAction::ArrowType::Right);
     submenus.push_back(SubmenuEntry(menuLabel, m, m_widgetCount));
     connect(menuLabel, &MenuAction::triggered, [=]() {
        m->m_containingLayout.setCurrentWidget(m);
@@ -62,11 +69,16 @@ void Menu::keyPressEvent(QKeyEvent *event)
         items[index]->userSelected();
         event->accept();
     } else if(event->key() == Qt::Key_Escape) {
-        if(parent) {
-            // got a parent menu
-            parent->m_containingLayout.setCurrentWidget(parent);
-        }
+        leave();
         event->accept();
+    }
+}
+
+void Menu::leave()
+{
+    if(parent) {
+        // got a parent menu
+        parent->m_containingLayout.setCurrentWidget(parent);
     }
 }
 

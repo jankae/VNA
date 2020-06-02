@@ -64,7 +64,8 @@ Device::Device()
     libusb_free_device_list(devList, 1);
     if(!m_handle) {
         BOOST_LOG_TRIVIAL(error) << "No device found";
-        throw std::runtime_error("No device found");
+        //throw std::runtime_error("No device found");
+        return;
     }
 
     // Found the correct device, now connect
@@ -111,23 +112,27 @@ Device::~Device()
 
 bool Device::Configure(Protocol::SweepSettings settings)
 {
-    unsigned char buffer[128];
-    Protocol::PacketInfo p;
-    p.type = Protocol::PacketType::SweepSettings;
-    p.settings = settings;
-    unsigned int length = Protocol::EncodePacket(p, buffer, sizeof(buffer));
-    if(!length) {
-        BOOST_LOG_TRIVIAL(error) << "Failed to encode packet";
+    if(m_connected) {
+        unsigned char buffer[128];
+        Protocol::PacketInfo p;
+        p.type = Protocol::PacketType::SweepSettings;
+        p.settings = settings;
+        unsigned int length = Protocol::EncodePacket(p, buffer, sizeof(buffer));
+        if(!length) {
+            BOOST_LOG_TRIVIAL(error) << "Failed to encode packet";
+            return false;
+        }
+        int actual_length;
+        auto ret = libusb_bulk_transfer(m_handle, EP_Out_Addr, buffer, length, &actual_length, 0);
+        if(ret < 0) {
+            BOOST_LOG_TRIVIAL(error) << "Error sending data: "
+                                    << libusb_strerror((libusb_error) ret);
+            return false;
+        }
+        return true;
+    } else {
         return false;
     }
-    int actual_length;
-    auto ret = libusb_bulk_transfer(m_handle, EP_Out_Addr, buffer, length, &actual_length, 0);
-    if(ret < 0) {
-        BOOST_LOG_TRIVIAL(error) << "Error sending data: "
-                                << libusb_strerror((libusb_error) ret);
-        return false;
-    }
-    return true;
 }
 
 void Device::ReceiveThread()

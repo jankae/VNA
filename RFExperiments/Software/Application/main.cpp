@@ -14,16 +14,16 @@
 
 #include <complex>
 int main(int argc, char *argv[]) {
-//    QApplication a(argc, argv);
-//    VNA vna;
-//    vna.resize(1280, 800);
-//    vna.show();
-//    a.exec();
-
     QApplication a(argc, argv);
-    auto c = new Calkit;
-    c->edit();
+    VNA vna;
+    vna.resize(1280, 800);
+    vna.show();
     a.exec();
+
+//    QApplication a(argc, argv);
+//    auto c = new Calkit;
+//    c->edit();
+//    a.exec();
 
 //    int ports = 2;
 //    auto t = Touchstone(ports);

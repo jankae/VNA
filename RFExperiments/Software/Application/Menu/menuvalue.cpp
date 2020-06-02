@@ -7,6 +7,7 @@
 #include "valueinput.h"
 #include <QMouseEvent>
 #include "unit.h"
+#include <QDoubleValidator>
 
 using namespace std;
 
@@ -20,8 +21,13 @@ MenuValue::MenuValue(QString name, double defaultValue, QString unit, QString pr
     auto label = new QLabel(name, this);
     label->setAlignment(Qt::AlignCenter);
     layout->addWidget(label);
-    lvalue = new QLabel(this);
+    lvalue = new QLineEdit(this);
     lvalue->setAlignment(Qt::AlignCenter);
+    lvalue->installEventFilter(this);
+    lvalue->setValidator(new QDoubleValidator);
+    connect(lvalue, &QLineEdit::editingFinished, [this]() {
+       parseNewValue(1.0);
+    });
     layout->addWidget(lvalue);
     setValueQuiet(defaultValue);
     setIncrement(1);
@@ -31,7 +37,9 @@ MenuValue::MenuValue(QString name, double defaultValue, QString unit, QString pr
 void MenuValue::setValueQuiet(double value)
 {
     this->value = value;
-    lvalue->setText(Unit::ToString(value, unit, prefixes, precision));
+    lvalue->clear();
+    lvalue->setPlaceholderText(Unit::ToString(value, unit, prefixes, precision));
+    lvalue->clearFocus();
 }
 
 void MenuValue::setValue(double value)
@@ -47,7 +55,8 @@ void MenuValue::setIncrement(double inc)
 
 void MenuValue::userSelected()
 {
-    startInputDialog();
+    lvalue->setFocus();
+    //startInputDialog();
 }
 
 void MenuValue::keyPressEvent(QKeyEvent *event)
@@ -59,6 +68,36 @@ void MenuValue::keyPressEvent(QKeyEvent *event)
     } else {
         event->ignore();
     }
+}
+
+bool MenuValue::eventFilter(QObject *obj, QEvent *event)
+{
+    if (event->type() == QEvent::KeyPress) {
+        int key = static_cast<QKeyEvent *>(event)->key();
+        if(key == Qt::Key_Escape) {
+            setValueQuiet(value);
+            lvalue->clearFocus();
+            return true;
+        }
+        auto mod = static_cast<QKeyEvent *>(event)->modifiers();
+        if (!(mod & Qt::ShiftModifier)) {
+            key = tolower(key);
+        }
+        if(key <= 255 && prefixes.indexOf(key) >= 0) {
+            // a valid prefix key was pressed
+            parseNewValue(Unit::SIPrefixToFactor(key));
+            return true;
+        }
+    } else if(event->type() == QEvent::FocusOut) {
+        setValueQuiet(value);
+    }
+    return false;
+}
+
+void MenuValue::parseNewValue(double factor)
+{
+    double v = lvalue->text().toDouble() * factor;
+    setValue(v);
 }
 
 void MenuValue::startInputDialog(QString initialInput)
