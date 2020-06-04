@@ -201,6 +201,7 @@ bool VNA::Init(Callback cb) {
 	FPGA::WriteMAX2871Default(Source.GetRegisters());
 
 	LOG_INFO("Initialized");
+	FPGA::Enable(FPGA::Periphery::ReadyLED);
 	return true;
 }
 
@@ -210,7 +211,7 @@ bool VNA::ConfigureSweep(Protocol::SweepSettings s) {
 	FPGA::AbortSweep();
 	uint16_t points = settings.points <= FPGA::MaxPoints ? settings.points : FPGA::MaxPoints;
 	// Configure sweep
-	FPGA::SetSettlingTime(50);
+	FPGA::SetSettlingTime(500);
 	FPGA::SetNumberOfPoints(points);
 	uint32_t samplesPerPoint = (1000000 / s.if_bandwidth);
 	// round up to next multiple of 128 (128 samples are spread across 35 IF2 periods)

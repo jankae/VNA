@@ -14,7 +14,7 @@ public:
         std::complex<double> Open;
         std::complex<double> Short;
         std::complex<double> Load;
-        std::complex<double> Through;
+        std::complex<double> ThroughS11, ThroughS12, ThroughS21, ThroughS22;
     };
 
     double open_Z0, open_delay, open_loss, open_C0, open_C1, open_C2, open_C3;

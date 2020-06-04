@@ -1,7 +1,9 @@
 HEADERS += \
     ../RFExperiments/Application/Communication/Protocol.hpp \
+    CustomWidgets/toggleswitch.h \
     Menu/menu.h \
     Menu/menuaction.h \
+    Menu/menubool.h \
     Menu/menuitem.h \
     Menu/menuvalue.h \
     bodeplot.h \
@@ -15,14 +17,17 @@ HEADERS += \
     sparam.h \
     sparamtable.h \
     touchstone.h \
+    trace.h \
     unit.h \
     valueinput.h \
     vna.h
 
 SOURCES += \
     ../RFExperiments/Application/Communication/Protocol.cpp \
+    CustomWidgets/toggleswitch.cpp \
     Menu/menu.cpp \
     Menu/menuaction.cpp \
+    Menu/menubool.cpp \
     Menu/menuitem.cpp \
     Menu/menuvalue.cpp \
     bodeplot.cpp \
@@ -35,6 +40,7 @@ SOURCES += \
     smithchart.cpp \
     sparamtable.cpp \
     touchstone.cpp \
+    trace.cpp \
     unit.cpp \
     valueinput.cpp \
     vna.cpp

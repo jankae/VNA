@@ -15,12 +15,14 @@
 #include "Menu/menu.h"
 #include "Menu/menuaction.h"
 #include "Menu/menuvalue.h"
+#include "Menu/menubool.h"
 #include <QMessageBox>
 #include <QFileDialog>
 #include <iostream>
 #include <fstream>
 #include <QDateTime>
 #include "unit.h"
+#include "CustomWidgets/toggleswitch.h"
 
 using namespace std;
 
@@ -203,8 +205,8 @@ VNA::VNA(QWidget *parent)
     auto mCalPort1Open = new MenuAction("Port 1 Open");
     auto mCalPort1Short = new MenuAction("Port 1 Short");
     auto mCalPort1Load = new MenuAction("Port 1 Load");
-    mCalPort1->addItem(mCalPort1Open);
     mCalPort1->addItem(mCalPort1Short);
+    mCalPort1->addItem(mCalPort1Open);
     mCalPort1->addItem(mCalPort1Load);
     mCalPort1->finalize();
     mCalibration->addMenu(mCalPort1);
@@ -212,8 +214,8 @@ VNA::VNA(QWidget *parent)
     auto mCalPort2Open = new MenuAction("Port 2 Open");
     auto mCalPort2Short = new MenuAction("Port 2 Short");
     auto mCalPort2Load = new MenuAction("Port 2 Load");
-    mCalPort2->addItem(mCalPort2Open);
     mCalPort2->addItem(mCalPort2Short);
+    mCalPort2->addItem(mCalPort2Open);
     mCalPort2->addItem(mCalPort2Load);
     mCalPort2->finalize();
     mCalibration->addMenu(mCalPort2);
@@ -222,17 +224,17 @@ VNA::VNA(QWidget *parent)
     mCalibration->addItem(mCalThrough);
     mCalibration->addItem(mCalIsolation);
 
-    mCalOSL1 = new MenuAction("Apply Port 1 OSL");
-    mCalibration->addItem(mCalOSL1);
-    mCalOSL1->setDisabled(true);
+    mCalSOL1 = new MenuAction("Apply Port 1 SOL");
+    mCalibration->addItem(mCalSOL1);
+    mCalSOL1->setDisabled(true);
 
-    mCalOSL2 = new MenuAction("Apply Port 2 OSL");
-    mCalibration->addItem(mCalOSL2);
-    mCalOSL2->setDisabled(true);
+    mCalSOL2 = new MenuAction("Apply Port 2 SOL");
+    mCalibration->addItem(mCalSOL2);
+    mCalSOL2->setDisabled(true);
 
-    mCalFullOSLT = new MenuAction("Apply full OSLT");
-    mCalibration->addItem(mCalFullOSLT);
-    mCalFullOSLT->setDisabled(true);
+    mCalFullSOLT = new MenuAction("Apply full SOLT");
+    mCalibration->addItem(mCalFullSOLT);
+    mCalFullSOLT->setDisabled(true);
 
     auto mCalSave = new MenuAction("Save to file");
     mCalibration->addItem(mCalSave);
@@ -394,16 +396,16 @@ VNA::VNA(QWidget *parent)
     connect(mCalIsolation, &MenuAction::triggered, [=](){
        startCalibration(Calibration::Measurement::Isolation, mCalIsolation);
     });
-    connect(mCalOSL1, &MenuAction::triggered, [=](){
-        cal.constructErrorTerms(Calibration::Type::Port1OSL, calkit);
+    connect(mCalSOL1, &MenuAction::triggered, [=](){
+        cal.constructErrorTerms(Calibration::Type::Port1SOL, calkit);
         calValid = true;
     });
-    connect(mCalOSL2, &MenuAction::triggered, [=](){
-        cal.constructErrorTerms(Calibration::Type::Port2OSL, calkit);
+    connect(mCalSOL2, &MenuAction::triggered, [=](){
+        cal.constructErrorTerms(Calibration::Type::Port2SOL, calkit);
         calValid = true;
     });
-    connect(mCalFullOSLT, &MenuAction::triggered, [=](){
-        cal.constructErrorTerms(Calibration::Type::FullOSLT, calkit);
+    connect(mCalFullSOLT, &MenuAction::triggered, [=](){
+        cal.constructErrorTerms(Calibration::Type::FullSOLT, calkit);
         calValid = true;
     });
 
@@ -469,14 +471,14 @@ void VNA::NewDatapoint(Protocol::Datapoint d)
             if(d.pointNum == settings.points - 1) {
                 calMeasuring = false;
                 // Check if applying calibration is available
-                if(cal.calculationPossible(Calibration::Type::Port1OSL)) {
-                    mCalOSL1->setEnabled(true);
+                if(cal.calculationPossible(Calibration::Type::Port1SOL)) {
+                    mCalSOL1->setEnabled(true);
                 }
-                if(cal.calculationPossible(Calibration::Type::Port2OSL)) {
-                    mCalOSL2->setEnabled(true);
+                if(cal.calculationPossible(Calibration::Type::Port2SOL)) {
+                    mCalSOL2->setEnabled(true);
                 }
-                if(cal.calculationPossible(Calibration::Type::FullOSLT)) {
-                    mCalFullOSLT->setEnabled(true);
+                if(cal.calculationPossible(Calibration::Type::FullSOLT)) {
+                    mCalFullSOLT->setEnabled(true);
                 }
             }
             calDialog.setValue(d.pointNum + 1);

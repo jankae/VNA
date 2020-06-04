@@ -164,7 +164,11 @@ Calkit::Reflection Calkit::toReflection(double frequency)
     double through_phaseshift = -2 * M_PI * frequency * through_delay * 1e-12;
     double through_att_db = through_loss * 1e9 * 4.3429 * through_delay * 1e-12 / through_Z0 * sqrt(frequency / 1e9);;
     double through_att = pow(10.0, -through_att_db / 10.0);
-    ref.Through = polar<double>(through_att, through_phaseshift);
+    ref.ThroughS12 = polar<double>(through_att, through_phaseshift);
+    // Assume symmetric and perfectly matched through for other parameters
+    ref.ThroughS21 = ref.ThroughS12;
+    ref.ThroughS11 = 0.0;
+    ref.ThroughS22 = 0.0;
 
     return ref;
 }

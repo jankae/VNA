@@ -4,6 +4,7 @@
 #include <qwt_plot.h>
 #include <qwt_plot_grid.h>
 #include "qwtplotpiecewisecurve.h"
+#include <qwt_plot_zoomer.h>
 
 static const QList<QString> displayableParameters = QList<QString>()
     << "S11"
@@ -83,6 +84,8 @@ BodePlot::BodePlot(SParamTable &datatable, QString parameter, QWidget *parent):
     QwtPlotGrid *grid = new QwtPlotGrid();
     grid->setMajorPen(QPen(Qt::DotLine));
     grid->attach(plot);
+
+    auto zoom = new QwtPlotZoomer(plot->canvas());
 
     auto layout = new QGridLayout;
     layout->addWidget(plot);

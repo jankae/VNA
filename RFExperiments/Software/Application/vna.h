@@ -48,7 +48,7 @@ private:
     QProgressDialog calDialog;
 
     // Calibration menu
-    MenuAction *mCalOSL1, *mCalOSL2, *mCalFullOSLT;
+    MenuAction *mCalSOL1, *mCalSOL2, *mCalFullSOLT;
 
     // Status Labels
     QLabel lStart, lCenter, lStop, lSpan, lPoints, lBandwidth;

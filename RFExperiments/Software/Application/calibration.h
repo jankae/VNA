@@ -29,9 +29,9 @@ public:
     void addMeasurement(Measurement type, Protocol::Datapoint &d);
 
     enum class Type {
-        Port1OSL,
-        Port2OSL,
-        FullOSLT,
+        Port1SOL,
+        Port2SOL,
+        FullSOLT,
     };
 
     bool calculationPossible(Type type);
@@ -58,8 +58,8 @@ public:
     }
 private:
     void construct12TermPoints(Calkit c);
-    void constructPort1OSL(Calkit c);
-    void constructPort2OSL(Calkit c);
+    void constructPort1SOL(Calkit c);
+    void constructPort2SOL(Calkit c);
     bool SanityCheckSamples(std::vector<Measurement> &requiredMeasurements);
     class Point
     {
@@ -101,8 +101,8 @@ private:
      * The actual reflection coefficients can be passed on as optional arguments to take into account the non-ideal
      * calibration kit.
      */
-    void computeOSL(std::complex<double> o_m,
-                    std::complex<double> s_m,
+    void computeSOL(std::complex<double> s_m,
+                    std::complex<double> o_m,
                     std::complex<double> l_m,
                     std::complex<double> &directivity,
                     std::complex<double> &match,
@@ -110,7 +110,7 @@ private:
                     std::complex<double> o_c = std::complex<double>(1.0, 0),
                     std::complex<double> s_c = std::complex<double>(-1.0, 0),
                     std::complex<double> l_c = std::complex<double>(0, 0));
-    std::complex<double> correctOSL(std::complex<double> measured,
+    std::complex<double> correctSOL(std::complex<double> measured,
                                     std::complex<double> directivity,
                                     std::complex<double> match,
                                     std::complex<double> tracking);
