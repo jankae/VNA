@@ -3,7 +3,7 @@
 
 #include "menuitem.h"
 #include <QLabel>
-#include <QLineEdit>
+#include <CustomWidgets/siunitedit.h>
 
 class MenuValue : public MenuItem
 {
@@ -17,19 +17,10 @@ public slots:
     void setValue(double value);
     // same as setValue, except that no valueChanged signal is emitted
     void setValueQuiet(double value);
-    void setIncrement(double inc);
     void userSelected() override;
-protected:
-    void keyPressEvent(QKeyEvent *event) override;
-    bool eventFilter(QObject *obj, QEvent *event) override;
 private:
-    void parseNewValue(double factor);
-    void startInputDialog(QString initialInput = QString());
-    double value;
-    double increment;
-    QLineEdit *lvalue;
-    const QString unit, name, prefixes;
-    const int precision;
+    SIUnitEdit *lvalue;
+    const QString name;
 };
 
 #endif // MENUVALUE_H

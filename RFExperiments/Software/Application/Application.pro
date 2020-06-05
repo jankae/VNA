@@ -1,5 +1,6 @@
 HEADERS += \
     ../RFExperiments/Application/Communication/Protocol.hpp \
+    CustomWidgets/siunitedit.h \
     CustomWidgets/toggleswitch.h \
     Menu/menu.h \
     Menu/menuaction.h \
@@ -11,6 +12,7 @@ HEADERS += \
     calkit.h \
     calkitdialog.h \
     device.h \
+    manualcontroldialog.h \
     plot.h \
     qwtplotpiecewisecurve.h \
     smithchart.h \
@@ -24,6 +26,7 @@ HEADERS += \
 
 SOURCES += \
     ../RFExperiments/Application/Communication/Protocol.cpp \
+    CustomWidgets/siunitedit.cpp \
     CustomWidgets/toggleswitch.cpp \
     Menu/menu.cpp \
     Menu/menuaction.cpp \
@@ -36,6 +39,7 @@ SOURCES += \
     calkitdialog.cpp \
     device.cpp \
     main.cpp \
+    manualcontroldialog.cpp \
     qwtplotpiecewisecurve.cpp \
     smithchart.cpp \
     sparamtable.cpp \
@@ -53,7 +57,8 @@ LIBS += -L/usr/lib/ -lqwt-qt5
 QT += widgets charts
 
 FORMS += \
-    calkitdialog.ui
+    calkitdialog.ui \
+    manualcontroldialog.ui
 
 DISTFILES +=
 

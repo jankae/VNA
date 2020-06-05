@@ -51,6 +51,8 @@ entity SPICommands is
            SWEEP_POINTS : out  STD_LOGIC_VECTOR (12 downto 0);
            NSAMPLES : out  STD_LOGIC_VECTOR (16 downto 0);
 			  SETTLING_TIME : out STD_LOGIC_VECTOR (15 downto 0);
+			  EXCITE_PORT1 : out STD_LOGIC;
+			  EXCITE_PORT2 : out STD_LOGIC;
 			  PORT1_EN : out STD_LOGIC;
 			  PORT2_EN : out STD_LOGIC;
 			  REF_EN : out STD_LOGIC;
@@ -201,6 +203,8 @@ begin
 											SYNC_SETTING <= spi_buf_out(6 downto 5);
 											SOURCE_CE_EN <= spi_buf_out(4);
 											LO_CE_EN <= spi_buf_out(3);
+											EXCITE_PORT1 <= spi_buf_out(1);
+											EXCITE_PORT2 <= spi_buf_out(2);
 								when 4 => SETTLING_TIME <= spi_buf_out;
 								
 								when 8 => MAX2871_DEF_0(15 downto 0) <= spi_buf_out;

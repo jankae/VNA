@@ -46,6 +46,8 @@ enum class Periphery {
 	DebugLED = 0x0080,
 	SourceChip = 0x0010,
 	LO1Chip = 0x0008,
+	ExcitePort2 = 0x0004,
+	ExcitePort1 = 0x0002,
 };
 
 enum class Interrupt {
@@ -56,18 +58,26 @@ enum class Interrupt {
 	SweepHalted = 0x0010,
 };
 
+enum class LowpassFilter {
+	M947 = 0x00,
+	M1880 = 0x01,
+	M3500 = 0x02,
+	None = 0x03,
+	Auto = 0xFF,
+};
+
 using HaltedCallback = void(*)(void);
 bool Init(HaltedCallback cb = nullptr);
 void SetNumberOfPoints(uint16_t npoints);
 void SetSamplesPerPoint(uint32_t nsamples);
 void SetSettlingTime(uint16_t us);
-void Enable(Periphery p);
+void Enable(Periphery p, bool enable = true);
 void Disable(Periphery p);
 void EnableInterrupt(Interrupt i);
 void DisableInterrupt(Interrupt i);
 void WriteMAX2871Default(uint32_t *DefaultRegs);
 void WriteSweepConfig(uint16_t pointnum, bool lowband, uint32_t *SourceRegs, uint32_t *LORegs,
-		uint8_t attenuation, uint64_t frequency, bool halt = false);
+		uint8_t attenuation, uint64_t frequency, bool halt = false, LowpassFilter filter = LowpassFilter::Auto);
 using ReadCallback = void(*)(SamplingResult result);
 bool InitiateSampleRead(ReadCallback cb);
 ADCLimits GetADCLimits();

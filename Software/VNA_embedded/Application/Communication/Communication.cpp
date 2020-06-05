@@ -34,6 +34,10 @@ void Communication::Input(uint8_t *buf, uint16_t len) {
 		switch(packet.type) {
 		case Protocol::PacketType::SweepSettings:
 			App::NewSettings(packet.settings);
+			break;
+		case Protocol::PacketType::ManualControl:
+			App::SetManual(packet.manual);
+			break;
 		}
 	} while (handled_len > 0);
 }

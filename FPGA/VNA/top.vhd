@@ -145,6 +145,8 @@ architecture Behavioral of top is
 		SWEEP_RESUME : in STD_LOGIC;
 		ATTENUATOR : OUT std_logic_vector(6 downto 0);
 		SOURCE_FILTER : OUT std_logic_vector(1 downto 0);
+		EXCITE_PORT1 : out STD_LOGIC;
+		EXCITE_PORT2 : out STD_LOGIC;
 		DEBUG_STATUS : out STD_LOGIC_VECTOR (10 downto 0)
 		);
 	END COMPONENT;
@@ -230,6 +232,8 @@ architecture Behavioral of top is
 		SWEEP_POINTS : OUT std_logic_vector(12 downto 0);
 		NSAMPLES : OUT std_logic_vector(16 downto 0);
 		SETTLING_TIME : out STD_LOGIC_VECTOR (15 downto 0);
+		EXCITE_PORT1 : out STD_LOGIC;
+		EXCITE_PORT2 : out STD_LOGIC;
 		PORT1_EN : out STD_LOGIC;
 		PORT2_EN : out STD_LOGIC;
 		REF_EN : out STD_LOGIC;
@@ -322,6 +326,9 @@ architecture Behavioral of top is
 	signal sweep_reset : std_logic;
 	signal sweep_halted : std_logic;
 	signal sweep_resume : std_logic;
+	
+	signal sweep_excite_port1 : std_logic;
+	signal sweep_excite_port2 : std_logic;
 	
 	-- Configuration signals
 	signal settling_time : std_logic_vector(15 downto 0);
@@ -582,6 +589,8 @@ begin
 		ATTENUATOR => ATTENUATION,
 		SOURCE_FILTER => source_filter,
 		SETTLING_TIME => settling_time,
+		EXCITE_PORT1 => sweep_excite_port1,
+		EXCITE_PORT2 => sweep_excite_port2,
 		DEBUG_STATUS => debug
 	);
 	
@@ -644,6 +653,8 @@ begin
 		RESET_MINMAX => adc_reset_minmax,
 		SWEEP_HALTED => sweep_halted,
 		SWEEP_RESUME => sweep_resume,
+		EXCITE_PORT1 => sweep_excite_port1,
+		EXCITE_PORT2 => sweep_excite_port2,
 		DEBUG_STATUS => debug
 	);
 	

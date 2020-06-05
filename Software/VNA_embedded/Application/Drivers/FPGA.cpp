@@ -77,9 +77,13 @@ void FPGA::SetSettlingTime(uint16_t us) {
 	WriteRegister(Reg::SettlingTime, regval);
 }
 
-void FPGA::Enable(Periphery p) {
-	SysCtrlReg |= (uint16_t) p;
-	WriteRegister(Reg::SystemControl, SysCtrlReg);
+void FPGA::Enable(Periphery p, bool enable) {
+	if (enable) {
+		SysCtrlReg |= (uint16_t) p;
+		WriteRegister(Reg::SystemControl, SysCtrlReg);
+	} else {
+		Disable(p);
+	}
 }
 
 void FPGA::Disable(Periphery p) {
@@ -109,7 +113,7 @@ void FPGA::WriteMAX2871Default(uint32_t *DefaultRegs) {
 }
 
 void FPGA::WriteSweepConfig(uint16_t pointnum, bool lowband, uint32_t *SourceRegs, uint32_t *LORegs,
-		uint8_t attenuation, uint64_t frequency, bool halt) {
+		uint8_t attenuation, uint64_t frequency, bool halt, LowpassFilter filter) {
 	uint16_t send[8];
 	// select which point this sweep config is for
 	send[0] = pointnum & 0x1FFF;
@@ -121,13 +125,21 @@ void FPGA::WriteSweepConfig(uint16_t pointnum, bool lowband, uint32_t *SourceReg
 	if (lowband) {
 		send[1] |= 0x4000;
 	}
-	// Select source LP filter
-	if(frequency >= 3500000000) {
-		send[1] |= 0x0600;
-	} else if(frequency >= 1800000000) {
-		send[1] |= 0x0400;
-	} else if(frequency >= 900000000) {
-		send[1] |= 0x0200;
+	switch(filter) {
+	case LowpassFilter::Auto:
+		// Select source LP filter
+		if (frequency >= 3500000000) {
+			send[1] |= 0x0600;
+		} else if (frequency >= 1800000000) {
+			send[1] |= 0x0400;
+		} else if (frequency >= 900000000) {
+			send[1] |= 0x0200;
+		}
+		break;
+	case LowpassFilter::M947: break;
+	case LowpassFilter::M1880: send[1] |= 0x0200; break;
+	case LowpassFilter::M3500: send[1] |= 0x0400; break;
+	case LowpassFilter::None: send[1] |= 0x0600; break;
 	}
 	send[2] = (LORegs[1] & 0x00007FF8) << 1 | (LORegs[0] & 0x00007800) >> 11;
 	send[3] = (LORegs[0] & 0x000007F8) << 5 | (LORegs[0] & 0x7F800000) >> 23;

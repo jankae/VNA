@@ -9,10 +9,10 @@ public:
 		B = 1,
 	};
 	enum class DriveStrength : uint8_t {
-		mA2,
-		mA4,
-		mA6,
-		mA8,
+		mA2 = 0x00,
+		mA4 = 0x01,
+		mA6 = 0x02,
+		mA8 = 0x03,
 	};
 	enum class PLLSource : uint8_t {
 		XTAL,

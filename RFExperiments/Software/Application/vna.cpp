@@ -23,6 +23,7 @@
 #include <QDateTime>
 #include "unit.h"
 #include "CustomWidgets/toggleswitch.h"
+#include "manualcontroldialog.h"
 
 using namespace std;
 
@@ -248,6 +249,12 @@ VNA::VNA(QWidget *parent)
     mCalibration->finalize();
     mMain->addMenu(mCalibration);
 
+    auto mSystem = new Menu(*menuLayout, "System");
+    auto aManual = new MenuAction("Manual Control");
+    mSystem->addItem(aManual);
+    mSystem->finalize();
+    mMain->addMenu(mSystem);
+
     mMain->finalize();
 
     auto updateMenuValues = [=]() {
@@ -439,6 +446,12 @@ VNA::VNA(QWidget *parent)
 
     connect(mEditKit, &MenuAction::triggered, [=](){
         calkit.edit();
+    });
+
+    // Manual control trigger
+    connect(aManual, &MenuAction::triggered, [=]() {
+        auto control = new ManualControlDialog(device, this);
+        control->show();
     });
 
     auto mainWidget = new QWidget;

@@ -8,6 +8,7 @@
 #include <QObject>
 
 Q_DECLARE_METATYPE(Protocol::Datapoint);
+Q_DECLARE_METATYPE(Protocol::Status);
 
 class Device : public QObject
 {
@@ -16,8 +17,10 @@ public:
     Device();
     ~Device();
     bool Configure(Protocol::SweepSettings settings);
+    bool SetManual(Protocol::ManualControl manual);
 signals:
     void DatapointReceived(Protocol::Datapoint);
+    void StatusReceived(Protocol::Status);
 private:
     static constexpr int VID = 1155;
     static constexpr int PID = 22336;

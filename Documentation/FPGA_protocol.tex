@@ -272,7 +272,8 @@ The register contains the number of points per sweep negative one, e.g. set to 1
 \rwbits{9}{2}{SYNC[1:0]}
 \rwbits{11}{1}{SCEN}
 \rwbits{12}{1}{LCEN}
-\robits{13}{2}{reserved}
+\rwbits{13}{1}{EXP2}
+\rwbits{14}{1}{EXP1}
 \rwbits{15}{1}{SPP[16]}
 \end{tikzpicture}
 \end{center}
@@ -287,6 +288,8 @@ The register contains the number of points per sweep negative one, e.g. set to 1
 \item \textbf{LED6:}{User LED 6 control}
 \item \textbf{LED7:}{User LED 7 control}
 \item \textbf{SYNC[1:0]:}{Synchronization control for switching regulator}
+\item \textbf{EXP1:}{Excite Port1 during sweep}
+\item \textbf{EXP2:}{Excite Port2 during sweep}
 \begin{center}
 \begin{tabular}{ c|c }
 Setting & Functionality\\

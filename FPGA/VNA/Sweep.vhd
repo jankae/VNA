@@ -65,6 +65,9 @@ entity Sweep is
 			  
 			  SETTLING_TIME : in STD_LOGIC_VECTOR (15 downto 0);
 			  
+			  EXCITE_PORT1 : in STD_LOGIC;
+			  EXCITE_PORT2 : in STD_LOGIC;
+			  
 			  -- Debug signals
 			  DEBUG_STATUS : out STD_LOGIC_VECTOR (10 downto 0)
 			  );
@@ -130,12 +133,10 @@ begin
 				point_cnt <= (others => '0');
 				state <= TriggerSetup;
 				START_SAMPLING <= '0';
-				PORT_SELECT <= '1';
 				RELOAD_PLL_REGS <= '0';
 			else
 				case state is
 					when TriggerSetup =>
-						PORT_SELECT <= '1';
 						RELOAD_PLL_REGS <= '1';
 						if PLL_RELOAD_DONE = '0' then
 							state <= SettingUp;
@@ -148,11 +149,18 @@ begin
 							-- check if halted sweep is resumed
 							if CONFIG_DATA(111) = '0' or SWEEP_RESUME = '1' then
 								SWEEP_HALTED <= '0';
-								state <= SettlingPort1;
+								if EXCITE_PORT1 = '1' then
+									state <= SettlingPort1;
+								elsif EXCITE_PORT2 = '1' then
+									state <= SettlingPort2;
+								else
+									state <= Done;
+								end if;
 								settling_cnt <= unsigned(SETTLING_TIME);
 							end if;
 						end if;
 					when SettlingPort1 =>
+						PORT_SELECT <= '1';
 						-- wait for settling time to elapse
 						if settling_cnt > 0 then
 							settling_cnt <= settling_cnt - 1;
@@ -166,11 +174,15 @@ begin
 						-- wait for sampling to finish
 						START_SAMPLING <= '0';
 						if SAMPLING_BUSY = '0' then
-							state <= SettlingPort2;
-							PORT_SELECT <= '0';
+							if EXCITE_PORT2 = '1' then
+								state <= SettlingPort2;
+							else
+								state <= Done;
+							end if;
 							settling_cnt <= unsigned(SETTLING_TIME);
 						end if;
 					when SettlingPort2 =>
+						PORT_SELECT <= '0';
 						-- wait for settling time to elapse
 						if settling_cnt > 0 then
 							settling_cnt <= settling_cnt - 1;

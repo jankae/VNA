@@ -135,6 +135,31 @@ bool Device::Configure(Protocol::SweepSettings settings)
     }
 }
 
+bool Device::SetManual(Protocol::ManualControl manual)
+{
+    if(m_connected) {
+        unsigned char buffer[128];
+        Protocol::PacketInfo p;
+        p.type = Protocol::PacketType::ManualControl;
+        p.manual = manual;
+        unsigned int length = Protocol::EncodePacket(p, buffer, sizeof(buffer));
+        if(!length) {
+            BOOST_LOG_TRIVIAL(error) << "Failed to encode packet";
+            return false;
+        }
+        int actual_length;
+        auto ret = libusb_bulk_transfer(m_handle, EP_Out_Addr, buffer, length, &actual_length, 0);
+        if(ret < 0) {
+            BOOST_LOG_TRIVIAL(error) << "Error sending data: "
+                                    << libusb_strerror((libusb_error) ret);
+            return false;
+        }
+        return true;
+    } else {
+        return false;
+    }
+}
+
 void Device::ReceiveThread()
 {
     BOOST_LOG_TRIVIAL(info) << "Receive thread started" << flush;
@@ -169,6 +194,9 @@ void Device::ReceiveThread()
                     if(packet.type == Protocol::PacketType::Datapoint) {
                         BOOST_LOG_TRIVIAL(debug) << "Got new datapoint: " << packet.datapoint.pointNum << std::flush;
                         emit DatapointReceived(packet.datapoint);
+                    } else if(packet.type == Protocol::PacketType::Status) {
+                        BOOST_LOG_TRIVIAL(debug) << "Got status" << std::flush;
+                        emit StatusReceived(packet.status);
                     }
                 } while (handled_len > 0);
             }

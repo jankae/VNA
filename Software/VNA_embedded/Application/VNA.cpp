@@ -22,11 +22,13 @@ static constexpr uint32_t IF1 = 60100000;
 static constexpr uint32_t IF1_alternate = 57000000;
 static constexpr uint32_t IF2 = 250000;
 
-static VNA::Callback callback;
+static VNA::SweepCallback sweepCallback;
+static VNA::StatusCallback statusCallback;
 static Protocol::SweepSettings settings;
 static uint16_t pointCnt;
 static bool excitingPort1;
 static Protocol::Datapoint data;
+static bool manualMode = false;
 
 using IFTableEntry = struct {
 	uint16_t pointCnt;
@@ -74,48 +76,56 @@ static void HaltedCallback() {
 }
 
 static void ReadComplete(FPGA::SamplingResult result) {
-	auto port1_raw = std::complex<float>(result.P1I, result.P1Q);
-	auto port2_raw = std::complex<float>(result.P2I, result.P2Q);
-	auto ref = std::complex<float>(result.RefI, result.RefQ);
-	auto port1 = port1_raw / ref;
-	auto port2 = port2_raw / ref;
-	if(excitingPort1) {
-		data.pointNum = pointCnt;
-		data.frequency = settings.f_start + (settings.f_stop - settings.f_start) * pointCnt / (settings.points - 1);
-		data.real_S11 = port1.real();
-		data.imag_S11 = port1.imag();
-		data.real_S21 = port2.real();
-		data.imag_S21 = port2.imag();
-	} else {
-		data.real_S12 = port1.real();
-		data.imag_S12 = port1.imag();
-		data.real_S22 = port2.real();
-		data.imag_S22 = port2.imag();
-		if (callback) {
-			callback(data);
+	if(!manualMode) {
+		// normal sweep mode
+		auto port1_raw = std::complex<float>(result.P1I, result.P1Q);
+		auto port2_raw = std::complex<float>(result.P2I, result.P2Q);
+		auto ref = std::complex<float>(result.RefI, result.RefQ);
+		auto port1 = port1_raw / ref;
+		auto port2 = port2_raw / ref;
+		if(excitingPort1) {
+			data.pointNum = pointCnt;
+			data.frequency = settings.f_start + (settings.f_stop - settings.f_start) * pointCnt / (settings.points - 1);
+			data.real_S11 = port1.real();
+			data.imag_S11 = port1.imag();
+			data.real_S21 = port2.real();
+			data.imag_S21 = port2.imag();
+		} else {
+			data.real_S12 = port1.real();
+			data.imag_S12 = port1.imag();
+			data.real_S22 = port2.real();
+			data.imag_S22 = port2.imag();
+			if (sweepCallback) {
+				sweepCallback(data);
+			}
+			pointCnt++;
+			if (pointCnt >= settings.points) {
+				// reached end of sweep, start again
+				pointCnt = 0;
+				IFTableIndexCnt = 0;
+	//			FPGA::StartSweep();
+			}
 		}
-		pointCnt++;
-		if (pointCnt >= settings.points) {
-			// reached end of sweep, start again
-			pointCnt = 0;
-			IFTableIndexCnt = 0;
-//			FPGA::StartSweep();
+		excitingPort1 = !excitingPort1;
+	} else {
+		// Manual control mode, simply pass on raw result
+		if(statusCallback) {
+			statusCallback(result);
 		}
 	}
-	excitingPort1 = !excitingPort1;
 }
 
 static void FPGA_Interrupt(void*) {
 	FPGA::InitiateSampleRead(ReadComplete);
 }
 
-bool VNA::Init(Callback cb) {
+bool VNA::Init() {
 	LOG_DEBUG("Initializing...");
 
 	// Wait for FPGA to finish configuration
 	Delay::ms(2000);
+	manualMode = false;
 
-	callback = cb;
 	Si5351.Init();
 
 	// Use Si5351 to generate reference frequencies for other PLLs and ADC
@@ -205,7 +215,12 @@ bool VNA::Init(Callback cb) {
 	return true;
 }
 
-bool VNA::ConfigureSweep(Protocol::SweepSettings s) {
+bool VNA::ConfigureSweep(Protocol::SweepSettings s, SweepCallback cb) {
+	if (manualMode) {
+		// was used in manual mode last, do full initialization before starting sweep
+		VNA::Init();
+	}
+	sweepCallback = cb;
 	settings = s;
 	// Abort possible active sweep first
 	FPGA::AbortSweep();
@@ -309,10 +324,76 @@ bool VNA::ConfigureSweep(Protocol::SweepSettings s) {
 	FPGA::Enable(FPGA::Periphery::SourceRF);
 	FPGA::Enable(FPGA::Periphery::LO1Chip);
 	FPGA::Enable(FPGA::Periphery::LO1RF);
+	FPGA::Enable(FPGA::Periphery::ExcitePort1);
+	FPGA::Enable(FPGA::Periphery::ExcitePort2);
 	pointCnt = 0;
 	excitingPort1 = true;
 	IFTableIndexCnt = 0;
 	// Start the sweep
+	FPGA::StartSweep();
+	return true;
+}
+
+bool VNA::ConfigureManual(Protocol::ManualControl m, StatusCallback cb) {
+	manualMode = true;
+	statusCallback = cb;
+	FPGA::AbortSweep();
+	// Configure lowband source
+	if (m.SourceLowEN) {
+		Si5351.SetCLK(0, m.SourceLowFrequency, Si5351C::PLL::B,
+				(Si5351C::DriveStrength) m.SourceLowPower);
+		Si5351.Enable(0);
+	} else {
+		Si5351.Disable(0);
+	}
+	// Configure highband source
+	Source.SetFrequency(m.SourceHighFrequency);
+	Source.SetPowerOutA((MAX2871::Power) m.SourceHighPower);
+
+	// Configure LO1
+	LO1.SetFrequency(m.LO1Frequency);
+
+	// Configure LO2
+	if(m.LO2EN) {
+		// Generate second LO with Si5351
+		Si5351.SetCLK(1, m.LO2Frequency, Si5351C::PLL::B, Si5351C::DriveStrength::mA2);
+		Si5351.Enable(1);
+		Si5351.SetCLK(4, m.LO2Frequency, Si5351C::PLL::B, Si5351C::DriveStrength::mA2);
+		Si5351.Enable(4);
+		Si5351.SetCLK(5, m.LO2Frequency, Si5351C::PLL::B, Si5351C::DriveStrength::mA2);
+		Si5351.Enable(5);
+
+		// PLL reset appears to realign phases of clock signals
+		Si5351.ResetPLL(Si5351C::PLL::B);
+	} else {
+		Si5351.Disable(1);
+		Si5351.Disable(4);
+		Si5351.Disable(5);
+	}
+
+	FPGA::WriteMAX2871Default(Source.GetRegisters());
+
+	FPGA::SetNumberOfPoints(1);
+	FPGA::SetSamplesPerPoint(m.Samples);
+	FPGA::SetSettlingTime(1);
+
+	// Configure single sweep point
+	FPGA::WriteSweepConfig(0, !m.SourceHighband, Source.GetRegisters(),
+			LO1.GetRegisters(), m.attenuator, 0, 0,
+			(FPGA::LowpassFilter) m.SourceHighLowpass);
+
+	// Enable/Disable periphery
+	FPGA::Enable(FPGA::Periphery::SourceChip, m.SourceHighCE);
+	FPGA::Enable(FPGA::Periphery::SourceRF, m.SourceHighRFEN);
+	FPGA::Enable(FPGA::Periphery::LO1Chip, m.LO1CE);
+	FPGA::Enable(FPGA::Periphery::LO1RF, m.LO1RFEN);
+	FPGA::Enable(FPGA::Periphery::Amplifier, m.AmplifierEN);
+	FPGA::Enable(FPGA::Periphery::Port1Mixer, m.Port1EN);
+	FPGA::Enable(FPGA::Periphery::Port2Mixer, m.Port2EN);
+	FPGA::Enable(FPGA::Periphery::RefMixer, m.RefEN);
+	FPGA::Enable(FPGA::Periphery::ExcitePort1, m.PortSwitch == 0);
+	FPGA::Enable(FPGA::Periphery::ExcitePort2, m.PortSwitch == 1);
+
 	FPGA::StartSweep();
 	return true;
 }
