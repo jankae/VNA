@@ -75,7 +75,7 @@
        <item>
         <widget class="QStackedWidget" name="open_stack">
          <property name="currentIndex">
-          <number>1</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="page">
           <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -156,185 +156,9 @@
           </layout>
          </widget>
          <widget class="QWidget" name="page_2">
-          <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0,1">
+          <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0">
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_3">
-             <item>
-              <widget class="QLineEdit" name="open_file">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Maximum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="open_browse">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>20</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>...</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <widget class="QLabel" name="open_status">
-             <property name="palette">
-              <palette>
-               <active>
-                <colorrole role="WindowText">
-                 <brush brushstyle="SolidPattern">
-                  <color alpha="255">
-                   <red>239</red>
-                   <green>41</green>
-                   <blue>41</blue>
-                  </color>
-                 </brush>
-                </colorrole>
-               </active>
-               <inactive>
-                <colorrole role="WindowText">
-                 <brush brushstyle="SolidPattern">
-                  <color alpha="255">
-                   <red>239</red>
-                   <green>41</green>
-                   <blue>41</blue>
-                  </color>
-                 </brush>
-                </colorrole>
-               </inactive>
-               <disabled>
-                <colorrole role="WindowText">
-                 <brush brushstyle="SolidPattern">
-                  <color alpha="255">
-                   <red>190</red>
-                   <green>190</green>
-                   <blue>190</blue>
-                  </color>
-                 </brush>
-                </colorrole>
-               </disabled>
-              </palette>
-             </property>
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_4">
-             <item>
-              <widget class="QRadioButton" name="open_S11">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>S11</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">openSparam</string>
-               </attribute>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="open_S22">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>S22</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">openSparam</string>
-               </attribute>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="open_S33">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>S33</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">openSparam</string>
-               </attribute>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="open_S44">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>S44</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">openSparam</string>
-               </attribute>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QFormLayout" name="formLayout_6">
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_17">
-               <property name="text">
-                <string>Points:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QLineEdit" name="open_points">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_24">
-               <property name="text">
-                <string>Lower Frequency:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QLineEdit" name="open_lower">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_25">
-               <property name="text">
-                <string>Upper Frequency:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QLineEdit" name="open_upper">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-            </layout>
+            <widget class="TouchstoneImport" name="open_touchstone" native="true"/>
            </item>
           </layout>
          </widget>
@@ -393,7 +217,7 @@
        <item>
         <widget class="QStackedWidget" name="short_stack">
          <property name="currentIndex">
-          <number>1</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="page_3">
           <layout class="QHBoxLayout" name="horizontalLayout_6">
@@ -474,239 +298,9 @@
           </layout>
          </widget>
          <widget class="QWidget" name="page_4">
-          <layout class="QVBoxLayout" name="verticalLayout_5" stretch="0,0,0,1">
+          <layout class="QVBoxLayout" name="verticalLayout_5" stretch="0">
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_7">
-             <item>
-              <widget class="QLineEdit" name="short_file">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Maximum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="short_browse">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>20</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>...</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <widget class="QLabel" name="short_status">
-             <property name="palette">
-              <palette>
-               <active>
-                <colorrole role="WindowText">
-                 <brush brushstyle="SolidPattern">
-                  <color alpha="255">
-                   <red>239</red>
-                   <green>41</green>
-                   <blue>41</blue>
-                  </color>
-                 </brush>
-                </colorrole>
-                <colorrole role="Text">
-                 <brush brushstyle="SolidPattern">
-                  <color alpha="255">
-                   <red>0</red>
-                   <green>0</green>
-                   <blue>0</blue>
-                  </color>
-                 </brush>
-                </colorrole>
-                <colorrole role="PlaceholderText">
-                 <brush brushstyle="SolidPattern">
-                  <color alpha="128">
-                   <red>239</red>
-                   <green>41</green>
-                   <blue>41</blue>
-                  </color>
-                 </brush>
-                </colorrole>
-               </active>
-               <inactive>
-                <colorrole role="WindowText">
-                 <brush brushstyle="SolidPattern">
-                  <color alpha="255">
-                   <red>239</red>
-                   <green>41</green>
-                   <blue>41</blue>
-                  </color>
-                 </brush>
-                </colorrole>
-                <colorrole role="Text">
-                 <brush brushstyle="SolidPattern">
-                  <color alpha="255">
-                   <red>0</red>
-                   <green>0</green>
-                   <blue>0</blue>
-                  </color>
-                 </brush>
-                </colorrole>
-                <colorrole role="PlaceholderText">
-                 <brush brushstyle="SolidPattern">
-                  <color alpha="128">
-                   <red>239</red>
-                   <green>41</green>
-                   <blue>41</blue>
-                  </color>
-                 </brush>
-                </colorrole>
-               </inactive>
-               <disabled>
-                <colorrole role="WindowText">
-                 <brush brushstyle="SolidPattern">
-                  <color alpha="255">
-                   <red>190</red>
-                   <green>190</green>
-                   <blue>190</blue>
-                  </color>
-                 </brush>
-                </colorrole>
-                <colorrole role="Text">
-                 <brush brushstyle="SolidPattern">
-                  <color alpha="255">
-                   <red>190</red>
-                   <green>190</green>
-                   <blue>190</blue>
-                  </color>
-                 </brush>
-                </colorrole>
-                <colorrole role="PlaceholderText">
-                 <brush brushstyle="SolidPattern">
-                  <color alpha="128">
-                   <red>0</red>
-                   <green>0</green>
-                   <blue>0</blue>
-                  </color>
-                 </brush>
-                </colorrole>
-               </disabled>
-              </palette>
-             </property>
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_8">
-             <item>
-              <widget class="QRadioButton" name="short_S11">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>S11</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">shortSparam</string>
-               </attribute>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="short_S22">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>S22</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">shortSparam</string>
-               </attribute>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="short_S33">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>S33</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">shortSparam</string>
-               </attribute>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="short_S44">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>S44</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">shortSparam</string>
-               </attribute>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QFormLayout" name="formLayout_7">
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_18">
-               <property name="text">
-                <string>Points:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QLineEdit" name="short_points">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_26">
-               <property name="text">
-                <string>Lower Frequency:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QLineEdit" name="short_lower">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_27">
-               <property name="text">
-                <string>Upper Frequency:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QLineEdit" name="short_upper">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-            </layout>
+            <widget class="TouchstoneImport" name="short_touchstone" native="true"/>
            </item>
           </layout>
          </widget>
@@ -765,7 +359,7 @@
        <item>
         <widget class="QStackedWidget" name="load_stack">
          <property name="currentIndex">
-          <number>1</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="page_5">
           <layout class="QHBoxLayout" name="horizontalLayout_10">
@@ -786,239 +380,9 @@
           </layout>
          </widget>
          <widget class="QWidget" name="page_6">
-          <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0,0,0,1">
+          <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0">
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_11">
-             <item>
-              <widget class="QLineEdit" name="load_file">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Maximum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="load_browse">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>20</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>...</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <widget class="QLabel" name="load_status">
-             <property name="palette">
-              <palette>
-               <active>
-                <colorrole role="WindowText">
-                 <brush brushstyle="SolidPattern">
-                  <color alpha="255">
-                   <red>239</red>
-                   <green>41</green>
-                   <blue>41</blue>
-                  </color>
-                 </brush>
-                </colorrole>
-                <colorrole role="Text">
-                 <brush brushstyle="SolidPattern">
-                  <color alpha="255">
-                   <red>0</red>
-                   <green>0</green>
-                   <blue>0</blue>
-                  </color>
-                 </brush>
-                </colorrole>
-                <colorrole role="PlaceholderText">
-                 <brush brushstyle="SolidPattern">
-                  <color alpha="128">
-                   <red>239</red>
-                   <green>41</green>
-                   <blue>41</blue>
-                  </color>
-                 </brush>
-                </colorrole>
-               </active>
-               <inactive>
-                <colorrole role="WindowText">
-                 <brush brushstyle="SolidPattern">
-                  <color alpha="255">
-                   <red>239</red>
-                   <green>41</green>
-                   <blue>41</blue>
-                  </color>
-                 </brush>
-                </colorrole>
-                <colorrole role="Text">
-                 <brush brushstyle="SolidPattern">
-                  <color alpha="255">
-                   <red>0</red>
-                   <green>0</green>
-                   <blue>0</blue>
-                  </color>
-                 </brush>
-                </colorrole>
-                <colorrole role="PlaceholderText">
-                 <brush brushstyle="SolidPattern">
-                  <color alpha="128">
-                   <red>239</red>
-                   <green>41</green>
-                   <blue>41</blue>
-                  </color>
-                 </brush>
-                </colorrole>
-               </inactive>
-               <disabled>
-                <colorrole role="WindowText">
-                 <brush brushstyle="SolidPattern">
-                  <color alpha="255">
-                   <red>190</red>
-                   <green>190</green>
-                   <blue>190</blue>
-                  </color>
-                 </brush>
-                </colorrole>
-                <colorrole role="Text">
-                 <brush brushstyle="SolidPattern">
-                  <color alpha="255">
-                   <red>190</red>
-                   <green>190</green>
-                   <blue>190</blue>
-                  </color>
-                 </brush>
-                </colorrole>
-                <colorrole role="PlaceholderText">
-                 <brush brushstyle="SolidPattern">
-                  <color alpha="128">
-                   <red>0</red>
-                   <green>0</green>
-                   <blue>0</blue>
-                  </color>
-                 </brush>
-                </colorrole>
-               </disabled>
-              </palette>
-             </property>
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_12">
-             <item>
-              <widget class="QRadioButton" name="load_S11">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>S11</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">loadSparam</string>
-               </attribute>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="load_S22">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>S22</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">loadSparam</string>
-               </attribute>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="load_S33">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>S33</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">loadSparam</string>
-               </attribute>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="load_S44">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>S44</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">loadSparam</string>
-               </attribute>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QFormLayout" name="formLayout_8">
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_31">
-               <property name="text">
-                <string>Points:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QLineEdit" name="load_points">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_32">
-               <property name="text">
-                <string>Lower Frequency:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QLineEdit" name="load_lower">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_33">
-               <property name="text">
-                <string>Upper Frequency:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QLineEdit" name="load_upper">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-            </layout>
+            <widget class="TouchstoneImport" name="load_touchstone" native="true"/>
            </item>
           </layout>
          </widget>
@@ -1077,7 +441,7 @@
        <item>
         <widget class="QStackedWidget" name="through_stack">
          <property name="currentIndex">
-          <number>1</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="page_7">
           <layout class="QHBoxLayout" name="horizontalLayout_14">
@@ -1118,239 +482,9 @@
           </layout>
          </widget>
          <widget class="QWidget" name="page_8">
-          <layout class="QVBoxLayout" name="verticalLayout_8" stretch="0,0,0,1">
+          <layout class="QVBoxLayout" name="verticalLayout_8" stretch="0">
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_15">
-             <item>
-              <widget class="QLineEdit" name="through_file">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Maximum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="through_browse">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>20</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>...</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <widget class="QLabel" name="through_status">
-             <property name="palette">
-              <palette>
-               <active>
-                <colorrole role="WindowText">
-                 <brush brushstyle="SolidPattern">
-                  <color alpha="255">
-                   <red>239</red>
-                   <green>41</green>
-                   <blue>41</blue>
-                  </color>
-                 </brush>
-                </colorrole>
-                <colorrole role="Text">
-                 <brush brushstyle="SolidPattern">
-                  <color alpha="255">
-                   <red>0</red>
-                   <green>0</green>
-                   <blue>0</blue>
-                  </color>
-                 </brush>
-                </colorrole>
-                <colorrole role="PlaceholderText">
-                 <brush brushstyle="SolidPattern">
-                  <color alpha="128">
-                   <red>239</red>
-                   <green>41</green>
-                   <blue>41</blue>
-                  </color>
-                 </brush>
-                </colorrole>
-               </active>
-               <inactive>
-                <colorrole role="WindowText">
-                 <brush brushstyle="SolidPattern">
-                  <color alpha="255">
-                   <red>239</red>
-                   <green>41</green>
-                   <blue>41</blue>
-                  </color>
-                 </brush>
-                </colorrole>
-                <colorrole role="Text">
-                 <brush brushstyle="SolidPattern">
-                  <color alpha="255">
-                   <red>0</red>
-                   <green>0</green>
-                   <blue>0</blue>
-                  </color>
-                 </brush>
-                </colorrole>
-                <colorrole role="PlaceholderText">
-                 <brush brushstyle="SolidPattern">
-                  <color alpha="128">
-                   <red>239</red>
-                   <green>41</green>
-                   <blue>41</blue>
-                  </color>
-                 </brush>
-                </colorrole>
-               </inactive>
-               <disabled>
-                <colorrole role="WindowText">
-                 <brush brushstyle="SolidPattern">
-                  <color alpha="255">
-                   <red>190</red>
-                   <green>190</green>
-                   <blue>190</blue>
-                  </color>
-                 </brush>
-                </colorrole>
-                <colorrole role="Text">
-                 <brush brushstyle="SolidPattern">
-                  <color alpha="255">
-                   <red>190</red>
-                   <green>190</green>
-                   <blue>190</blue>
-                  </color>
-                 </brush>
-                </colorrole>
-                <colorrole role="PlaceholderText">
-                 <brush brushstyle="SolidPattern">
-                  <color alpha="128">
-                   <red>0</red>
-                   <green>0</green>
-                   <blue>0</blue>
-                  </color>
-                 </brush>
-                </colorrole>
-               </disabled>
-              </palette>
-             </property>
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_16">
-             <item>
-              <widget class="QRadioButton" name="through_S11">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>S11</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">throughSparam</string>
-               </attribute>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="through_S22">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>S22</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">throughSparam</string>
-               </attribute>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="through_S33">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>S33</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">throughSparam</string>
-               </attribute>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="through_S44">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>S44</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">throughSparam</string>
-               </attribute>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QFormLayout" name="formLayout_9">
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_36">
-               <property name="text">
-                <string>Points:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QLineEdit" name="through_points">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_37">
-               <property name="text">
-                <string>Lower Frequency:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QLineEdit" name="through_lower">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_38">
-               <property name="text">
-                <string>Upper Frequency:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QLineEdit" name="through_upper">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-            </layout>
+            <widget class="TouchstoneImport" name="through_touchstone" native="true"/>
            </item>
           </layout>
          </widget>
@@ -1375,6 +509,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>TouchstoneImport</class>
+   <extends>QWidget</extends>
+   <header>CustomWidgets/touchstoneimport.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>open_Z0</tabstop>
   <tabstop>open_delay</tabstop>
@@ -1384,15 +526,80 @@
   <tabstop>open_C2</tabstop>
  </tabstops>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>OpenType</sender>
+   <signal>buttonClicked(int)</signal>
+   <receiver>open_stack</receiver>
+   <slot>setCurrentIndex(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>141</x>
+     <y>187</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ShortType</sender>
+   <signal>buttonClicked(int)</signal>
+   <receiver>short_stack</receiver>
+   <slot>setCurrentIndex(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>420</x>
+     <y>187</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>LoadType</sender>
+   <signal>buttonClicked(int)</signal>
+   <receiver>load_stack</receiver>
+   <slot>setCurrentIndex(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>187</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ThroughType</sender>
+   <signal>buttonClicked(int)</signal>
+   <receiver>through_stack</receiver>
+   <slot>setCurrentIndex(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>560</x>
+     <y>323</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>978</x>
+     <y>187</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
  <buttongroups>
-  <buttongroup name="OpenType"/>
-  <buttongroup name="ShortType"/>
-  <buttongroup name="LoadType"/>
-  <buttongroup name="loadSparam"/>
   <buttongroup name="shortSparam"/>
-  <buttongroup name="openSparam"/>
   <buttongroup name="throughSparam"/>
+  <buttongroup name="LoadType"/>
+  <buttongroup name="ShortType"/>
   <buttongroup name="ThroughType"/>
+  <buttongroup name="loadSparam"/>
+  <buttongroup name="OpenType"/>
+  <buttongroup name="openSparam"/>
  </buttongroups>
 </ui>

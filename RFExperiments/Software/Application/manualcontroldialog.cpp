@@ -133,10 +133,12 @@ ManualControlDialog::ManualControlDialog(Device &dev, QWidget *parent) :
     MakeReadOnly(ui->port1max);
     MakeReadOnly(ui->port1mag);
     MakeReadOnly(ui->port1phase);
+    MakeReadOnly(ui->port1referenced);
     MakeReadOnly(ui->port2min);
     MakeReadOnly(ui->port2max);
     MakeReadOnly(ui->port2mag);
     MakeReadOnly(ui->port2phase);
+    MakeReadOnly(ui->port2referenced);
     MakeReadOnly(ui->refmin);
     MakeReadOnly(ui->refmax);
     MakeReadOnly(ui->refmag);
@@ -201,6 +203,14 @@ void ManualControlDialog::NewStatus(Protocol::Status status)
     auto ref = complex<double>(status.refreal, status.refimag);
     ui->refmag->setText(QString::number(abs(ref)));
     ui->refphase->setText(QString::number(arg(ref)*180/M_PI));
+
+    auto port1referenced = port1 / ref;
+    auto port2referenced = port2 / ref;
+    auto port1db = 20*log10(abs(port1referenced));
+    auto port2db = 20*log10(abs(port2referenced));
+
+    ui->port1referenced->setText(QString::number(port1db, 'f', 1) + "db@" + QString::number(arg(port1referenced)*180/M_PI, 'f', 0) + "°");
+    ui->port2referenced->setText(QString::number(port2db, 'f', 1) + "db@" + QString::number(arg(port2referenced)*180/M_PI, 'f', 0) + "°");
 
     // PLL state
     ui->SourceLocked->setChecked(status.source_locked);

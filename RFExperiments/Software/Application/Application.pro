@@ -2,11 +2,16 @@ HEADERS += \
     ../RFExperiments/Application/Communication/Protocol.hpp \
     CustomWidgets/siunitedit.h \
     CustomWidgets/toggleswitch.h \
+    CustomWidgets/touchstoneimport.h \
     Menu/menu.h \
     Menu/menuaction.h \
     Menu/menubool.h \
     Menu/menuitem.h \
     Menu/menuvalue.h \
+    Traces/trace.h \
+    Traces/traceeditdialog.h \
+    Traces/tracemodel.h \
+    Traces/tracewidget.h \
     bodeplot.h \
     calibration.h \
     calkit.h \
@@ -19,7 +24,6 @@ HEADERS += \
     sparam.h \
     sparamtable.h \
     touchstone.h \
-    trace.h \
     unit.h \
     valueinput.h \
     vna.h
@@ -28,11 +32,16 @@ SOURCES += \
     ../RFExperiments/Application/Communication/Protocol.cpp \
     CustomWidgets/siunitedit.cpp \
     CustomWidgets/toggleswitch.cpp \
+    CustomWidgets/touchstoneimport.cpp \
     Menu/menu.cpp \
     Menu/menuaction.cpp \
     Menu/menubool.cpp \
     Menu/menuitem.cpp \
     Menu/menuvalue.cpp \
+    Traces/trace.cpp \
+    Traces/traceeditdialog.cpp \
+    Traces/tracemodel.cpp \
+    Traces/tracewidget.cpp \
     bodeplot.cpp \
     calibration.cpp \
     calkit.cpp \
@@ -44,7 +53,6 @@ SOURCES += \
     smithchart.cpp \
     sparamtable.cpp \
     touchstone.cpp \
-    trace.cpp \
     unit.cpp \
     valueinput.cpp \
     vna.cpp
@@ -57,6 +65,9 @@ LIBS += -L/usr/lib/ -lqwt-qt5
 QT += widgets charts
 
 FORMS += \
+    CustomWidgets/touchstoneimport.ui \
+    Traces/traceeditdialog.ui \
+    Traces/tracewidget.ui \
     calkitdialog.ui \
     manualcontroldialog.ui
 

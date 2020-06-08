@@ -24,6 +24,8 @@
 #include "unit.h"
 #include "CustomWidgets/toggleswitch.h"
 #include "manualcontroldialog.h"
+#include "Traces/tracemodel.h"
+#include "Traces/tracewidget.h"
 
 using namespace std;
 
@@ -114,6 +116,12 @@ VNA::VNA(QWidget *parent)
         statusLayout->addWidget(&lCalibration);
     }
     statusLayout->addStretch();
+
+    auto tm = new TraceModel();
+    auto tw = new TraceWidget(*tm);
+    // trigger creation of initial trace
+    tw->on_add_clicked();
+    statusLayout->addWidget(tw);
 
     plots.append(new SmithChart(dataTable, "S11"));
     plots.append(new BodePlot(dataTable, "S21"));
@@ -459,6 +467,7 @@ VNA::VNA(QWidget *parent)
     mainWidget->setLayout(mainLayout);
     auto statusWidget = new QWidget;
     statusWidget->setLayout(statusLayout);
+    statusWidget->setFixedWidth(150);
     mainLayout->addWidget(statusWidget);
     auto plotWidget = new QWidget;
     plotWidget->setLayout(&plotLayout);
