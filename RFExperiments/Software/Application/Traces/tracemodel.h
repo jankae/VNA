@@ -4,6 +4,7 @@
 #include <QAbstractTableModel>
 #include "trace.h"
 #include <vector>
+#include "device.h"
 
 class TraceModel : public QAbstractTableModel
 {
@@ -21,8 +22,13 @@ public:
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
 
+    std::vector<Trace*> getTraces();
 signals:
     void traceAdded(Trace *t);
+
+public slots:
+    void clearVNAData();
+    void addVNAData(Protocol::Datapoint d);
 
 private:
     std::vector<Trace*> traces;

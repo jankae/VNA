@@ -111,6 +111,37 @@
          </item>
         </widget>
        </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Parameter:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QComboBox" name="CLiveParam">
+         <item>
+          <property name="text">
+           <string>S11</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>S12</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>S21</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>S22</string>
+          </property>
+         </item>
+        </widget>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="page_2">
@@ -159,8 +190,6 @@
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="GPort1"/>
-  <buttongroup name="GPort2"/>
   <buttongroup name="GSource"/>
  </buttongroups>
 </ui>

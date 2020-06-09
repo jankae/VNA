@@ -10,6 +10,7 @@
 #include "calibration.h"
 #include <QProgressDialog>
 #include "Menu/menuaction.h"
+#include "Traces/tracemodel.h"
 
 class VNA : public QMainWindow
 {
@@ -37,6 +38,8 @@ private:
     int fsRow, fsColumn, fsRowSpan, fsColumnSpan;
     void SettingsChanged();
     SParamTable dataTable;
+    TraceModel traceModel;
+
 
     // Calibration
     Calibration cal;

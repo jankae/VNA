@@ -11,6 +11,8 @@ HEADERS += \
     Traces/trace.h \
     Traces/traceeditdialog.h \
     Traces/tracemodel.h \
+    Traces/traceplot.h \
+    Traces/tracesmithchart.h \
     Traces/tracewidget.h \
     bodeplot.h \
     calibration.h \
@@ -41,6 +43,8 @@ SOURCES += \
     Traces/trace.cpp \
     Traces/traceeditdialog.cpp \
     Traces/tracemodel.cpp \
+    Traces/traceplot.cpp \
+    Traces/tracesmithchart.cpp \
     Traces/tracewidget.cpp \
     bodeplot.cpp \
     calibration.cpp \

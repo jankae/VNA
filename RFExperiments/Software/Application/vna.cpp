@@ -26,6 +26,7 @@
 #include "manualcontroldialog.h"
 #include "Traces/tracemodel.h"
 #include "Traces/tracewidget.h"
+#include "Traces/tracesmithchart.h"
 
 using namespace std;
 
@@ -117,11 +118,26 @@ VNA::VNA(QWidget *parent)
     }
     statusLayout->addStretch();
 
-    auto tm = new TraceModel();
-    auto tw = new TraceWidget(*tm);
-    // trigger creation of initial trace
-    tw->on_add_clicked();
+    auto tw = new TraceWidget(traceModel);
+    // Create default traces
+    auto tS11 = new Trace("S11", Qt::darkYellow);
+    tS11->fromLivedata(Trace::LivedataType::Overwrite, Trace::LiveParameter::S11);
+    traceModel.addTrace(tS11);
+    auto tS12 = new Trace("S12", Qt::blue);
+    tS12->fromLivedata(Trace::LivedataType::Overwrite, Trace::LiveParameter::S12);
+    traceModel.addTrace(tS12);
+    auto tS21 = new Trace("S21", Qt::green);
+    tS21->fromLivedata(Trace::LivedataType::Overwrite, Trace::LiveParameter::S21);
+    traceModel.addTrace(tS21);
+    auto tS22 = new Trace("S22", Qt::red);
+    tS22->fromLivedata(Trace::LivedataType::Overwrite, Trace::LiveParameter::S22);
+    traceModel.addTrace(tS22);
     statusLayout->addWidget(tw);
+
+    auto tracesmith1 = new TraceSmithChart(traceModel);
+    tracesmith1->enableTrace(tS11, true);
+    auto tracesmith2 = new TraceSmithChart(traceModel);
+    tracesmith2->enableTrace(tS22, true);
 
     plots.append(new SmithChart(dataTable, "S11"));
     plots.append(new BodePlot(dataTable, "S21"));
@@ -143,10 +159,11 @@ VNA::VNA(QWidget *parent)
         plotLayout.setRowStretch(i, 1);
     }
 
-    plotLayout.addWidget(plots[0], 0, 0);
+//    plotLayout.addWidget(plots[0], 0, 0);
+    plotLayout.addWidget(tracesmith1, 0, 0);
     plotLayout.addWidget(plots[1], 0, 1);
     plotLayout.addWidget(plots[2], 1, 0);
-    plotLayout.addWidget(plots[3], 1, 1);
+    plotLayout.addWidget(tracesmith2, 1, 1);
     plotLayout.setSpacing(0);
     plotLayout.setContentsMargins(0,0,0,0);
 
@@ -510,6 +527,7 @@ void VNA::NewDatapoint(Protocol::Datapoint d)
         cal.correctMeasurement(d);
     }
     dataTable.addVNAResult(d);
+    traceModel.addVNAData(d);
     emit dataChanged();
     if(d.pointNum == settings.points - 1) {
         UpdateStatusPanel();
@@ -546,6 +564,7 @@ void VNA::SettingsChanged()
 {
     device.Configure(settings);
     dataTable.clearResults();
+    traceModel.clearVNAData();
     for(auto p : plots) {
         p->setXAxis(settings);
     }

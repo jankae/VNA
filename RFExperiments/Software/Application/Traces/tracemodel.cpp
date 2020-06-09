@@ -1,6 +1,8 @@
 #include "tracemodel.h"
 #include <QIcon>
 
+using namespace std;
+
 TraceModel::TraceModel(QObject *parent)
     : QAbstractTableModel(parent)
 {
@@ -97,5 +99,37 @@ QVariant TraceModel::data(const QModelIndex &index, int role) const
         }
     } else {
         return QVariant();
+    }
+}
+
+std::vector<Trace *> TraceModel::getTraces()
+{
+    return traces;
+}
+
+void TraceModel::clearVNAData()
+{
+    for(auto t : traces) {
+        if (!t->isTouchstone()) {
+            // this trace is fed from live data
+            t->clear();
+        }
+    }
+}
+
+void TraceModel::addVNAData(Protocol::Datapoint d)
+{
+    for(auto t : traces) {
+        if (!t->isTouchstone()) {
+            Trace::Data td;
+            td.frequency = d.frequency;
+            switch(t->liveParameter()) {
+            case Trace::LiveParameter::S11: td.S = complex<double>(d.real_S11, d.imag_S11); break;
+            case Trace::LiveParameter::S12: td.S = complex<double>(d.real_S12, d.imag_S12); break;
+            case Trace::LiveParameter::S21: td.S = complex<double>(d.real_S21, d.imag_S21); break;
+            case Trace::LiveParameter::S22: td.S = complex<double>(d.real_S22, d.imag_S22); break;
+            }
+            t->addData(td);
+        }
     }
 }
