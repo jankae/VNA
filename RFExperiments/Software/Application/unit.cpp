@@ -9,12 +9,13 @@ QString Unit::ToString(double value, QString unit, QString prefixes, int precisi
 {
     // change label text
     QString sValue;
-    if(value < 0) {
-        sValue.append('-');
-        value = -value;
-    } else if(value == 0.0) {
+    if(value == 0.0) {
         sValue.append('0');
     } else {
+        if(value < 0) {
+            sValue.append('-');
+            value = -value;
+        }
         int preDotDigits = log10(value) + 1;
         int prefixIndex = prefixes.indexOf(' ');
         while(preDotDigits > 3 && prefixIndex < prefixes.length() - 1) {

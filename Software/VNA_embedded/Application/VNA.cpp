@@ -234,6 +234,15 @@ bool VNA::ConfigureSweep(Protocol::SweepSettings s, SweepCallback cb) {
 	// has to be one less than actual number of samples
 	FPGA::SetSamplesPerPoint(samplesPerPoint);
 
+	uint8_t attenuator;
+	if(s.cdbm_excitation >= -1000) {
+		attenuator = 0;
+	} else if (s.cdbm_excitation <= -4175){
+		attenuator = 127;
+	} else {
+		attenuator = (-1000 - s.cdbm_excitation) / 25;
+	}
+
 	uint32_t last_IF1 = IF1;
 
 	IFTableIndexCnt = 0;
@@ -309,7 +318,7 @@ bool VNA::ConfigureSweep(Protocol::SweepSettings s, SweepCallback cb) {
 			needs_halt = true;
 		}
 		LO1.SetFrequency(freq + used_IF);
-		FPGA::WriteSweepConfig(i, lowband, Source.GetRegisters(), LO1.GetRegisters(), 0, freq, needs_halt);
+		FPGA::WriteSweepConfig(i, lowband, Source.GetRegisters(), LO1.GetRegisters(), attenuator, freq, needs_halt);
 		last_lowband = lowband;
 	}
 //	// revert clk configuration to previous value (might have been changed in sweep calculation)

@@ -217,6 +217,8 @@ VNA::VNA(QWidget *parent)
     mMain->addMenu(mSpan);
 
     auto mAcquisition = new Menu(*menuLayout, "Acquisition");
+    auto mdbm = new MenuValue("Source Level", -10, "dbm", " ");
+    mAcquisition->addItem(mdbm);
     auto mPoints = new MenuValue("Points", settings.points, "", " ");
     mAcquisition->addItem(mPoints);
     auto mBandwidth = new MenuValue("IF Bandwidth", settings.if_bandwidth, "Hz", " k", 2);
@@ -362,8 +364,18 @@ VNA::VNA(QWidget *parent)
         SettingsChanged();
     });
     connect(mPoints, &MenuValue::valueChanged, [=](double newval){
-       settings.points = newval;
-       SettingsChanged();
+        settings.points = newval;
+        SettingsChanged();
+    });
+    connect(mdbm, &MenuValue::valueChanged, [=](double newval){
+        if(newval > -10.0) {
+            newval = -10.0;
+        } else if(newval < -42.0) {
+            newval = -42.0;
+        }
+        mdbm->setValueQuiet(newval);
+        settings.mdbm_excitation = newval * 100;
+        SettingsChanged();
     });
     connect(mBandwidth, &MenuValue::valueChanged, [=](double newval){
        settings.if_bandwidth = newval;

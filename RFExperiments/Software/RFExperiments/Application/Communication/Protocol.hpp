@@ -18,7 +18,7 @@ using SweepSettings = struct _sweepSettings {
 	uint64_t f_stop;
 	uint16_t points;
         uint32_t if_bandwidth;
-	int16_t mdbm_excitation;
+        int16_t mdbm_excitation; // in 1/100 dbm
 } __attribute__((packed));
 
 using Status = struct _status {

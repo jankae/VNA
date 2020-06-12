@@ -19,12 +19,18 @@ Trace::~Trace()
 }
 
 void Trace::clear() {
+    if(paused) {
+        return;
+    }
     _data.clear();
     emit cleared(this);
     emit dataChanged();
 }
 
 void Trace::addData(Trace::Data d) {
+    if(paused) {
+        return;
+    }
     // add or replace data in vector while keeping it sorted with increasing frequency
     auto lower = lower_bound(_data.begin(), _data.end(), d, [](const Data &lhs, const Data &rhs) -> bool {
         return lhs.frequency < rhs.frequency;
