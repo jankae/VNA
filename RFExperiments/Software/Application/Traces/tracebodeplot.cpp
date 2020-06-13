@@ -244,14 +244,12 @@ void TraceBodePlot::enableTraceAxis(Trace *t, int axis, bool enabled)
             cd.curve->attach(plot);
             cd.curve->setYAxis(axis == 0 ? QwtPlot::yLeft : QwtPlot::yRight);
             cd.curve->setSamples(cd.data);
-            if(axis == 0) {
-                cd.curve->setPen(t->color());
-            } else {
-                cd.curve->setPen(t->color(), 1.0, Qt::DashLine);
-            }
             curves[axis][t] = cd;
             // connect signals
             connect(t, &Trace::dataChanged, this, &TraceBodePlot::replot);
+            connect(t, &Trace::colorChanged, this, &TraceBodePlot::traceColorChanged);
+            connect(t, &Trace::visibilityChanged, this, &TraceBodePlot::traceColorChanged);
+            traceColorChanged(t);
         } else {
             tracesAxis[axis].erase(t);
             // clean up and delete
@@ -262,8 +260,13 @@ void TraceBodePlot::enableTraceAxis(Trace *t, int axis, bool enabled)
                 }
                 curves[axis].erase(t);
             }
-            // disconnect from notifications
-            disconnect(t, &Trace::dataChanged, this, &TraceBodePlot::replot);
+            int otherAxis = axis == 0 ? 1 : 0;
+            if(curves[otherAxis].find(t) == curves[otherAxis].end()) {
+                // this trace is not used anymore, disconnect from notifications
+                disconnect(t, &Trace::dataChanged, this, &TraceBodePlot::replot);
+                disconnect(t, &Trace::colorChanged, this, &TraceBodePlot::traceColorChanged);
+                disconnect(t, &Trace::visibilityChanged, this, &TraceBodePlot::traceColorChanged);
+            }
         }
 
         updateContextMenu();
@@ -298,6 +301,24 @@ QwtSeriesData<QPointF> *TraceBodePlot::createQwtSeriesData(Trace &t, int axis)
         return new QwtTraceSeries<YAxisType::VSWR>(t);
     default:
         return nullptr;
+    }
+}
+
+void TraceBodePlot::traceColorChanged(Trace *t)
+{
+    for(int axis = 0;axis < 2;axis++) {
+        if(curves[axis].find(t) != curves[axis].end()) {
+            // trace active, change the pen color
+            if(t->isVisible()) {
+                if(axis == 0) {
+                    curves[axis][t].curve->setPen(t->color());
+                } else {
+                    curves[axis][t].curve->setPen(t->color(), 1.0, Qt::DashLine);
+                }
+            } else {
+                curves[axis][t].curve->setPen(t->color(), 0.0, Qt::NoPen);
+            }
+        }
     }
 }
 

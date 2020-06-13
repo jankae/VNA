@@ -31,6 +31,8 @@ protected:
     virtual bool supported(Trace *t);
     void replot() override;
 
+private slots:
+    void traceColorChanged(Trace *t);
 private:
     QString AxisTypeToName(YAxisType type);
     void enableTraceAxis(Trace *t, int axis, bool enabled);

@@ -39,8 +39,25 @@ void Trace::addData(Trace::Data d) {
         // highest frequency yet, add to vector
         _data.push_back(d);
     } else if(lower->frequency == d.frequency) {
-        // replace this data element
-        *lower = d;
+        switch(_liveType) {
+        case LivedataType::Overwrite:
+            // replace this data element
+            *lower = d;
+            break;
+        case LivedataType::MaxHold:
+            // replace this data element
+            if(abs(d.S) > abs(lower->S)) {
+                *lower = d;
+            }
+            break;
+        case LivedataType::MinHold:
+            // replace this data element
+            if(abs(d.S) < abs(lower->S)) {
+                *lower = d;
+            }
+            break;
+        }
+
     } else {
         // insert at this position
         _data.insert(lower, d);
@@ -91,7 +108,10 @@ void Trace::fromLivedata(Trace::LivedataType type, LiveParameter param)
 }
 
 void Trace::setColor(QColor color) {
-    _color = color;
+    if(_color != color) {
+        _color = color;
+        emit colorChanged(this);
+    }
 }
 
 void Trace::setVisible(bool visible)

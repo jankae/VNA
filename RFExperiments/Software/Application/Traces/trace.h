@@ -59,6 +59,7 @@ signals:
     void visibilityChanged(Trace *t);
     void dataChanged();
     void nameChanged();
+    void colorChanged(Trace *t);
 
 private:
     std::vector<Data> _data;
