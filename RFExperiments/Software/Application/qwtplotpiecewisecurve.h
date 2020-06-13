@@ -24,6 +24,7 @@ public:
     explicit QwtPlotPiecewiseCurve();
     explicit QwtPlotPiecewiseCurve(const QwtText &title);
     explicit QwtPlotPiecewiseCurve(const QString &title);
+    ~QwtPlotPiecewiseCurve();
 
     virtual void drawCurve(QPainter *p, int style,
                            const QwtScaleMap &xMap, const QwtScaleMap &yMap,
@@ -45,6 +46,11 @@ inline QwtPlotPiecewiseCurve::QwtPlotPiecewiseCurve(const QwtText &title):
 inline QwtPlotPiecewiseCurve::QwtPlotPiecewiseCurve(const QString &title):
     QwtPlotCurve(title)
 {
+}
+
+inline QwtPlotPiecewiseCurve::~QwtPlotPiecewiseCurve()
+{
+
 }
 
 inline bool QwtPlotPiecewiseCurve::isNaN(double x)

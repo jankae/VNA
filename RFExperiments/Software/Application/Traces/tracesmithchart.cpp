@@ -14,8 +14,8 @@ TraceSmithChart::TraceSmithChart(TraceModel &model, QWidget *parent)
     initializeTraceInfo(model);
 }
 
-void TraceSmithChart::draw(QPainter * painter) {
-    painter->setPen(QPen(0.75));
+void TraceSmithChart::draw(QPainter * painter, double width_factor) {
+    painter->setPen(QPen(1.0 * width_factor));
     painter->setBrush(palette().windowText());
 
 //    // Display parameter name
@@ -26,17 +26,18 @@ void TraceSmithChart::draw(QPainter * painter) {
 //    painter->drawText(-512, -512, title);
 
     // Outer circle
+    painter->setPen(QPen(Border, 1.5 * width_factor));
     QRectF rectangle(-512, -512, 1024, 1024);
     painter->drawArc(rectangle, 0, 5760);
-    painter->drawLine(-512, 0, 512, 0);
 
     constexpr int Circles = 6;
-    painter->setPen(QPen(palette().windowText(), 0.75, Qt::DashLine));
+    painter->setPen(QPen(Divisions, 0.5 * width_factor, Qt::DashLine));
     for(int i=1;i<Circles;i++) {
         rectangle.adjust(1024/Circles, 512/Circles, 0, -512/Circles);
         painter->drawArc(rectangle, 0, 5760);
     }
 
+    painter->drawLine(-512, 0, 512, 0);
     constexpr std::array<double, 5> impedanceLines = {10, 25, 50, 100, 250};
     for(auto z : impedanceLines) {
         z /= ReferenceImpedance;
@@ -59,7 +60,7 @@ void TraceSmithChart::draw(QPainter * painter) {
             // trace marked invisible
             continue;
         }
-        painter->setPen(QPen(trace->color()));
+        painter->setPen(QPen(trace->color(), 1.5 * width_factor));
         int nPoints = trace->size();
         for(int i=1;i<nPoints;i++) {
             auto last = trace->sample(i-1).S;
@@ -76,19 +77,24 @@ void TraceSmithChart::draw(QPainter * painter) {
     }
 }
 
+void TraceSmithChart::replot()
+{
+    update();
+}
+
 void TraceSmithChart::paintEvent(QPaintEvent * /* the event */)
 {
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
-    painter.setBackground(QBrush(QColor(255, 255, 255)));
-    painter.fillRect(0, 0, width(), height(), QBrush(QColor(255, 255, 255)));
+    painter.setBackground(QBrush(Background));
+    painter.fillRect(0, 0, width(), height(), QBrush(Background));
 
     int side = qMin(width(), height()) * 0.9;
 
     painter.setViewport((width()-side)/2, (height()-side)/2, side, side);
     painter.setWindow(-512, -512, 1024, 1024);
 
-    draw(&painter);
+    draw(&painter, 1024/side);
 }
 
 bool TraceSmithChart::supported(Trace *t)

@@ -5,7 +5,7 @@
 #include <QMainWindow>
 #include <QGridLayout>
 #include "device.h"
-#include "plot.h"
+#include "Traces/traceplot.h"
 #include "sparamtable.h"
 #include "calibration.h"
 #include <QProgressDialog>
@@ -32,7 +32,7 @@ private:
     Device device;
     Protocol::SweepSettings settings;
     unsigned int averages;
-    QList<Plot*> plots;
+    QList<TracePlot*> plots;
     QGridLayout plotLayout;
     bool fsPlot;
     int fsRow, fsColumn, fsRowSpan, fsColumnSpan;

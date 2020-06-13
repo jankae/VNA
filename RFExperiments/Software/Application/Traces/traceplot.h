@@ -12,7 +12,7 @@ class TracePlot : public QWidget
 public:
     TracePlot( QWidget *parent = nullptr);
 
-    void enableTrace(Trace *t, bool enabled);
+    virtual void enableTrace(Trace *t, bool enabled);
     void mouseDoubleClickEvent(QMouseEvent *event) override;
     virtual void setXAxis(double min, double max){};
 
@@ -21,11 +21,15 @@ signals:
     void deleted(TracePlot*);
 
 protected:
+    static constexpr QColor Background = QColor(0,0,0);
+    static constexpr QColor Border = QColor(255,255,255);
+    static constexpr QColor Divisions = QColor(255,255,255);
     // need to be called in derived class constructor
     void initializeTraceInfo(TraceModel &model);
     void contextMenuEvent(QContextMenuEvent *event) override;
-    void updateContextMenu();
+    virtual void updateContextMenu();
     virtual bool supported(Trace *t) = 0;
+    virtual void replot(){};
     std::map<Trace*, bool> traces;
     QMenu *contextmenu;
 

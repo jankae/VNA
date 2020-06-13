@@ -11,13 +11,12 @@ class TraceSmithChart : public TracePlot
 public:
     TraceSmithChart(TraceModel &model, QWidget *parent = 0);
 
-    protected:
-    void paintEvent(QPaintEvent *event) override;
-
 protected:
+    void paintEvent(QPaintEvent *event) override;
     static constexpr double ReferenceImpedance = 50.0;
     bool supported(Trace *t) override;
-    void draw(QPainter * painter);
+    void draw(QPainter * painter, double width_factor);
+    void replot() override;
     QPen textPen;
     QPen chartLinesPen;
     QPen thinPen;

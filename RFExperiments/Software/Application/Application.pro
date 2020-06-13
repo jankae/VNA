@@ -9,20 +9,18 @@ HEADERS += \
     Menu/menuitem.h \
     Menu/menuvalue.h \
     Traces/trace.h \
+    Traces/tracebodeplot.h \
     Traces/traceeditdialog.h \
     Traces/tracemodel.h \
     Traces/traceplot.h \
     Traces/tracesmithchart.h \
     Traces/tracewidget.h \
-    bodeplot.h \
     calibration.h \
     calkit.h \
     calkitdialog.h \
     device.h \
     manualcontroldialog.h \
-    plot.h \
     qwtplotpiecewisecurve.h \
-    smithchart.h \
     sparam.h \
     sparamtable.h \
     touchstone.h \
@@ -41,12 +39,12 @@ SOURCES += \
     Menu/menuitem.cpp \
     Menu/menuvalue.cpp \
     Traces/trace.cpp \
+    Traces/tracebodeplot.cpp \
     Traces/traceeditdialog.cpp \
     Traces/tracemodel.cpp \
     Traces/traceplot.cpp \
     Traces/tracesmithchart.cpp \
     Traces/tracewidget.cpp \
-    bodeplot.cpp \
     calibration.cpp \
     calkit.cpp \
     calkitdialog.cpp \
@@ -54,7 +52,6 @@ SOURCES += \
     main.cpp \
     manualcontroldialog.cpp \
     qwtplotpiecewisecurve.cpp \
-    smithchart.cpp \
     sparamtable.cpp \
     touchstone.cpp \
     unit.cpp \

@@ -1,5 +1,9 @@
 #include "traceplot.h"
 
+constexpr QColor TracePlot::Background;
+constexpr QColor TracePlot::Border;
+constexpr QColor TracePlot::Divisions;
+
 TracePlot::TracePlot(QWidget *parent) : QWidget(parent)
 {
     contextmenu = nullptr;
@@ -11,13 +15,13 @@ void TracePlot::enableTrace(Trace *t, bool enabled)
         traces[t] = enabled;
         if(enabled) {
             // connect signals
-            connect(t, &Trace::dataChanged, this, qOverload<>(&TracePlot::update));
+            connect(t, &Trace::dataChanged, this, &TracePlot::replot);
         } else {
             // disconnect from notifications
-            disconnect(t, &Trace::dataChanged, this, qOverload<>(&TracePlot::update));
+            disconnect(t, &Trace::dataChanged, this, &TracePlot::replot);
         }
         updateContextMenu();
-        update();
+        replot();
     }
 }
 
@@ -83,7 +87,8 @@ void TracePlot::newTraceAvailable(Trace *t)
 
 void TracePlot::traceDeleted(Trace *t)
 {
+    enableTrace(t, false);
     traces.erase(t);
     updateContextMenu();
-    update();
+    replot();
 }
