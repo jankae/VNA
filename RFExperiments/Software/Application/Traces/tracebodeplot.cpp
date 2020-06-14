@@ -249,6 +249,7 @@ void TraceBodePlot::enableTraceAxis(Trace *t, int axis, bool enabled)
             connect(t, &Trace::dataChanged, this, &TraceBodePlot::replot);
             connect(t, &Trace::colorChanged, this, &TraceBodePlot::traceColorChanged);
             connect(t, &Trace::visibilityChanged, this, &TraceBodePlot::traceColorChanged);
+            connect(t, &Trace::visibilityChanged, this, &TraceBodePlot::replot);
             traceColorChanged(t);
         } else {
             tracesAxis[axis].erase(t);
@@ -266,6 +267,7 @@ void TraceBodePlot::enableTraceAxis(Trace *t, int axis, bool enabled)
                 disconnect(t, &Trace::dataChanged, this, &TraceBodePlot::replot);
                 disconnect(t, &Trace::colorChanged, this, &TraceBodePlot::traceColorChanged);
                 disconnect(t, &Trace::visibilityChanged, this, &TraceBodePlot::traceColorChanged);
+                disconnect(t, &Trace::visibilityChanged, this, &TraceBodePlot::replot);
             }
         }
 

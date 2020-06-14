@@ -92,67 +92,84 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="port1Selector">
-     <item>
-      <widget class="QLabel" name="label_5">
-       <property name="text">
-        <string>Port 1:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QRadioButton" name="port1_1">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>1</string>
-       </property>
-       <attribute name="buttonGroup">
-        <string notr="true">port1Group</string>
-       </attribute>
-      </widget>
-     </item>
-     <item>
-      <widget class="QRadioButton" name="port1_2">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>2</string>
-       </property>
-       <attribute name="buttonGroup">
-        <string notr="true">port1Group</string>
-       </attribute>
-      </widget>
-     </item>
-     <item>
-      <widget class="QRadioButton" name="port1_3">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>3</string>
-       </property>
-       <attribute name="buttonGroup">
-        <string notr="true">port1Group</string>
-       </attribute>
-      </widget>
-     </item>
-     <item>
-      <widget class="QRadioButton" name="port1_4">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>4</string>
-       </property>
-       <attribute name="buttonGroup">
-        <string notr="true">port1Group</string>
-       </attribute>
-      </widget>
-     </item>
-    </layout>
+    <widget class="QWidget" name="port1Widget" native="true">
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <property name="spacing">
+       <number>6</number>
+      </property>
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Port 1:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="port1_1">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>1</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">port1Group</string>
+        </attribute>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="port1_2">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>2</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">port1Group</string>
+        </attribute>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="port1_3">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>3</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">port1Group</string>
+        </attribute>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="port1_4">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>4</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">port1Group</string>
+        </attribute>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </item>
    <item>
     <widget class="QWidget" name="port2Widget" native="true">
@@ -289,7 +306,7 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="port1Group"/>
   <buttongroup name="port2Group"/>
+  <buttongroup name="port1Group"/>
  </buttongroups>
 </ui>

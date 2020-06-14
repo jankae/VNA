@@ -16,9 +16,11 @@ void TracePlot::enableTrace(Trace *t, bool enabled)
         if(enabled) {
             // connect signals
             connect(t, &Trace::dataChanged, this, &TracePlot::replot);
+            connect(t, &Trace::visibilityChanged, this, &TracePlot::replot);
         } else {
             // disconnect from notifications
             disconnect(t, &Trace::dataChanged, this, &TracePlot::replot);
+            disconnect(t, &Trace::visibilityChanged, this, &TracePlot::replot);
         }
         updateContextMenu();
         replot();

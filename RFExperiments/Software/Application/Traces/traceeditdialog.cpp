@@ -15,6 +15,10 @@ TraceEditDialog::TraceEditDialog(Trace &t, QWidget *parent) :
     ui->GSource->setId(ui->bLive, 0);
     ui->GSource->setId(ui->bFile, 1);
 
+    if(t.isTouchstone()) {
+        ui->bFile->click();
+    }
+
     auto updateFileStatus = [=]() {
         if (ui->bFile->isChecked() && !ui->touchstoneImport->getStatus())  {
             ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);

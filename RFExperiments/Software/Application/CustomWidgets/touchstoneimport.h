@@ -25,6 +25,7 @@ public:
 
 signals:
     void statusChanged(bool status);
+    void filenameChanged(QString name);
 
 public slots:
     void setFile(QString filename);
@@ -33,7 +34,7 @@ private slots:
     void on_browse_clicked();
 
 private:
-    void filenameChanged();
+    void evaluateFile();
     void preventCollisionWithGroup(QButtonGroup *group, int id);
     Ui::TouchstoneImport *ui;
     int required_ports;

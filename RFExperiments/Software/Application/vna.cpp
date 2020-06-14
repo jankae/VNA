@@ -26,6 +26,7 @@
 #include "Traces/tracewidget.h"
 #include "Traces/tracesmithchart.h"
 #include "Traces/tracebodeplot.h"
+#include "Traces/traceimportdialog.h"
 
 using namespace std;
 
@@ -518,6 +519,9 @@ VNA::VNA(QWidget *parent)
     auto success = connect(&device, &Device::DatapointReceived, this, &VNA::NewDatapoint);
     Q_ASSERT(success);
     SettingsChanged();
+
+    auto importDialog = new TraceImportDialog(traceModel);
+    importDialog->show();
 }
 
 void VNA::NewDatapoint(Protocol::Datapoint d)

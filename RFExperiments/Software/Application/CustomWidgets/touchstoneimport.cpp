@@ -12,7 +12,7 @@ TouchstoneImport::TouchstoneImport(QWidget *parent, int ports) :
     status(false)
 {
     ui->setupUi(this);
-    connect(ui->browse, &QPushButton::clicked, this, &TouchstoneImport::filenameChanged);
+    connect(ui->browse, &QPushButton::clicked, this, &TouchstoneImport::evaluateFile);
     ui->port1Group->setId(ui->port1_1, 0);
     ui->port1Group->setId(ui->port1_2, 1);
     ui->port1Group->setId(ui->port1_3, 2);
@@ -43,19 +43,14 @@ bool TouchstoneImport::getStatus()
 
 Touchstone TouchstoneImport::getTouchstone()
 {
-    switch(required_ports) {
-    case 1: {
+    if(required_ports == 1) {
         auto t1 = touchstone;
         t1.reduceTo1Port(ui->port1Group->checkedId());
         return t1;
-        break;
-    }
-    default: {
+    } else if(required_ports == 2) {
         auto t2 = touchstone;
         t2.reduceTo2Port(ui->port1Group->checkedId(), ui->port2Group->checkedId());
         return t2;
-        break;
-    }
     }
 
     return touchstone;
@@ -64,7 +59,8 @@ Touchstone TouchstoneImport::getTouchstone()
 void TouchstoneImport::setPorts(int ports)
 {
     required_ports = ports;
-    ui->port2Widget->setVisible(ports != 1);
+    ui->port1Widget->setVisible(ports >= 1);
+    ui->port2Widget->setVisible(ports >= 2);
 }
 
 QString TouchstoneImport::getFilename()
@@ -89,7 +85,7 @@ void TouchstoneImport::selectPort(int destination, int source)
 void TouchstoneImport::setFile(QString filename)
 {
     ui->file->setText(filename);
-    filenameChanged();
+    evaluateFile();
 }
 
 void TouchstoneImport::on_browse_clicked()
@@ -97,11 +93,11 @@ void TouchstoneImport::on_browse_clicked()
     auto filename = QFileDialog::getOpenFileName(nullptr, "Open measurement file", "", "Touchstone files (*.s1p *.s2p *.s3p *.s4p)", nullptr, QFileDialog::DontUseNativeDialog);
     if (filename.length() > 0) {
         ui->file->setText(filename);
-        filenameChanged();
+        evaluateFile();
     }
 }
 
-void TouchstoneImport::filenameChanged()
+void TouchstoneImport::evaluateFile()
 {
     bool new_status = false;
     ui->port1_1->setEnabled(false);
@@ -151,6 +147,7 @@ void TouchstoneImport::filenameChanged()
         status = new_status;
         emit statusChanged(status);
     }
+    emit filenameChanged(ui->file->text());
 }
 
 void TouchstoneImport::preventCollisionWithGroup(QButtonGroup *group, int id)

@@ -11,6 +11,7 @@ HEADERS += \
     Traces/trace.h \
     Traces/tracebodeplot.h \
     Traces/traceeditdialog.h \
+    Traces/traceimportdialog.h \
     Traces/tracemodel.h \
     Traces/traceplot.h \
     Traces/tracesmithchart.h \
@@ -41,6 +42,7 @@ SOURCES += \
     Traces/trace.cpp \
     Traces/tracebodeplot.cpp \
     Traces/traceeditdialog.cpp \
+    Traces/traceimportdialog.cpp \
     Traces/tracemodel.cpp \
     Traces/traceplot.cpp \
     Traces/tracesmithchart.cpp \
@@ -68,6 +70,7 @@ QT += widgets charts
 FORMS += \
     CustomWidgets/touchstoneimport.ui \
     Traces/traceeditdialog.ui \
+    Traces/traceimportdialog.ui \
     Traces/tracewidget.ui \
     calkitdialog.ui \
     manualcontroldialog.ui
