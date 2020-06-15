@@ -15,5 +15,8 @@
         <file>icons/plus.svg</file>
         <file>icons/export.svg</file>
         <file>icons/import.svg</file>
+        <file>icons/close.svg</file>
+        <file>icons/horizontal.svg</file>
+        <file>icons/vertical.svg</file>
     </qresource>
 </RCC>

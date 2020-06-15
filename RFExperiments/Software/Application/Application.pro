@@ -1,6 +1,7 @@
 HEADERS += \
     ../RFExperiments/Application/Communication/Protocol.hpp \
     CustomWidgets/siunitedit.h \
+    CustomWidgets/tilewidget.h \
     CustomWidgets/toggleswitch.h \
     CustomWidgets/touchstoneimport.h \
     Menu/menu.h \
@@ -32,6 +33,7 @@ HEADERS += \
 SOURCES += \
     ../RFExperiments/Application/Communication/Protocol.cpp \
     CustomWidgets/siunitedit.cpp \
+    CustomWidgets/tilewidget.cpp \
     CustomWidgets/toggleswitch.cpp \
     CustomWidgets/touchstoneimport.cpp \
     Menu/menu.cpp \
@@ -68,6 +70,7 @@ LIBS += -L/usr/lib/ -lqwt-qt5
 QT += widgets charts
 
 FORMS += \
+    CustomWidgets/tilewidget.ui \
     CustomWidgets/touchstoneimport.ui \
     Traces/traceeditdialog.ui \
     Traces/traceimportdialog.ui \

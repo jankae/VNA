@@ -27,6 +27,7 @@
 #include "Traces/tracesmithchart.h"
 #include "Traces/tracebodeplot.h"
 #include "Traces/traceimportdialog.h"
+#include "CustomWidgets/tilewidget.h"
 
 using namespace std;
 
@@ -148,56 +149,14 @@ VNA::VNA(QWidget *parent)
     tracebode2->setYAxisType(1, TraceBodePlot::YAxisType::Phase);
     tracebode2->enableTrace(tS21, true);
 
-
-    plots.append(tracesmith1);
-    plots.append(tracebode1);
-    plots.append(tracebode2);
-    plots.append(tracesmith2);
-
-    // no plot is in fullscreen mode
-    fsPlot = false;
-
-    auto button = new QPushButton(QIcon(":/icons/plus.svg"), "Add plot");
-    plotLayout.addWidget(button, 0, 0, Qt::AlignCenter);
-    plotLayout.addWidget(new QPushButton("Dummy"), 0, 1, Qt::AlignCenter);
-    plotLayout.addWidget(new QPushButton("Dummy"), 1, 0, Qt::AlignCenter);
-    plotLayout.addWidget(new QPushButton("Dummy"), 1, 1, Qt::AlignCenter);
-    for(int i=0;i<plotLayout.columnCount();i++) {
-        plotLayout.setColumnStretch(i, 1);
-    }
-    for(int i=0;i<plotLayout.rowCount();i++) {
-        plotLayout.setRowStretch(i, 1);
-    }
-
-//    plotLayout.addWidget(plots[0], 0, 0);
-    plotLayout.addWidget(plots[0], 0, 0);
-    plotLayout.addWidget(plots[1], 0, 1);
-    plotLayout.addWidget(plots[2], 1, 0);
-    plotLayout.addWidget(plots[3], 1, 1);
-    plotLayout.setSpacing(0);
-    plotLayout.setContentsMargins(0,0,0,0);
-
-    for(auto p : plots) {
-        connect(p, &TracePlot::doubleClicked, [=](QWidget *w) {
-            if(!fsPlot) {
-                // this plot is becoming the new fullscreen plot, save old position in layout
-                plotLayout.getItemPosition(plotLayout.indexOf(w), &fsRow, &fsColumn, &fsRowSpan, &fsColumnSpan);
-                fsPlot = true;
-                plotLayout.addWidget(w, 0, 0, 2, 2);
-                w->raise();
-            } else {
-                // restore old widget position in layout
-                plotLayout.addWidget(w, fsRow, fsColumn, fsRowSpan, fsColumnSpan);
-                fsPlot = false;
-            }
-        });
-        connect(p, &TracePlot::deleted, [=](TracePlot *p) {
-            auto it = std::find(plots.begin(), plots.end(), p);
-            if(it != plots.end()) {
-                plots.erase(it);
-            }
-        });
-    }
+    auto tiles = new TileWidget(traceModel);
+    tiles->splitVertically();
+    tiles->Child1()->splitHorizontally();
+    tiles->Child2()->splitHorizontally();
+    tiles->Child1()->Child1()->setPlot(tracesmith1);
+    tiles->Child1()->Child2()->setPlot(tracebode1);
+    tiles->Child2()->Child1()->setPlot(tracebode2);
+    tiles->Child2()->Child2()->setPlot(tracesmith2);
 
     auto menuLayout = new QStackedLayout;
     auto mMain = new Menu(*menuLayout);
@@ -506,9 +465,7 @@ VNA::VNA(QWidget *parent)
     statusWidget->setLayout(statusLayout);
     statusWidget->setFixedWidth(150);
     mainLayout->addWidget(statusWidget);
-    auto plotWidget = new QWidget;
-    plotWidget->setLayout(&plotLayout);
-    mainLayout->addWidget(plotWidget);
+    mainLayout->addWidget(tiles);
     auto menuWidget = new QWidget;
     menuWidget->setLayout(menuLayout);
     menuWidget->setFixedWidth(180);
@@ -585,8 +542,5 @@ void VNA::SettingsChanged()
     device.Configure(settings);
     dataTable.clearResults();
     traceModel.clearVNAData();
-    for(auto p : plots) {
-        p->setXAxis(settings.f_start, settings.f_stop);
-    }
     UpdateStatusPanel();
 }

@@ -32,10 +32,6 @@ private:
     Device device;
     Protocol::SweepSettings settings;
     unsigned int averages;
-    QList<TracePlot*> plots;
-    QGridLayout plotLayout;
-    bool fsPlot;
-    int fsRow, fsColumn, fsRowSpan, fsColumnSpan;
     void SettingsChanged();
     SParamTable dataTable;
     TraceModel traceModel;

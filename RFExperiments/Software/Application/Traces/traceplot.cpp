@@ -7,6 +7,7 @@ constexpr QColor TracePlot::Divisions;
 TracePlot::TracePlot(QWidget *parent) : QWidget(parent)
 {
     contextmenu = nullptr;
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }
 
 void TracePlot::enableTrace(Trace *t, bool enabled)
