@@ -70,10 +70,16 @@ void TileWidget::closeTile()
         pTile->child1->parent = pTile;
         pTile->child2->parent = pTile;
         pTile->ui->ContentPage->layout()->addWidget(absorbedTile->splitter);
+        auto oldsplitter = pTile->splitter;
+        pTile->splitter = absorbedTile->splitter;
         delete absorbedTile;
+        delete oldsplitter;
     } else if(absorbedTile->hasContent) {
         pTile->setContent(absorbedTile->content);
         delete absorbedTile;
+        pTile->isSplit = false;
+        delete pTile->splitter;
+        pTile->splitter = nullptr;
     } else {
         delete absorbedTile;
         pTile->isSplit = false;
@@ -114,12 +120,7 @@ void TileWidget::setContent(TracePlot *plot)
     hasContent = true;
     ui->ContentPage->layout()->addWidget(plot);
     ui->stack->setCurrentWidget(ui->ContentPage);
-    connect(content, &TracePlot::deleted, [=]() {
-        // Plot has been deleted, revert to tile state
-        ui->stack->setCurrentWidget(ui->TilePage);
-        hasContent = false;
-        content = nullptr;
-    });
+    connect(content, &TracePlot::deleted, this, &TileWidget::traceDeleted);
 }
 
 void TileWidget::on_bSmithchart_clicked()
@@ -130,4 +131,11 @@ void TileWidget::on_bSmithchart_clicked()
 void TileWidget::on_bBodeplot_clicked()
 {
     setContent(new TraceBodePlot(model));
+}
+
+void TileWidget::traceDeleted(TracePlot *t)
+{
+    ui->stack->setCurrentWidget(ui->TilePage);
+    hasContent = false;
+    content = nullptr;
 }
