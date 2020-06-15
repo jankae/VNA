@@ -36,12 +36,10 @@ public:
     void clear();
     void addData(Data d);
     void setName(QString name);
-    void fillFromTouchstone(Touchstone &t);
+    void fillFromTouchstone(Touchstone &t, int parameter, QString filename = QString());
     void fromLivedata(LivedataType type, LiveParameter param);
     QString name() { return _name; };
-    void setColor(QColor color);
     QColor color() { return _color; };
-    void setVisible(bool visible);
     bool isVisible();
     bool pause();
     bool resume();
@@ -52,6 +50,15 @@ public:
     LivedataType liveType() { return _liveType; }
     unsigned int size() { return _data.size(); }
     Data sample(unsigned int index) { return _data.at(index); }
+    QString getTouchstoneFilename() const;
+    int getTouchstoneParameter() const;
+
+public slots:
+    void setTouchstoneParameter(int value);
+    void setTouchstoneFilename(const QString &value);
+    void setVisible(bool visible);
+    void setColor(QColor color);
+
 signals:
     void cleared(Trace *t);
     void dataAdded(Trace *t, Data d);
@@ -71,6 +78,8 @@ private:
     bool visible;
     bool paused;
     bool touchstone;
+    QString touchstoneFilename;
+    int touchstoneParameter;
 };
 
 #endif // TRACE_H

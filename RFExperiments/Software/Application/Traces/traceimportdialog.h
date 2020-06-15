@@ -32,6 +32,7 @@ private:
         bool enabled;
         QString trace;
         QString name;
+        QColor color;
     };
     std::vector<Parameter> params;
 };
@@ -46,6 +47,8 @@ public:
 
 private slots:
     void on_buttonBox_accepted();
+
+    void on_tableView_doubleClicked(const QModelIndex &index);
 
 private:
     Ui::TraceImportDialog *ui;

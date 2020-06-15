@@ -17,13 +17,30 @@ TraceEditDialog::TraceEditDialog(Trace &t, QWidget *parent) :
 
     if(t.isTouchstone()) {
         ui->bFile->click();
+        ui->touchstoneImport->setFile(t.getTouchstoneFilename());
     }
 
-    auto updateFileStatus = [=]() {
+    auto updateFileStatus = [this]() {
+        // remove all options from paramater combo box
+        while(ui->CParameter->count() > 0) {
+            ui->CParameter->removeItem(0);
+        }
         if (ui->bFile->isChecked() && !ui->touchstoneImport->getStatus())  {
             ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
         } else {
             ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
+            auto touchstone = ui->touchstoneImport->getTouchstone();
+            for(int i=0;i<touchstone.ports();i++) {
+                for(int j=0;j<touchstone.ports();j++) {
+                    QString name = "S"+QString::number(i+1)+QString::number(j+1);
+                    ui->CParameter->addItem(name);
+                }
+            }
+            if(trace.getTouchstoneParameter() < touchstone.ports()*touchstone.ports()) {
+                ui->CParameter->setCurrentIndex(trace.getTouchstoneParameter());
+            } else {
+                ui->CParameter->setCurrentIndex(0);
+            }
         }
     };
 
@@ -42,6 +59,9 @@ TraceEditDialog::TraceEditDialog(Trace &t, QWidget *parent) :
 
     connect(ui->GSource, qOverload<int>(&QButtonGroup::buttonClicked), updateFileStatus);
     connect(ui->touchstoneImport, &TouchstoneImport::statusChanged, updateFileStatus);
+    connect(ui->touchstoneImport, &TouchstoneImport::filenameChanged, updateFileStatus);
+
+    updateFileStatus();
 }
 
 TraceEditDialog::~TraceEditDialog()
@@ -61,7 +81,7 @@ void TraceEditDialog::on_buttonBox_accepted()
     trace.setName(ui->name->text());
     if (ui->bFile->isChecked()) {
         auto t = ui->touchstoneImport->getTouchstone();
-        trace.fillFromTouchstone(t);
+        trace.fillFromTouchstone(t, ui->CParameter->currentIndex(), ui->touchstoneImport->getFilename());
     } else {
         Trace::LivedataType type;
         Trace::LiveParameter param;

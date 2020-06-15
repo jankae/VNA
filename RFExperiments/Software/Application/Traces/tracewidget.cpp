@@ -3,6 +3,7 @@
 #include "trace.h"
 #include <QKeyEvent>
 #include "traceeditdialog.h"
+#include "traceimportdialog.h"
 
 TraceWidget::TraceWidget(TraceModel &model, QWidget *parent) :
     QWidget(parent),
@@ -72,4 +73,10 @@ void TraceWidget::on_view_clicked(const QModelIndex &index)
     } else if(index.column()==1) {
         model.togglePause(index.row());
     }
+}
+
+void TraceWidget::on_bImport_clicked()
+{
+    auto i = new TraceImportDialog(model);
+    i->show();
 }

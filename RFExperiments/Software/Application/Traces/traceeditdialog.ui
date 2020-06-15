@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>294</width>
-    <height>369</height>
+    <width>282</width>
+    <height>355</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -81,7 +81,7 @@
    <item>
     <widget class="QStackedWidget" name="stack">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="page">
       <layout class="QFormLayout" name="formLayout_2">
@@ -148,6 +148,20 @@
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <widget class="TouchstoneImport" name="touchstoneImport" native="true"/>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QLabel" name="label_5">
+           <property name="text">
+            <string>Parameter:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="CParameter"/>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>

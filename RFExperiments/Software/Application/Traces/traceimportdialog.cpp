@@ -3,6 +3,7 @@
 #include <QAbstractTableModel>
 #include <QObject>
 #include <QModelIndex>
+#include <QColorDialog>
 
 TraceImportDialog::TraceImportDialog(TraceModel &model, QWidget *parent) :
     QDialog(parent),
@@ -47,16 +48,8 @@ void TraceImportDialog::on_buttonBox_accepted()
     auto t = ui->touchstoneImport->getTouchstone();
     for(int i=0;i<tableModel->params.size();i++) {
         if(tableModel->params[i].enabled) {
-            int port1 = i / t.ports();
-            int port2 = i % t.ports();
-            auto t_copy = t;
-            if(port1 == port2) {
-                t_copy.reduceTo1Port(port1);
-            } else {
-                t_copy.reduceTo2Port(port2, port1);
-            }
-            auto trace = new Trace(tableModel->params[i].name);
-            trace->fillFromTouchstone(t_copy);
+            auto trace = new Trace(tableModel->params[i].name, tableModel->params[i].color);
+            trace->fillFromTouchstone(t, i, ui->touchstoneImport->getFilename());
             model.addTrace(trace);
         }
     }
@@ -67,7 +60,7 @@ int TouchstoneParameterModel::rowCount(const QModelIndex &parent) const {
 }
 
 int TouchstoneParameterModel::columnCount(const QModelIndex &parent) const {
-    return 3;
+    return 4;
 }
 
 QVariant TouchstoneParameterModel::data(const QModelIndex &index, int role) const {
@@ -94,6 +87,16 @@ QVariant TouchstoneParameterModel::data(const QModelIndex &index, int role) cons
             return QVariant();
         }
     } else if (index.column() == 2) {
+        if (role == Qt::BackgroundRole || role == Qt::EditRole) {
+            if(p.enabled) {
+                return p.color;
+            } else {
+                return (QColor) Qt::gray;
+            }
+        } else {
+            return QVariant();
+        }
+    } else if (index.column() == 3) {
         if (role == Qt::DisplayRole || role == Qt::EditRole) {
             return p.name;
         } else {
@@ -110,7 +113,8 @@ QVariant TouchstoneParameterModel::headerData(int section, Qt::Orientation orien
         switch(section) {
         case 0: return "Parameter"; break;
         case 1: return "Import"; break;
-        case 2: return "Tracename"; break;
+        case 2: return "Color"; break;
+        case 3: return "Tracename"; break;
         default: return QVariant(); break;
         }
     } else {
@@ -130,9 +134,12 @@ bool TouchstoneParameterModel::setData(const QModelIndex &index, const QVariant 
         } else {
             p.enabled = false;
         }
-        dataChanged(this->index(index.row(),2), this->index(index.row(),2));
+        dataChanged(this->index(index.row(),2), this->index(index.row(),3));
         return true;
     } else if(role == Qt::EditRole && index.column() == 2) {
+        p.color = value.value<QColor>();
+        return true;
+    } else if(role == Qt::EditRole && index.column() == 3) {
         p.name = value.toString();
         return true;
     }
@@ -148,6 +155,10 @@ Qt::ItemFlags TouchstoneParameterModel::flags(const QModelIndex &index) const
         flags |= Qt::ItemIsUserCheckable;
         flags |= Qt::ItemIsEnabled;
     } else if(index.column() == 2) {
+        if(params[index.row()].enabled) {
+            flags |= Qt::ItemIsEnabled;
+        }
+    } else if(index.column() == 3) {
         flags |= Qt::ItemIsEditable;
         if(params[index.row()].enabled) {
             flags |= Qt::ItemIsEnabled;
@@ -166,6 +177,7 @@ void TouchstoneParameterModel::fromTouchstone(Touchstone &t, QString name_prefix
             p.enabled = true;
             p.trace = "S" + QString::number(i+1) + QString::number(j+1);
             p.name = name_prefix + "_" + p.trace;
+            p.color = QColor::fromHsl(((i*ports + j) * 50) % 360, 250, 128);
             params.push_back(p);
         }
     }
@@ -176,4 +188,15 @@ void TouchstoneParameterModel::clear() {
     beginRemoveRows(QModelIndex(), 0, params.size() - 1);
     params.clear();
     endRemoveRows();
+}
+
+void TraceImportDialog::on_tableView_doubleClicked(const QModelIndex &index)
+{
+    if(index.column() == 2 && tableModel->params[index.row()].enabled) {
+        auto initialColor = tableModel->params[index.row()].color;
+        auto newColor = QColorDialog::getColor(initialColor, this, "Select color", QColorDialog::DontUseNativeDialog);
+        if(newColor.isValid()) {
+            tableModel->setData(index, newColor);
+        }
+    }
 }
