@@ -5,6 +5,7 @@
 #include "tracemodel.h"
 #include <QMenu>
 #include <QContextMenuEvent>
+#include <QTime>
 
 class TracePlot : public QWidget
 {
@@ -24,6 +25,7 @@ protected:
     static constexpr QColor Background = QColor(0,0,0);
     static constexpr QColor Border = QColor(255,255,255);
     static constexpr QColor Divisions = QColor(255,255,255);
+    static constexpr int MinUpdateInterval = 100;
     // need to be called in derived class constructor
     void initializeTraceInfo(TraceModel &model);
     void contextMenuEvent(QContextMenuEvent *event) override;
@@ -32,10 +34,12 @@ protected:
     virtual void replot(){};
     std::map<Trace*, bool> traces;
     QMenu *contextmenu;
+    QTime lastUpdate;
 
 protected slots:
     void newTraceAvailable(Trace *t);
     void traceDeleted(Trace *t);
+    void triggerReplot();
 
 };
 

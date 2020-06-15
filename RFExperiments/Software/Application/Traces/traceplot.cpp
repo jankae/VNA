@@ -8,6 +8,7 @@ TracePlot::TracePlot(QWidget *parent) : QWidget(parent)
 {
     contextmenu = nullptr;
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    lastUpdate = QTime::currentTime();
 }
 
 void TracePlot::enableTrace(Trace *t, bool enabled)
@@ -16,15 +17,15 @@ void TracePlot::enableTrace(Trace *t, bool enabled)
         traces[t] = enabled;
         if(enabled) {
             // connect signals
-            connect(t, &Trace::dataChanged, this, &TracePlot::replot);
-            connect(t, &Trace::visibilityChanged, this, &TracePlot::replot);
+            connect(t, &Trace::dataChanged, this, &TracePlot::triggerReplot);
+            connect(t, &Trace::visibilityChanged, this, &TracePlot::triggerReplot);
         } else {
             // disconnect from notifications
-            disconnect(t, &Trace::dataChanged, this, &TracePlot::replot);
-            disconnect(t, &Trace::visibilityChanged, this, &TracePlot::replot);
+            disconnect(t, &Trace::dataChanged, this, &TracePlot::triggerReplot);
+            disconnect(t, &Trace::visibilityChanged, this, &TracePlot::triggerReplot);
         }
         updateContextMenu();
-        replot();
+        triggerReplot();
     }
 }
 
@@ -93,5 +94,14 @@ void TracePlot::traceDeleted(Trace *t)
     enableTrace(t, false);
     traces.erase(t);
     updateContextMenu();
-    replot();
+    triggerReplot();
+}
+
+void TracePlot::triggerReplot()
+{
+    auto now = QTime::currentTime();
+    if (lastUpdate.msecsTo(now) >= MinUpdateInterval) {
+        replot();
+        lastUpdate = now;
+    }
 }

@@ -32,7 +32,11 @@ public:
             p.setY(arg(d.S) * 180.0 / M_PI);
             break;
         case TraceBodePlot::YAxisType::VSWR:
-            p.setY((1+abs(d.S)) / (1-abs(d.S)));
+            if(abs(d.S) >= 1.0) {
+                p.setY(numeric_limits<double>::quiet_NaN());
+            } else {
+                p.setY((1+abs(d.S)) / (1-abs(d.S)));
+            }
             break;
         }
         return p;
@@ -116,7 +120,7 @@ void TraceBodePlot::setYAxisType(int axis, TraceBodePlot::YAxisType type)
         }while(erased);
 
         updateContextMenu();
-        plot->replot();
+        triggerReplot();
     }
     // enable/disable y axis
     auto qwtaxis = axis == 0 ? QwtPlot::yLeft : QwtPlot::yRight;
@@ -133,7 +137,7 @@ void TraceBodePlot::setYAxisType(int axis, TraceBodePlot::YAxisType type)
         plot->setAxisScale(qwtaxis, 1, 10, 1);
         break;
     }
-    plot->replot();
+    triggerReplot();
 }
 
 void TraceBodePlot::enableTrace(Trace *t, bool enabled)
@@ -246,10 +250,10 @@ void TraceBodePlot::enableTraceAxis(Trace *t, int axis, bool enabled)
             cd.curve->setSamples(cd.data);
             curves[axis][t] = cd;
             // connect signals
-            connect(t, &Trace::dataChanged, this, &TraceBodePlot::replot);
+            connect(t, &Trace::dataChanged, this, &TraceBodePlot::triggerReplot);
             connect(t, &Trace::colorChanged, this, &TraceBodePlot::traceColorChanged);
             connect(t, &Trace::visibilityChanged, this, &TraceBodePlot::traceColorChanged);
-            connect(t, &Trace::visibilityChanged, this, &TraceBodePlot::replot);
+            connect(t, &Trace::visibilityChanged, this, &TraceBodePlot::triggerReplot);
             traceColorChanged(t);
         } else {
             tracesAxis[axis].erase(t);
@@ -264,15 +268,15 @@ void TraceBodePlot::enableTraceAxis(Trace *t, int axis, bool enabled)
             int otherAxis = axis == 0 ? 1 : 0;
             if(curves[otherAxis].find(t) == curves[otherAxis].end()) {
                 // this trace is not used anymore, disconnect from notifications
-                disconnect(t, &Trace::dataChanged, this, &TraceBodePlot::replot);
+                disconnect(t, &Trace::dataChanged, this, &TraceBodePlot::triggerReplot);
                 disconnect(t, &Trace::colorChanged, this, &TraceBodePlot::traceColorChanged);
                 disconnect(t, &Trace::visibilityChanged, this, &TraceBodePlot::traceColorChanged);
-                disconnect(t, &Trace::visibilityChanged, this, &TraceBodePlot::replot);
+                disconnect(t, &Trace::visibilityChanged, this, &TraceBodePlot::triggerReplot);
             }
         }
 
         updateContextMenu();
-        plot->replot();
+        triggerReplot();
     }
 }
 
