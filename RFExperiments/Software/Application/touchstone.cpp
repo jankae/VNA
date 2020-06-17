@@ -36,7 +36,9 @@ void Touchstone::AddDatapoint(Touchstone::Datapoint p)
 void Touchstone::toFile(string filename, Unit unit, Format format)
 {
     // strip any potential file name extension and apply snp convention
-    filename.erase(filename.find_last_of('.'));
+    if(filename.find_last_of('.') != string::npos) {
+        filename.erase(filename.find_last_of('.'));
+    }
     filename.append(".s" + to_string(m_ports) + "p");
 
     // create file
@@ -262,6 +264,10 @@ Touchstone Touchstone::fromFile(string filename)
                 parameter_cnt++;
                 if(parameter_cnt >= parameters_per_point) {
                     parameter_cnt = 0;
+                    if(ports == 2) {
+                        // 2 port touchstone has S11 S21 S12 S22 order, swap S12 and S21
+                        swap(point.S[1], point.S[2]);
+                    }
                     ret.AddDatapoint(point);
                     break;
                 }

@@ -29,6 +29,8 @@ private slots:
 
     void on_bImport_clicked();
 
+    void on_bExport_clicked();
+
 private:
     bool eventFilter(QObject *obj, QEvent *event) override;
     Ui::TraceWidget *ui;

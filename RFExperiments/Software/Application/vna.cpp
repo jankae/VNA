@@ -43,6 +43,7 @@ VNA::VNA(QWidget *parent)
     calMeasuring = false;
     calDialog.reset();
     device.Configure(settings);
+    setWindowTitle("VNA");
 
     // Create status panel
     auto statusLayout = new QVBoxLayout();

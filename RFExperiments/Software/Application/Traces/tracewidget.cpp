@@ -4,6 +4,7 @@
 #include <QKeyEvent>
 #include "traceeditdialog.h"
 #include "traceimportdialog.h"
+#include "traceexportdialog.h"
 
 TraceWidget::TraceWidget(TraceModel &model, QWidget *parent) :
     QWidget(parent),
@@ -79,4 +80,20 @@ void TraceWidget::on_bImport_clicked()
 {
     auto i = new TraceImportDialog(model);
     i->show();
+}
+
+void TraceWidget::on_bExport_clicked()
+{
+    auto e = new TraceExportDialog(model);
+    // Attempt to set default traces (this will result in correctly populated
+    // 2 port export if the initial 4 traces have not been modified)
+    e->setPortNum(2);
+    auto traces = model.getTraces();
+    for(int i=0;i<4;i++) {
+        if(i >= traces.size()) {
+            break;
+        }
+        e->setTrace(i%2, i/2, traces[i]);
+    }
+    e->show();
 }

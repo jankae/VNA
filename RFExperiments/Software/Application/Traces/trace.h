@@ -49,6 +49,8 @@ public:
     LiveParameter liveParameter() { return _liveParam; }
     LivedataType liveType() { return _liveType; }
     unsigned int size() { return _data.size(); }
+    double minFreq() { return _data.front().frequency; };
+    double maxFreq() { return _data.back().frequency; };
     Data sample(unsigned int index) { return _data.at(index); }
     QString getTouchstoneFilename() const;
     int getTouchstoneParameter() const;
