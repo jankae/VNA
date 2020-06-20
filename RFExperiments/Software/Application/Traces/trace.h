@@ -5,6 +5,7 @@
 #include <complex>
 #include <map>
 #include <QColor>
+#include <set>
 #include "touchstone.h"
 
 class Trace : public QObject
@@ -54,6 +55,8 @@ public:
     Data sample(unsigned int index) { return _data.at(index); }
     QString getTouchstoneFilename() const;
     int getTouchstoneParameter() const;
+    std::complex<double> getData(double frequency);
+    int index(double frequency);
 
 public slots:
     void setTouchstoneParameter(int value);

@@ -11,6 +11,7 @@
 #include <QProgressDialog>
 #include "Menu/menuaction.h"
 #include "Traces/tracemodel.h"
+#include "Traces/tracemarkermodel.h"
 
 class VNA : public QMainWindow
 {
@@ -35,6 +36,7 @@ private:
     void SettingsChanged();
     SParamTable dataTable;
     TraceModel traceModel;
+    TraceMarkerModel *markerModel;
 
 
     // Calibration

@@ -25,6 +25,7 @@ public:
     std::vector<Trace*> getTraces();
 signals:
     void traceAdded(Trace *t);
+    void traceRemoved(Trace *t);
 
 public slots:
     void clearVNAData();

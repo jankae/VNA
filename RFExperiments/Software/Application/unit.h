@@ -6,6 +6,7 @@
 class Unit
 {
 public:
+    static double FromString(QString string, QString unit = QString(), QString prefixes = " ");
     static QString ToString(double value, QString unit = QString(), QString prefixes = " ", int precision = 6);
     static double SIPrefixToFactor(char prefix);
 };

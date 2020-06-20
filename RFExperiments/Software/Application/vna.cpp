@@ -28,6 +28,8 @@
 #include "Traces/tracebodeplot.h"
 #include "Traces/traceimportdialog.h"
 #include "CustomWidgets/tilewidget.h"
+#include <QDockWidget>
+#include "Traces/markerwidget.h"
 
 using namespace std;
 
@@ -44,6 +46,8 @@ VNA::VNA(QWidget *parent)
     calDialog.reset();
     device.Configure(settings);
     setWindowTitle("VNA");
+
+    markerModel = new TraceMarkerModel(traceModel);
 
     // Create status panel
     auto statusLayout = new QVBoxLayout();
@@ -134,7 +138,6 @@ VNA::VNA(QWidget *parent)
     auto tS22 = new Trace("S22", Qt::red);
     tS22->fromLivedata(Trace::LivedataType::Overwrite, Trace::LiveParameter::S22);
     traceModel.addTrace(tS22);
-    statusLayout->addWidget(tw);
 
     auto tracesmith1 = new TraceSmithChart(traceModel);
     tracesmith1->enableTrace(tS11, true);
@@ -459,18 +462,45 @@ VNA::VNA(QWidget *parent)
         control->show();
     });
 
+    setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
+    setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
+    setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
+    setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
+
     auto mainWidget = new QWidget;
     auto mainLayout = new QHBoxLayout;
     mainWidget->setLayout(mainLayout);
     auto statusWidget = new QWidget;
     statusWidget->setLayout(statusLayout);
-    statusWidget->setFixedWidth(150);
-    mainLayout->addWidget(statusWidget);
+//    statusWidget->setFixedWidth(150);
+    auto statusDock = new QDockWidget("Status");
+    statusDock->setWidget(statusWidget);
+//    statusDock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+    addDockWidget(Qt::LeftDockWidgetArea, statusDock);
+
+    auto tracesDock = new QDockWidget("Traces");
+    tracesDock->setWidget(tw);
+//    tracesDock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+    addDockWidget(Qt::LeftDockWidgetArea, tracesDock);
+
+//    mainLayout->addWidget(statusWidget);
     mainLayout->addWidget(tiles);
     auto menuWidget = new QWidget;
     menuWidget->setLayout(menuLayout);
-    menuWidget->setFixedWidth(180);
-    mainLayout->addWidget(menuWidget);
+//    menuWidget->setFixedWidth(180);
+    auto menuDock = new QDockWidget("Menu");
+    menuDock->setWidget(menuWidget);
+//    menuDock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+    addDockWidget(Qt::RightDockWidgetArea, menuDock);
+//    mainLayout->addWidget(menuWidget);
+
+    auto markerWidget = new MarkerWidget(*markerModel);
+
+    auto markerDock = new QDockWidget("Marker");
+    markerDock->setWidget(markerWidget);
+//    markerDock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+    addDockWidget(Qt::BottomDockWidgetArea, markerDock);
+
     setCentralWidget(mainWidget);
     //setLayout(mainLayout);
     qRegisterMetaType<Protocol::Datapoint>("Datapoint");

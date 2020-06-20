@@ -21,9 +21,11 @@ void TraceModel::removeTrace(int index)
 {
     if (index < traces.size()) {
         beginRemoveRows(QModelIndex(), index, index);
-        delete traces[index];
+        auto trace = traces[index];
+        delete trace;
         traces.erase(traces.begin() + index);
         endRemoveRows();
+        emit traceRemoved(trace);
     }
 }
 

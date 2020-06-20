@@ -177,6 +177,23 @@ int Trace::getTouchstoneParameter() const
     return touchstoneParameter;
 }
 
+std::complex<double> Trace::getData(double frequency)
+{
+    if(_data.size() == 0 || frequency < minFreq() || frequency > maxFreq()) {
+        return std::numeric_limits<std::complex<double>>::quiet_NaN();
+    }
+
+    return sample(index(frequency)).S;
+}
+
+int Trace::index(double frequency)
+{
+    auto lower = lower_bound(_data.begin(), _data.end(), frequency, [](const Data &lhs, const double freq) -> bool {
+        return lhs.frequency < freq;
+    });
+    return lower - _data.begin();
+}
+
 void Trace::setTouchstoneParameter(int value)
 {
     touchstoneParameter = value;

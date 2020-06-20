@@ -5,6 +5,30 @@
 
 using namespace std;
 
+double Unit::FromString(QString string, QString unit, QString prefixes)
+{
+    if(string.size() == 0) {
+        return std::numeric_limits<double>::quiet_NaN();
+    }
+    // remove unit if present
+    if(string.endsWith(unit, Qt::CaseInsensitive)) {
+        string.chop(unit.size());
+    }
+    // check if last char is a valid prefix
+    double factor = 1.0;
+    if(prefixes.contains(string.back())) {
+        QChar prefix = string.back();
+        factor = SIPrefixToFactor(prefix.toLatin1());
+        string.chop(1);
+    }
+    bool convertOk;
+    auto value = string.toDouble(&convertOk);
+    if(!convertOk) {
+        return std::numeric_limits<double>::quiet_NaN();
+    }
+    return value * factor;
+}
+
 QString Unit::ToString(double value, QString unit, QString prefixes, int precision)
 {
     // change label text

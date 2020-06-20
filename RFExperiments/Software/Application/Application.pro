@@ -9,11 +9,14 @@ HEADERS += \
     Menu/menubool.h \
     Menu/menuitem.h \
     Menu/menuvalue.h \
+    Traces/markerwidget.h \
     Traces/trace.h \
     Traces/tracebodeplot.h \
     Traces/traceeditdialog.h \
     Traces/traceexportdialog.h \
     Traces/traceimportdialog.h \
+    Traces/tracemarker.h \
+    Traces/tracemarkermodel.h \
     Traces/tracemodel.h \
     Traces/traceplot.h \
     Traces/tracesmithchart.h \
@@ -42,11 +45,14 @@ SOURCES += \
     Menu/menubool.cpp \
     Menu/menuitem.cpp \
     Menu/menuvalue.cpp \
+    Traces/markerwidget.cpp \
     Traces/trace.cpp \
     Traces/tracebodeplot.cpp \
     Traces/traceeditdialog.cpp \
     Traces/traceexportdialog.cpp \
     Traces/traceimportdialog.cpp \
+    Traces/tracemarker.cpp \
+    Traces/tracemarkermodel.cpp \
     Traces/tracemodel.cpp \
     Traces/traceplot.cpp \
     Traces/tracesmithchart.cpp \
@@ -74,6 +80,7 @@ QT += widgets charts
 FORMS += \
     CustomWidgets/tilewidget.ui \
     CustomWidgets/touchstoneimport.ui \
+    Traces/markerwidget.ui \
     Traces/traceeditdialog.ui \
     Traces/traceexportdialog.ui \
     Traces/traceimportdialog.ui \
