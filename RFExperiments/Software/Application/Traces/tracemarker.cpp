@@ -1,4 +1,5 @@
 #include "tracemarker.h"
+#include <QPainter>
 
 TraceMarker::TraceMarker()
     : parentTrace(nullptr),
@@ -11,6 +12,9 @@ TraceMarker::TraceMarker()
 
 TraceMarker::~TraceMarker()
 {
+    if(parentTrace) {
+        emit parentTrace->markerRemoved(this);
+    }
     emit deleted(this);
 }
 
@@ -18,13 +22,18 @@ void TraceMarker::assignTrace(Trace *t)
 {
     if(parentTrace) {
         // remove connection from previous parent trace
+        parentTrace->removeMarker(this);
         disconnect(parentTrace, &Trace::deleted, this, &TraceMarker::parentTraceDeleted);
         disconnect(parentTrace, &Trace::dataChanged, this, &TraceMarker::traceDataChanged);
+        disconnect(parentTrace, &Trace::colorChanged, this, &TraceMarker::updateSymbol);
     }
     parentTrace = t;
     connect(parentTrace, &Trace::deleted, this, &TraceMarker::parentTraceDeleted);
     connect(parentTrace, &Trace::dataChanged, this, &TraceMarker::traceDataChanged);
+    connect(parentTrace, &Trace::colorChanged, this, &TraceMarker::updateSymbol);
     constrainFrequency();
+    updateSymbol();
+    parentTrace->addMarker(this);
 }
 
 Trace *TraceMarker::trace()
@@ -58,8 +67,25 @@ void TraceMarker::traceDataChanged()
     auto tracedata = parentTrace->getData(frequency);
     if(tracedata != data) {
         data = tracedata;
-        emit dataChanged();
+        emit dataChanged(this);
     }
+}
+
+void TraceMarker::updateSymbol()
+{
+    constexpr int width = 15, height = 15;
+    symbol = QPixmap(width, height);
+    symbol.fill(Qt::transparent);
+    QPainter p(&symbol);
+    p.setRenderHint(QPainter::Antialiasing);
+    QPointF points[] = {QPointF(0,0),QPointF(width,0),QPointF(width/2,height)};
+    auto traceColor = parentTrace->color();
+    p.setPen(traceColor);
+    p.setBrush(traceColor);
+    p.drawConvexPolygon(points, 3);
+    auto brightness = traceColor.redF() * 0.299 + traceColor.greenF() * 0.587 + traceColor.blueF() * 0.114;
+    p.setPen((brightness > 0.6) ? Qt::black : Qt::white);
+    p.drawText(QRectF(0,0,width, height*2.0/3.0), Qt::AlignCenter, QString::number(number));
 }
 
 void TraceMarker::constrainFrequency()
@@ -71,5 +97,20 @@ void TraceMarker::constrainFrequency()
             frequency = parentTrace->minFreq();
         }
     }
+}
+
+std::complex<double> TraceMarker::getData() const
+{
+    return data;
+}
+
+QPixmap &TraceMarker::getSymbol()
+{
+    return symbol;
+}
+
+double TraceMarker::getFrequency() const
+{
+    return frequency;
 }
 

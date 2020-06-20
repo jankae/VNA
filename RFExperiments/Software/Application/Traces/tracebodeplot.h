@@ -6,6 +6,7 @@
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 #include <qwt_series_data.h>
+#include <qwt_plot_marker.h>
 
 class TraceBodePlot : public TracePlot
 {
@@ -33,6 +34,9 @@ protected:
 
 private slots:
     void traceColorChanged(Trace *t);
+    void markerAdded(TraceMarker *m);
+    void markerRemoved(TraceMarker *m);
+    void markerDataChanged(TraceMarker *m);
 private:
     QString AxisTypeToName(YAxisType type);
     void enableTraceAxis(Trace *t, int axis, bool enabled);
@@ -48,6 +52,7 @@ private:
     };
 
     std::map<Trace*, CurveData> curves[2];
+    std::map<TraceMarker*, QwtPlotMarker*> markers;
     QwtPlot *plot;
 };
 

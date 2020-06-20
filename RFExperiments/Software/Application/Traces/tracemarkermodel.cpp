@@ -27,6 +27,7 @@ TraceMarker *TraceMarkerModel::createDefaultMarker()
     } while (used);
     auto marker = new TraceMarker();
     marker->number = number;
+    marker->frequency = 2150000000;
     marker->assignTrace(model.trace(0));
     return marker;
 }
@@ -61,7 +62,7 @@ void TraceMarkerModel::removeMarker(TraceMarker *m)
     }
 }
 
-void TraceMarkerModel::markerDataChanged()
+void TraceMarkerModel::markerDataChanged(TraceMarker *m)
 {
     emit dataChanged(index(0, ColIndexData), index(markers.size()-1, ColIndexData));
 }
@@ -172,6 +173,17 @@ Qt::ItemFlags TraceMarkerModel::flags(const QModelIndex &index) const
 std::vector<TraceMarker *> TraceMarkerModel::getMarker()
 {
     return markers;
+}
+
+std::vector<TraceMarker *> TraceMarkerModel::getMarker(Trace *t)
+{
+    std::vector<TraceMarker*> attachedMarkers;
+    for(auto m : markers) {
+        if(m->parentTrace == t) {
+            attachedMarkers.push_back(m);
+        }
+    }
+    return attachedMarkers;
 }
 
 TraceModel &TraceMarkerModel::getModel()

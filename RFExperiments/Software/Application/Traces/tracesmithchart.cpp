@@ -2,6 +2,7 @@
 #include <QPainter>
 #include <array>
 #include <math.h>
+#include "tracemarker.h"
 
 TraceSmithChart::TraceSmithChart(TraceModel &model, QWidget *parent)
     : TracePlot(parent)
@@ -17,6 +18,7 @@ TraceSmithChart::TraceSmithChart(TraceModel &model, QWidget *parent)
 void TraceSmithChart::draw(QPainter * painter, double width_factor) {
     painter->setPen(QPen(1.0 * width_factor));
     painter->setBrush(palette().windowText());
+    painter->setRenderHint(QPainter::Antialiasing);
 
 //    // Display parameter name
 //    QFont font = painter->font();
@@ -74,6 +76,14 @@ void TraceSmithChart::draw(QPainter * painter, double width_factor) {
             // draw line
             painter->drawLine(std::real(last), -std::imag(last), std::real(now), -std::imag(now));
         }
+        auto markers = t.first->getMarkers();
+        for(auto m : markers) {
+            auto coords = m->getData();
+            coords *= 512;
+            auto symbol = m->getSymbol();
+            symbol = symbol.scaled(symbol.width()*width_factor, symbol.height()*width_factor);
+            painter->drawPixmap(coords.real() - symbol.width()/2, -coords.imag() - symbol.height(), symbol);
+        }
     }
 }
 
@@ -89,12 +99,12 @@ void TraceSmithChart::paintEvent(QPaintEvent * /* the event */)
     painter.setBackground(QBrush(Background));
     painter.fillRect(0, 0, width(), height(), QBrush(Background));
 
-    int side = qMin(width(), height()) * 0.9;
+    double side = qMin(width(), height()) * 0.9;
 
     painter.setViewport((width()-side)/2, (height()-side)/2, side, side);
     painter.setWindow(-512, -512, 1024, 1024);
 
-    draw(&painter, 1024/side);
+    draw(&painter, 1024.0/side);
 }
 
 bool TraceSmithChart::supported(Trace *t)

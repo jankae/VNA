@@ -8,6 +8,8 @@
 #include <set>
 #include "touchstone.h"
 
+class TraceMarker;
+
 class Trace : public QObject
 {
     Q_OBJECT
@@ -57,13 +59,17 @@ public:
     int getTouchstoneParameter() const;
     std::complex<double> getData(double frequency);
     int index(double frequency);
+    std::set<TraceMarker *> getMarkers() const;
 
 public slots:
     void setTouchstoneParameter(int value);
     void setTouchstoneFilename(const QString &value);
     void setVisible(bool visible);
     void setColor(QColor color);
+    void addMarker(TraceMarker *m);
+    void removeMarker(TraceMarker *m);
 
+private:
 signals:
     void cleared(Trace *t);
     void dataAdded(Trace *t, Data d);
@@ -72,6 +78,8 @@ signals:
     void dataChanged();
     void nameChanged();
     void colorChanged(Trace *t);
+    void markerAdded(TraceMarker *m);
+    void markerRemoved(TraceMarker *m);
 
 private:
     std::vector<Data> _data;
@@ -85,6 +93,7 @@ private:
     bool touchstone;
     QString touchstoneFilename;
     int touchstoneParameter;
+    std::set<TraceMarker*> markers;
 };
 
 #endif // TRACE_H

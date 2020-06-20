@@ -38,6 +38,7 @@ public:
     TraceMarker* createDefaultMarker();
     TraceMarker *marker(int index);
     std::vector<TraceMarker*> getMarker();
+    std::vector<TraceMarker*> getMarker(Trace *t);
     TraceModel& getModel();
 
 public slots:
@@ -50,7 +51,7 @@ signals:
     void markerAdded(TraceMarker *t);
 
 private slots:
-    void markerDataChanged();
+    void markerDataChanged(TraceMarker *m);
 private:
     std::vector<TraceMarker*> markers;
     TraceModel &model;

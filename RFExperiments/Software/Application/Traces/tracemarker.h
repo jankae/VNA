@@ -15,21 +15,29 @@ public:
     void assignTrace(Trace *t);
     Trace* trace();
     QString readableData();
+
+    double getFrequency() const;
+    std::complex<double> getData() const;
+
+    QPixmap& getSymbol();
+
 public slots:
     void setFrequency(double freq);
 signals:
     void deleted(TraceMarker *m);
-    void dataChanged();
+    void dataChanged(TraceMarker *m);
 
 private slots:
     void parentTraceDeleted(Trace *t);
     void traceDataChanged();
+    void updateSymbol();
 private:
     void constrainFrequency();
     Trace *parentTrace;
     double frequency;
     int number;
     std::complex<double> data;
+    QPixmap symbol;
 };
 
 #endif // TRACEMARKER_H

@@ -9,8 +9,23 @@
 #include <qwt_plot_canvas.h>
 #include <qwt_scale_div.h>
 #include <qwt_plot_layout.h>
+#include "tracemarker.h"
+#include <qwt_symbol.h>
 
 using namespace std;
+
+static double AxisTransformation(TraceBodePlot::YAxisType type, complex<double> data) {
+    switch(type) {
+    case TraceBodePlot::YAxisType::Magnitude: return 20*log10(abs(data)); break;
+    case TraceBodePlot::YAxisType::Phase: return arg(data) * 180.0 / M_PI; break;
+    case TraceBodePlot::YAxisType::VSWR:
+        if(abs(data) >= 1.0) {
+            return numeric_limits<double>::quiet_NaN();
+        }
+        break;
+    }
+    return numeric_limits<double>::quiet_NaN();
+}
 
 template<TraceBodePlot::YAxisType E> class QwtTraceSeries : public QwtSeriesData<QPointF> {
 public:
@@ -24,21 +39,7 @@ public:
         Trace::Data d = t.sample(i);
         QPointF p;
         p.setX(d.frequency);
-        switch(E) {
-        case TraceBodePlot::YAxisType::Magnitude:
-            p.setY(20*log10(abs(d.S)));
-            break;
-        case TraceBodePlot::YAxisType::Phase:
-            p.setY(arg(d.S) * 180.0 / M_PI);
-            break;
-        case TraceBodePlot::YAxisType::VSWR:
-            if(abs(d.S) >= 1.0) {
-                p.setY(numeric_limits<double>::quiet_NaN());
-            } else {
-                p.setY((1+abs(d.S)) / (1-abs(d.S)));
-            }
-            break;
-        }
+        p.setY(AxisTransformation(E, d.S));
         return p;
     }
     QRectF boundingRect() const override {
@@ -254,6 +255,12 @@ void TraceBodePlot::enableTraceAxis(Trace *t, int axis, bool enabled)
             connect(t, &Trace::colorChanged, this, &TraceBodePlot::traceColorChanged);
             connect(t, &Trace::visibilityChanged, this, &TraceBodePlot::traceColorChanged);
             connect(t, &Trace::visibilityChanged, this, &TraceBodePlot::triggerReplot);
+            connect(t, &Trace::markerAdded, this, &TraceBodePlot::markerAdded);
+            connect(t, &Trace::markerRemoved, this, &TraceBodePlot::markerRemoved);
+            auto tracemarkers = t->getMarkers();
+            for(auto m : tracemarkers) {
+                markerAdded(m);
+            }
             traceColorChanged(t);
         } else {
             tracesAxis[axis].erase(t);
@@ -272,6 +279,12 @@ void TraceBodePlot::enableTraceAxis(Trace *t, int axis, bool enabled)
                 disconnect(t, &Trace::colorChanged, this, &TraceBodePlot::traceColorChanged);
                 disconnect(t, &Trace::visibilityChanged, this, &TraceBodePlot::traceColorChanged);
                 disconnect(t, &Trace::visibilityChanged, this, &TraceBodePlot::triggerReplot);
+                disconnect(t, &Trace::markerAdded, this, &TraceBodePlot::markerAdded);
+                disconnect(t, &Trace::markerRemoved, this, &TraceBodePlot::markerRemoved);
+                auto tracemarkers = t->getMarkers();
+                for(auto m : tracemarkers) {
+                    markerRemoved(m);
+                }
             }
         }
 
@@ -326,5 +339,41 @@ void TraceBodePlot::traceColorChanged(Trace *t)
             }
         }
     }
+}
+
+void TraceBodePlot::markerAdded(TraceMarker *m)
+{
+    if(markers.count(m)) {
+        qDebug() << "Marker " << m << " already present, skipping add";
+        return;
+    }
+    QwtSymbol *sym=new QwtSymbol;
+    sym->setPixmap(m->getSymbol());
+    sym->setPinPoint(QPointF(m->getSymbol().width()/2, m->getSymbol().height()));
+    auto qwtMarker = new QwtPlotMarker;
+    qwtMarker->setSymbol(sym);
+    qDebug() << "Marker added";
+    connect(m, &TraceMarker::dataChanged, this, &TraceBodePlot::markerDataChanged);
+    markers[m] = qwtMarker;
+    markerDataChanged(m);
+    qwtMarker->attach(plot);
+}
+
+void TraceBodePlot::markerRemoved(TraceMarker *m)
+{
+    disconnect(m, &TraceMarker::dataChanged, this, &TraceBodePlot::markerDataChanged);
+    if(markers.count(m)) {
+        markers[m]->detach();
+        delete markers[m];
+        markers.erase(m);
+    }
+}
+
+void TraceBodePlot::markerDataChanged(TraceMarker *m)
+{
+    qDebug() << "Marker data changed";
+    auto qwtMarker = markers[m];
+    qwtMarker->setXValue(m->getFrequency());
+    qwtMarker->setYValue(AxisTransformation(AxisType[0], m->getData()));
 }
 

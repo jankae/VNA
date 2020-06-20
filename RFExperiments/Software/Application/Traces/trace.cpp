@@ -124,6 +124,23 @@ void Trace::setColor(QColor color) {
     }
 }
 
+void Trace::addMarker(TraceMarker *m)
+{
+    markers.insert(m);
+    emit markerAdded(m);
+}
+
+void Trace::removeMarker(TraceMarker *m)
+{
+    markers.erase(m);
+    emit markerRemoved(m);
+}
+
+std::set<TraceMarker *> Trace::getMarkers() const
+{
+    return markers;
+}
+
 void Trace::setVisible(bool visible)
 {
     if(visible != this->visible) {
