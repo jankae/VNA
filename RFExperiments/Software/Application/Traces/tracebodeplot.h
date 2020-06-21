@@ -54,6 +54,8 @@ private:
     std::map<Trace*, CurveData> curves[2];
     std::map<TraceMarker*, QwtPlotMarker*> markers;
     QwtPlot *plot;
+    TraceMarker *selectedMarker;
+    QwtPlotCurve *selectedCurve;
 };
 
 #endif // TRACEBODEPLOT_H

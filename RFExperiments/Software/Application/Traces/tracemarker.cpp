@@ -96,6 +96,7 @@ void TraceMarker::constrainFrequency()
         } else if(frequency < parentTrace->minFreq()) {
             frequency = parentTrace->minFreq();
         }
+        traceDataChanged();
     }
 }
 

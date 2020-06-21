@@ -11,6 +11,8 @@
 #include <qwt_plot_layout.h>
 #include "tracemarker.h"
 #include <qwt_symbol.h>
+#include <qwt_plot_picker.h>
+#include <qwt_picker_machine.h>
 
 using namespace std;
 
@@ -19,8 +21,8 @@ static double AxisTransformation(TraceBodePlot::YAxisType type, complex<double> 
     case TraceBodePlot::YAxisType::Magnitude: return 20*log10(abs(data)); break;
     case TraceBodePlot::YAxisType::Phase: return arg(data) * 180.0 / M_PI; break;
     case TraceBodePlot::YAxisType::VSWR:
-        if(abs(data) >= 1.0) {
-            return numeric_limits<double>::quiet_NaN();
+        if(abs(data) < 1.0) {
+            return (1+abs(data)) / (1-abs(data));
         }
         break;
     }
@@ -50,8 +52,22 @@ private:
     Trace &t;
 };
 
+// Derived plotpicker, exposing transformation functions
+class BodeplotPicker : public QwtPlotPicker {
+public:
+    BodeplotPicker(int xAxis, int yAxis, RubberBand rubberBand, DisplayMode trackerMode, QWidget *w)
+        : QwtPlotPicker(xAxis, yAxis, rubberBand, trackerMode, w) {};
+    QPoint plotToPixel(const QPointF &pos) {
+        return transform(pos);
+    }
+    QPointF pixelToPlot(const QPoint &pos) {
+        return invTransform(pos);
+    }
+};
+
 TraceBodePlot::TraceBodePlot(TraceModel &model, QWidget *parent)
-    : TracePlot(parent)
+    : TracePlot(parent),
+      selectedMarker(nullptr)
 {
     plot = new QwtPlot(this);
     plot->setCanvasBackground(Background);
@@ -64,6 +80,52 @@ TraceBodePlot::TraceBodePlot(TraceModel &model, QWidget *parent)
     plot->setCanvas(canvas);
     plot->setPalette(pal);
     plot->setAutoFillBackground(true);
+
+    auto selectPicker = new BodeplotPicker(plot->xBottom, plot->yLeft, QwtPicker::NoRubberBand, QwtPicker::ActiveOnly, plot->canvas());
+    selectPicker->setStateMachine(new QwtPickerClickPointMachine);
+
+    auto drawPicker = new BodeplotPicker(plot->xBottom, plot->yLeft, QwtPicker::NoRubberBand, QwtPicker::ActiveOnly, plot->canvas());
+    drawPicker->setStateMachine(new QwtPickerDragPointMachine);
+    drawPicker->setTrackerPen(QPen(Qt::white));
+
+    // Marker selection
+    connect(selectPicker, qOverload<const QPointF&>(&QwtPlotPicker::selected), [=](const QPointF pos) {
+        auto clickPoint = drawPicker->plotToPixel(pos);
+        unsigned int closestDistance = numeric_limits<unsigned int>::max();
+        TraceMarker *closestMarker = nullptr;
+        for(auto m : markers) {
+            auto markerPoint = drawPicker->plotToPixel(m.second->value());
+            auto yDiff = abs(markerPoint.y() - clickPoint.y());
+            auto xDiff = abs(markerPoint.x() - clickPoint.x());
+            unsigned int distance = xDiff * xDiff + yDiff * yDiff;
+            if(distance < closestDistance) {
+                closestDistance = distance;
+                closestMarker = m.first;
+            }
+        }
+        qDebug() << closestDistance;
+        if(closestDistance <= 400) {
+            selectedMarker = closestMarker;
+            selectedCurve = curves[0][selectedMarker->trace()].curve;
+        } else {
+            selectedMarker = nullptr;
+            selectedCurve = nullptr;
+        }
+    });
+    // Marker movement
+    connect(drawPicker, qOverload<const QPointF&>(&QwtPlotPicker::moved), [=](const QPointF pos) {
+        if(!selectedMarker || !selectedCurve) {
+            return;
+        }
+//        int index = selectedCurve->closestPoint(pos.toPoint());
+//        qDebug() << index;
+//        if(index < 0) {
+//            // unable to find closest point
+//            return;
+//        }
+//        selectedMarker->setFrequency(selectedCurve->sample(index).x());
+        selectedMarker->setFrequency(pos.x());
+    });
 
     QwtPlotGrid *grid = new QwtPlotGrid();
     grid->setMajorPen(QPen(Divisions, 1.0, Qt::DotLine));
@@ -118,7 +180,22 @@ void TraceBodePlot::setYAxisType(int axis, TraceBodePlot::YAxisType type)
                     break;
                 }
             }
-        }while(erased);
+        } while(erased);
+
+        for(auto t : tracesAxis[axis]) {
+            // supported but needs an adjusted QwtSeriesData
+            auto td = curves[axis][t];
+            td.data = createQwtSeriesData(*t, axis);
+            // call to setSamples deletes old QwtSeriesData
+            td.curve->setSamples(td.data);
+            if(axis == 0) {
+                // update marker data
+                auto marker = t->getMarkers();
+                for(auto m : marker) {
+                    markerDataChanged(m);
+                }
+            }
+        }
 
         updateContextMenu();
         triggerReplot();
@@ -255,11 +332,13 @@ void TraceBodePlot::enableTraceAxis(Trace *t, int axis, bool enabled)
             connect(t, &Trace::colorChanged, this, &TraceBodePlot::traceColorChanged);
             connect(t, &Trace::visibilityChanged, this, &TraceBodePlot::traceColorChanged);
             connect(t, &Trace::visibilityChanged, this, &TraceBodePlot::triggerReplot);
-            connect(t, &Trace::markerAdded, this, &TraceBodePlot::markerAdded);
-            connect(t, &Trace::markerRemoved, this, &TraceBodePlot::markerRemoved);
-            auto tracemarkers = t->getMarkers();
-            for(auto m : tracemarkers) {
-                markerAdded(m);
+            if(axis == 0) {
+                connect(t, &Trace::markerAdded, this, &TraceBodePlot::markerAdded);
+                connect(t, &Trace::markerRemoved, this, &TraceBodePlot::markerRemoved);
+                auto tracemarkers = t->getMarkers();
+                for(auto m : tracemarkers) {
+                    markerAdded(m);
+                }
             }
             traceColorChanged(t);
         } else {
@@ -279,6 +358,8 @@ void TraceBodePlot::enableTraceAxis(Trace *t, int axis, bool enabled)
                 disconnect(t, &Trace::colorChanged, this, &TraceBodePlot::traceColorChanged);
                 disconnect(t, &Trace::visibilityChanged, this, &TraceBodePlot::traceColorChanged);
                 disconnect(t, &Trace::visibilityChanged, this, &TraceBodePlot::triggerReplot);
+            }
+            if(axis == 0) {
                 disconnect(t, &Trace::markerAdded, this, &TraceBodePlot::markerAdded);
                 disconnect(t, &Trace::markerRemoved, this, &TraceBodePlot::markerRemoved);
                 auto tracemarkers = t->getMarkers();
@@ -344,7 +425,6 @@ void TraceBodePlot::traceColorChanged(Trace *t)
 void TraceBodePlot::markerAdded(TraceMarker *m)
 {
     if(markers.count(m)) {
-        qDebug() << "Marker " << m << " already present, skipping add";
         return;
     }
     QwtSymbol *sym=new QwtSymbol;
@@ -352,7 +432,6 @@ void TraceBodePlot::markerAdded(TraceMarker *m)
     sym->setPinPoint(QPointF(m->getSymbol().width()/2, m->getSymbol().height()));
     auto qwtMarker = new QwtPlotMarker;
     qwtMarker->setSymbol(sym);
-    qDebug() << "Marker added";
     connect(m, &TraceMarker::dataChanged, this, &TraceBodePlot::markerDataChanged);
     markers[m] = qwtMarker;
     markerDataChanged(m);
@@ -371,7 +450,6 @@ void TraceBodePlot::markerRemoved(TraceMarker *m)
 
 void TraceBodePlot::markerDataChanged(TraceMarker *m)
 {
-    qDebug() << "Marker data changed";
     auto qwtMarker = markers[m];
     qwtMarker->setXValue(m->getFrequency());
     qwtMarker->setYValue(AxisTransformation(AxisType[0], m->getData()));

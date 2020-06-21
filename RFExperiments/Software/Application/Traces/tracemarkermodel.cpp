@@ -64,7 +64,7 @@ void TraceMarkerModel::removeMarker(TraceMarker *m)
 
 void TraceMarkerModel::markerDataChanged(TraceMarker *m)
 {
-    emit dataChanged(index(0, ColIndexData), index(markers.size()-1, ColIndexData));
+    emit dataChanged(index(0, ColIndexFreq), index(markers.size()-1, ColIndexData));
 }
 
 TraceMarker *TraceMarkerModel::marker(int index)
