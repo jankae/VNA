@@ -3,6 +3,9 @@
 #include <array>
 #include <math.h>
 #include "tracemarker.h"
+#include <QDebug>
+
+using namespace std;
 
 TraceSmithChart::TraceSmithChart(TraceModel &model, QWidget *parent)
     : TracePlot(parent)
@@ -13,6 +16,66 @@ TraceSmithChart::TraceSmithChart(TraceModel &model, QWidget *parent)
     pointDataPen = QPen(QColor("red"), 4.0, Qt::SolidLine, Qt::RoundCap);
     lineDataPen = QPen(QColor("blue"), 1.0);
     initializeTraceInfo(model);
+}
+
+QPoint TraceSmithChart::plotToPixel(std::complex<double> S)
+{
+    QPoint ret;
+    ret.setX(S.real() * plotToPixelXScale + plotToPixelXOffset);
+    ret.setY(S.imag() * plotToPixelYScale + plotToPixelYOffset);
+    return ret;
+}
+
+std::complex<double> TraceSmithChart::pixelToPlot(const QPoint &pos)
+{
+    return complex<double>((pos.x() - plotToPixelXOffset) / plotToPixelXScale, (pos.y() - plotToPixelYOffset) / plotToPixelYScale);
+}
+
+void TraceSmithChart::mousePressEvent(QMouseEvent *event)
+{
+    auto clickPoint = event->pos();
+    unsigned int closestDistance = numeric_limits<unsigned int>::max();
+    TraceMarker *closestMarker = nullptr;
+    for(auto t : traces) {
+        auto markers = t.first->getMarkers();
+        for(auto m : markers) {
+            auto S = m->getData();
+            auto markerPoint = plotToPixel(S);
+            auto yDiff = abs(markerPoint.y() - clickPoint.y());
+            auto xDiff = abs(markerPoint.x() - clickPoint.x());
+            unsigned int distance = xDiff * xDiff + yDiff * yDiff;
+            if(distance < closestDistance) {
+                closestDistance = distance;
+                closestMarker = m;
+            }
+        }
+    }
+    qDebug() << closestDistance;
+    if(closestDistance <= 400) {
+        selectedMarker = closestMarker;
+    } else {
+        selectedMarker = nullptr;
+    }
+}
+
+void TraceSmithChart::mouseMoveEvent(QMouseEvent *event)
+{
+    if(selectedMarker) {
+        auto t = selectedMarker->trace();
+        auto mouseS = pixelToPlot(event->pos());
+        auto samples = t->size();
+        double closestDistance = numeric_limits<double>::max();
+        unsigned int closestIndex = 0;
+        for(int i=0;i<samples;i++) {
+            auto data = t->sample(i);
+            auto distance = norm(data.S - mouseS);
+            if(distance < closestDistance) {
+                closestDistance = distance;
+                closestIndex = i;
+            }
+        }
+        selectedMarker->setFrequency(t->sample(closestIndex).frequency);
+    }
 }
 
 void TraceSmithChart::draw(QPainter * painter, double width_factor) {
@@ -29,26 +92,26 @@ void TraceSmithChart::draw(QPainter * painter, double width_factor) {
 
     // Outer circle
     painter->setPen(QPen(Border, 1.5 * width_factor));
-    QRectF rectangle(-512, -512, 1024, 1024);
+    QRectF rectangle(-smithCoordMax, -smithCoordMax, 2*smithCoordMax, 2*smithCoordMax);
     painter->drawArc(rectangle, 0, 5760);
 
     constexpr int Circles = 6;
     painter->setPen(QPen(Divisions, 0.5 * width_factor, Qt::DashLine));
     for(int i=1;i<Circles;i++) {
-        rectangle.adjust(1024/Circles, 512/Circles, 0, -512/Circles);
+        rectangle.adjust(2*smithCoordMax/Circles, smithCoordMax/Circles, 0, -smithCoordMax/Circles);
         painter->drawArc(rectangle, 0, 5760);
     }
 
-    painter->drawLine(-512, 0, 512, 0);
+    painter->drawLine(-smithCoordMax, 0, smithCoordMax, 0);
     constexpr std::array<double, 5> impedanceLines = {10, 25, 50, 100, 250};
     for(auto z : impedanceLines) {
         z /= ReferenceImpedance;
-        auto radius = 512.0 * 1/z;
-        double span = M_PI - 2 * atan(radius/512);
+        auto radius = smithCoordMax * 1.0/z;
+        double span = M_PI - 2 * atan(radius/smithCoordMax);
         span *= 5760 / (2 * M_PI);
-        QRectF rectangle(512 - radius, -2*radius, 2 * radius, 2 * radius);
+        QRectF rectangle(smithCoordMax - radius, -2*radius, 2 * radius, 2 * radius);
         painter->drawArc(rectangle, 4320 - span, span);
-        rectangle = QRectF(512 - radius, 0, 2 * radius, 2 * radius);
+        rectangle = QRectF(smithCoordMax - radius, 0, 2 * radius, 2 * radius);
         painter->drawArc(rectangle, 1440, span);
     }
 
@@ -71,15 +134,15 @@ void TraceSmithChart::draw(QPainter * painter, double width_factor) {
                 break;
             }
             // scale to size of smith diagram
-            last *= 512;
-            now *= 512;
+            last *= smithCoordMax;
+            now *= smithCoordMax;
             // draw line
             painter->drawLine(std::real(last), -std::imag(last), std::real(now), -std::imag(now));
         }
         auto markers = t.first->getMarkers();
         for(auto m : markers) {
             auto coords = m->getData();
-            coords *= 512;
+            coords *= smithCoordMax;
             auto symbol = m->getSymbol();
             symbol = symbol.scaled(symbol.width()*width_factor, symbol.height()*width_factor);
             painter->drawPixmap(coords.real() - symbol.width()/2, -coords.imag() - symbol.height(), symbol);
@@ -99,12 +162,17 @@ void TraceSmithChart::paintEvent(QPaintEvent * /* the event */)
     painter.setBackground(QBrush(Background));
     painter.fillRect(0, 0, width(), height(), QBrush(Background));
 
-    double side = qMin(width(), height()) * 0.9;
+    double side = qMin(width(), height()) * screenUsage;
 
     painter.setViewport((width()-side)/2, (height()-side)/2, side, side);
-    painter.setWindow(-512, -512, 1024, 1024);
+    painter.setWindow(-smithCoordMax, -smithCoordMax, 2*smithCoordMax, 2*smithCoordMax);
 
-    draw(&painter, 1024.0/side);
+    plotToPixelXOffset = width()/2;
+    plotToPixelYOffset = height()/2;
+    plotToPixelXScale = side/2;
+    plotToPixelYScale = -side/2;
+
+    draw(&painter, 2*smithCoordMax/side);
 }
 
 bool TraceSmithChart::supported(Trace *t)
