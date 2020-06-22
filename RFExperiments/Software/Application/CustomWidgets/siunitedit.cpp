@@ -20,7 +20,7 @@ SIUnitEdit::SIUnitEdit(QString unit, QString prefixes, int precision, QWidget *p
 }
 
 SIUnitEdit::SIUnitEdit(QWidget *parent)
-    : SIUnitEdit("", " ", 3, parent)
+    : SIUnitEdit("", " ", 4, parent)
 {
 
 }

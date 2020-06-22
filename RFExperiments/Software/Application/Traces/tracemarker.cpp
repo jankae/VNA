@@ -100,6 +100,11 @@ void TraceMarker::constrainFrequency()
     }
 }
 
+int TraceMarker::getNumber() const
+{
+    return number;
+}
+
 std::complex<double> TraceMarker::getData() const
 {
     return data;

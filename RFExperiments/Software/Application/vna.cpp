@@ -30,6 +30,7 @@
 #include "CustomWidgets/tilewidget.h"
 #include <QDockWidget>
 #include "Traces/markerwidget.h"
+#include "Tools/impedancematchdialog.h"
 
 using namespace std;
 
@@ -249,7 +250,9 @@ VNA::VNA(QWidget *parent)
 
     auto mSystem = new Menu(*menuLayout, "System");
     auto aManual = new MenuAction("Manual Control");
+    auto aMatchDialog = new MenuAction("Impedance Matching");
     mSystem->addItem(aManual);
+    mSystem->addItem(aMatchDialog);
     mSystem->finalize();
     mMain->addMenu(mSystem);
 
@@ -460,6 +463,11 @@ VNA::VNA(QWidget *parent)
     connect(aManual, &MenuAction::triggered, [=]() {
         auto control = new ManualControlDialog(device, this);
         control->show();
+    });
+
+    connect(aMatchDialog, &MenuAction::triggered, [=]() {
+        auto dialog = new ImpedanceMatchDialog(*markerModel);
+        dialog->show();
     });
 
     setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);

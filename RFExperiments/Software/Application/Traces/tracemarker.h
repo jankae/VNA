@@ -21,6 +21,8 @@ public:
 
     QPixmap& getSymbol();
 
+    int getNumber() const;
+
 public slots:
     void setFrequency(double freq);
 signals:

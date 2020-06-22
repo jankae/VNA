@@ -34,7 +34,7 @@ QString Unit::ToString(double value, QString unit, QString prefixes, int precisi
     // change label text
     QString sValue;
     if(value == 0.0) {
-        sValue.append('0');
+        sValue.append("0 ");
     } else {
         if(value < 0) {
             sValue.append('-');
@@ -47,7 +47,7 @@ QString Unit::ToString(double value, QString unit, QString prefixes, int precisi
             preDotDigits -= 3;
             prefixIndex++;
         }
-        while(preDotDigits<=0 && prefixIndex > 0) {
+        while(preDotDigits<=1 && prefixIndex > 0) {
             value *= 1000.0;
             preDotDigits += 3;
             prefixIndex--;

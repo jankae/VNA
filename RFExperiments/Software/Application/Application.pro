@@ -9,6 +9,8 @@ HEADERS += \
     Menu/menubool.h \
     Menu/menuitem.h \
     Menu/menuvalue.h \
+    Tools/eseries.h \
+    Tools/impedancematchdialog.h \
     Traces/markerwidget.h \
     Traces/trace.h \
     Traces/tracebodeplot.h \
@@ -45,6 +47,8 @@ SOURCES += \
     Menu/menubool.cpp \
     Menu/menuitem.cpp \
     Menu/menuvalue.cpp \
+    Tools/eseries.cpp \
+    Tools/impedancematchdialog.cpp \
     Traces/markerwidget.cpp \
     Traces/trace.cpp \
     Traces/tracebodeplot.cpp \
@@ -80,6 +84,7 @@ QT += widgets charts
 FORMS += \
     CustomWidgets/tilewidget.ui \
     CustomWidgets/touchstoneimport.ui \
+    Tools/impedancematchdialog.ui \
     Traces/markerwidget.ui \
     Traces/traceeditdialog.ui \
     Traces/traceexportdialog.ui \
