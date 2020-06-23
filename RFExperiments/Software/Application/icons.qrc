@@ -18,5 +18,13 @@
         <file>icons/close.svg</file>
         <file>icons/horizontal.svg</file>
         <file>icons/vertical.svg</file>
+        <file>icons/pCsC_small.png</file>
+        <file>icons/pCsL_small.png</file>
+        <file>icons/pLsC_small.png</file>
+        <file>icons/pLsL_small.png</file>
+        <file>icons/sCpC_small.png</file>
+        <file>icons/sCpL_small.png</file>
+        <file>icons/sLpC_small.png</file>
+        <file>icons/sLpL_small.png</file>
     </qresource>
 </RCC>

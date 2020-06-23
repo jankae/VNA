@@ -23,7 +23,7 @@ ImpedanceMatchDialog::ImpedanceMatchDialog(TraceMarkerModel &model, TraceMarker 
     ui->mLoss->setUnit("db");
 
     ui->lValue->setUnit("H");
-    ui->lValue->setPrefixes("num ");
+    ui->lValue->setPrefixes("pnum ");
     ui->cValue->setUnit("F");
     ui->cValue->setPrefixes("pnum ");
 
@@ -108,13 +108,26 @@ void ImpedanceMatchDialog::calculateMatch()
         X -= Z.imag();
     }
     // convert X and B to inductor and capacitor
-    double L, C;
+    bool twoCs = false;
+    bool twoLs = false;
+    double L, C, C2, L2;
     if(X >= 0) {
         L = X/(2*M_PI*freq);
-        C = B/(2*M_PI*freq);
+        if(B > 0) {
+            C = B/(2*M_PI*freq);
+        } else {
+            L2 = X/(2*M_PI*freq);
+            L = -1/(B*2*M_PI*freq);
+            twoLs = true;
+        }
     } else {
-        L = -1/(B*2*M_PI*freq);
         C = -1/(X*2*M_PI*freq);
+        if(B < 0) {
+            L = -1/(B*2*M_PI*freq);
+        } else {
+            C2 = B/(2*M_PI*freq);
+            twoCs = true;
+        }
     }
 
     ESeries::Series Lseries;
@@ -148,19 +161,74 @@ void ImpedanceMatchDialog::calculateMatch()
 
     L = ESeries::ToESeries(L, Lseries);
     C = ESeries::ToESeries(C, Cseries);
+    L2 = ESeries::ToESeries(L2, Lseries);
+    C2 = ESeries::ToESeries(C2, Cseries);
 
-    ui->lValue->setValue(L);
-    ui->cValue->setValue(C);
-
+    if(twoCs) {
+        for(auto b : ui->lGroup->buttons()) {
+            b->setEnabled(false);
+        }
+        for(auto b : ui->cGroup->buttons()) {
+            b->setEnabled(true);
+        }
+        ui->lL->setText("C1:");
+        ui->lC->setText("C2:");
+        ui->lValue->setUnit("F");
+        ui->cValue->setUnit("F");
+        ui->lValue->setValue(C2);
+        ui->cValue->setValue(C);
+    } else if(twoLs) {
+        for(auto b : ui->cGroup->buttons()) {
+            b->setEnabled(false);
+        }
+        for(auto b : ui->lGroup->buttons()) {
+            b->setEnabled(true);
+        }
+        ui->lC->setText("L2:");
+        ui->lL->setText("L1:");
+        ui->cValue->setUnit("H");
+        ui->lValue->setUnit("H");
+        ui->cValue->setValue(L2);
+        ui->lValue->setValue(L);
+    } else {
+        for(auto b : ui->cGroup->buttons()) {
+            b->setEnabled(true);
+        }
+        for(auto b : ui->lGroup->buttons()) {
+            b->setEnabled(true);
+        }
+        ui->lC->setText("C:");
+        ui->lL->setText("L:");
+        ui->lValue->setUnit("H");
+        ui->cValue->setUnit("F");
+        ui->lValue->setValue(L);
+        ui->cValue->setValue(C);
+    }
     // calculate actual matched impedance
     complex<double> Zmatched;
     complex<double> Zp, Zs;
     if(seriesC) {
-        Zs = complex<double>(0, -1/(2*M_PI*freq*C));
-        Zp = complex<double>(0, 2*M_PI*freq*L);
+        if(twoLs) {
+            Zs = complex<double>(0, 2*M_PI*freq*L2);
+            Zp = complex<double>(0, 2*M_PI*freq*L);
+        } else if(twoCs) {
+            Zs = complex<double>(0, -1/(2*M_PI*freq*C2));
+            Zp = complex<double>(0, -1/(2*M_PI*freq*C));
+        } else {
+            Zs = complex<double>(0, -1/(2*M_PI*freq*C));
+            Zp = complex<double>(0, 2*M_PI*freq*L);
+        }
     } else {
-        Zs = complex<double>(0, 2*M_PI*freq*L);
-        Zp = complex<double>(0, -1/(2*M_PI*freq*C));
+        if(twoCs) {
+            Zs = complex<double>(0, -1/(2*M_PI*freq*C));
+            Zp = complex<double>(0, -1/(2*M_PI*freq*C2));
+        } else if(twoLs){
+            Zs = complex<double>(0, 2*M_PI*freq*L);
+            Zp = complex<double>(0, 2*M_PI*freq*L2);
+        } else {
+            Zs = complex<double>(0, 2*M_PI*freq*L);
+            Zp = complex<double>(0, -1/(2*M_PI*freq*C));
+        }
     }
     if(Z.real() > Z0) {
         Zmatched = Z*Zp/(Z+Zp) + Zs;
@@ -172,4 +240,27 @@ void ImpedanceMatchDialog::calculateMatch()
     double reflection = abs((Zmatched-Z0)/(Zmatched+Z0));
     auto loss = 20.0*log10(reflection);
     ui->mLoss->setValue(loss);
+
+    // set correct image
+    if(Z.real() > Z0) {
+        if(X >= 0 && B >= 0) {
+            ui->Image->setPixmap(QPixmap(":/icons/sLpC_small.png"));
+        } else if(X < 0 && B < 0) {
+            ui->Image->setPixmap(QPixmap(":/icons/sCpL_small.png"));
+        } else if(X >= 0 && B < 0) {
+            ui->Image->setPixmap(QPixmap(":/icons/sCpC_small.png")); // TODO check
+        } else {
+            ui->Image->setPixmap(QPixmap(":/icons/sLpL_small.png")); // TODO check
+        }
+    } else {
+        if(X >= 0 && B >= 0) {
+            ui->Image->setPixmap(QPixmap(":/icons/pCsL_small.png"));
+        } else if(X < 0 && B < 0) {
+            ui->Image->setPixmap(QPixmap(":/icons/pLsC_small.png"));
+        } else if(X >= 0 && B < 0) {
+            ui->Image->setPixmap(QPixmap(":/icons/pLsL_small.png"));
+        } else {
+            ui->Image->setPixmap(QPixmap(":/icons/pCsC_small.png"));
+        }
+    }
 }
