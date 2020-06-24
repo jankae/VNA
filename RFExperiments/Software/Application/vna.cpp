@@ -37,8 +37,7 @@ using namespace std;
 constexpr Protocol::SweepSettings VNA::defaultSweep;
 
 VNA::VNA(QWidget *parent)
-    : QMainWindow(parent),
-      dataTable(10001)
+    : QMainWindow(parent)
 {
     settings = defaultSweep;
     averages = 1;
@@ -357,7 +356,7 @@ VNA::VNA(QWidget *parent)
     });
     connect(mAverages, &MenuValue::valueChanged, [=](double newval){
        averages = newval;
-       dataTable.setAverages(averages);
+       average.setAverages(averages);
        SettingsChanged();
     });
 
@@ -417,14 +416,17 @@ VNA::VNA(QWidget *parent)
     connect(mCalSOL1, &MenuAction::triggered, [=](){
         cal.constructErrorTerms(Calibration::Type::Port1SOL, calkit);
         calValid = true;
+        average.reset();
     });
     connect(mCalSOL2, &MenuAction::triggered, [=](){
         cal.constructErrorTerms(Calibration::Type::Port2SOL, calkit);
         calValid = true;
+        average.reset();
     });
     connect(mCalFullSOLT, &MenuAction::triggered, [=](){
         cal.constructErrorTerms(Calibration::Type::FullSOLT, calkit);
         calValid = true;
+        average.reset();
     });
 
     connect(mCalSave, &MenuAction::triggered, [=](){
@@ -542,7 +544,7 @@ void VNA::NewDatapoint(Protocol::Datapoint d)
     if(calValid) {
         cal.correctMeasurement(d);
     }
-    dataTable.addVNAResult(d);
+    d = average.process(d);
     traceModel.addVNAData(d);
     emit dataChanged();
     if(d.pointNum == settings.points - 1) {
@@ -558,7 +560,7 @@ void VNA::UpdateStatusPanel()
     lSpan.setText(Unit::ToString(settings.f_stop - settings.f_start, "Hz", " kMG", 4));
     lPoints.setText(QString::number(settings.points));
     lBandwidth.setText(Unit::ToString(settings.if_bandwidth, "Hz", " k", 2));
-    lAverages.setText(QString::number(dataTable.getAcquiredAverages()) + "/" + QString::number(averages));
+    lAverages.setText(QString::number(average.getLevel()) + "/" + QString::number(averages));
     switch(cal.getInterpolation(settings)) {
     case Calibration::InterpolationType::NoCalibration:
         lCalibration.setText("Off");
@@ -579,7 +581,7 @@ void VNA::UpdateStatusPanel()
 void VNA::SettingsChanged()
 {
     device.Configure(settings);
-    dataTable.clearResults();
+    average.reset();
     traceModel.clearVNAData();
     UpdateStatusPanel();
 }

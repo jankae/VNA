@@ -3,7 +3,6 @@
 
 #include "traceplot.h"
 #include <QPen>
-#include "sparamtable.h"
 
 class TraceSmithChart : public TracePlot
 {

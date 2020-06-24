@@ -23,14 +23,13 @@ HEADERS += \
     Traces/traceplot.h \
     Traces/tracesmithchart.h \
     Traces/tracewidget.h \
+    averaging.h \
     calibration.h \
     calkit.h \
     calkitdialog.h \
     device.h \
     manualcontroldialog.h \
     qwtplotpiecewisecurve.h \
-    sparam.h \
-    sparamtable.h \
     touchstone.h \
     unit.h \
     valueinput.h \
@@ -61,6 +60,7 @@ SOURCES += \
     Traces/traceplot.cpp \
     Traces/tracesmithchart.cpp \
     Traces/tracewidget.cpp \
+    averaging.cpp \
     calibration.cpp \
     calkit.cpp \
     calkitdialog.cpp \
@@ -68,7 +68,6 @@ SOURCES += \
     main.cpp \
     manualcontroldialog.cpp \
     qwtplotpiecewisecurve.cpp \
-    sparamtable.cpp \
     touchstone.cpp \
     unit.cpp \
     valueinput.cpp \

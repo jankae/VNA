@@ -6,12 +6,12 @@
 #include <QGridLayout>
 #include "device.h"
 #include "Traces/traceplot.h"
-#include "sparamtable.h"
 #include "calibration.h"
 #include <QProgressDialog>
 #include "Menu/menuaction.h"
 #include "Traces/tracemodel.h"
 #include "Traces/tracemarkermodel.h"
+#include "averaging.h"
 
 class VNA : public QMainWindow
 {
@@ -34,10 +34,9 @@ private:
     Protocol::SweepSettings settings;
     unsigned int averages;
     void SettingsChanged();
-    SParamTable dataTable;
     TraceModel traceModel;
     TraceMarkerModel *markerModel;
-
+    Averaging average;
 
     // Calibration
     Calibration cal;
