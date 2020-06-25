@@ -8,7 +8,7 @@ A VNA can be very helpful for RF experiments so I decided to build one for my ne
 * Low sweep speed: Especially with averaging enabled, a sweep can take a few minutes
 * Ports are not 50 Ohm terminated, see also discussion [here](https://www.eevblog.com/forum/rf-microwave/pocketvna-any-idea-what-its-like/msg1220143/#msg1220143)
 
-There already are some other DIY VNA projects online, especially [these](https://hforsten.com/cheap-homemade-30-mhz-6-ghz-vector-network-analyzer.html) [two](http://www.yl3akb.lv/content/vna_v2/vna_v2.php) served as inspiration.
+There already are some other DIY VNA projects online, especially [these](https://hforsten.com/cheap-homemade-30-mhz-6-ghz-vector-network-analyzer.html) [two](http://www.yl3akb.lv/content/vna_v2/vna_v2.php) served as inspiration. Especially the first link also explains some general concepts of a VNA, what it is used for, how it works and some compromises when choosing a hardware architecture.
 
 ## Design goals
 * 1MHz to 6GHz usable frequency range. Both limits are essentially set by the specs of affordable RF ICs.
@@ -63,7 +63,7 @@ The shielding serves multiple purposes:
 * Full control over start/center/stop frequencies, span, IF bandwidth, number of points, stimulus power level, ...
 * SOLT calibration with fully customizable calibration kit (either from coefficients or touchstone measurements):
 ![](Screenshots/CalkitDialog.png)
-* Manually control the hardware components directly (helpful for hardware debugging or using the device as a simple signal source):
+* Manually control of the hardware components (helpful for hardware debugging or using the device as a simple signal source):
 ![](Screenshots/ManualControl.png)
 
 ## How well does it work?
