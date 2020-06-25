@@ -144,10 +144,11 @@ void CalkitDialog::parseEntries()
     ownKit.load_file = ui->load_touchstone->getFilename().toStdString();
     ownKit.through_file = ui->through_touchstone->getFilename().toStdString();
 
-    ownKit.open_Sparam = ui->openSparam->checkedId();
-    ownKit.short_Sparam = ui->shortSparam->checkedId();
-    ownKit.load_Sparam = ui->loadSparam->checkedId();
-    ownKit.through_Sparam = ui->throughSparam->checkedId();
+    ownKit.open_Sparam = ui->open_touchstone->getPorts()[0];
+    ownKit.short_Sparam = ui->short_touchstone->getPorts()[0];
+    ownKit.load_Sparam = ui->load_touchstone->getPorts()[0];
+    ownKit.through_Sparam1 = ui->through_touchstone->getPorts()[0];
+    ownKit.through_Sparam2 = ui->through_touchstone->getPorts()[1];
 }
 
 void CalkitDialog::updateEntries()
@@ -186,7 +187,8 @@ void CalkitDialog::updateEntries()
     ui->load_touchstone->selectPort(0, ownKit.load_Sparam);
 
     ui->through_touchstone->setFile(QString::fromStdString(ownKit.through_file));
-    ui->through_touchstone->selectPort(0, ownKit.through_Sparam);
+    ui->through_touchstone->selectPort(0, ownKit.through_Sparam1);
+    ui->through_touchstone->selectPort(1, ownKit.through_Sparam2);
 
     // Type
     if (ownKit.open_measurements) {

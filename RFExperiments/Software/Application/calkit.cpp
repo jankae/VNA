@@ -44,7 +44,8 @@ Calkit::Calkit()
     open_Sparam = 0;
     short_Sparam = 0;
     load_Sparam = 0;
-    through_Sparam = 0;
+    through_Sparam1 = 0;
+    through_Sparam2 = 1;
 }
 
 void Calkit::toFile(std::string filename)
@@ -67,7 +68,7 @@ void Calkit::toFile(std::string filename)
         file << load_file << "\n" << load_Sparam << "\n";
     }
     if(through_measurements) {
-        file << through_file << "\n" << through_Sparam << "\n";
+        file << through_file << "\n" << through_Sparam1 << "\n" << through_Sparam2 << "\n";
     }
     file.close();
 }
@@ -113,7 +114,8 @@ Calkit Calkit::fromFile(std::string filename)
     }
     if(c.through_measurements) {
         file >> c.through_file;
-        file >> c.through_Sparam;
+        file >> c.through_Sparam1;
+        file >> c.through_Sparam2;
     }
     file.close();
     return c;

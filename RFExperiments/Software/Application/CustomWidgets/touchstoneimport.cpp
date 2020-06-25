@@ -82,6 +82,18 @@ void TouchstoneImport::selectPort(int destination, int source)
     }
 }
 
+std::vector<int> TouchstoneImport::getPorts()
+{
+    vector<int> ret;
+    if(required_ports >= 1) {
+        ret.push_back(ui->port1Group->checkedId());
+    }
+    if(required_ports >= 2) {
+        ret.push_back(ui->port2Group->checkedId());
+    }
+    return ret;
+}
+
 void TouchstoneImport::setFile(QString filename)
 {
     ui->file->setText(filename);

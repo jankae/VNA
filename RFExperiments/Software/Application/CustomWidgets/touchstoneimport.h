@@ -22,6 +22,7 @@ public:
     void setPorts(int ports);
     QString getFilename();
     void selectPort(int destination, int source);
+    std::vector<int> getPorts();
 
 signals:
     void statusChanged(bool status);

@@ -582,8 +582,8 @@
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>560</x>
-     <y>323</y>
+     <x>-1</x>
+     <y>-1</y>
     </hint>
     <hint type="destinationlabel">
      <x>978</x>
@@ -593,13 +593,9 @@
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="shortSparam"/>
-  <buttongroup name="throughSparam"/>
   <buttongroup name="LoadType"/>
+  <buttongroup name="OpenType"/>
   <buttongroup name="ShortType"/>
   <buttongroup name="ThroughType"/>
-  <buttongroup name="loadSparam"/>
-  <buttongroup name="OpenType"/>
-  <buttongroup name="openSparam"/>
  </buttongroups>
 </ui>

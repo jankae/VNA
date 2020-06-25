@@ -29,7 +29,7 @@ public:
     bool through_measurements;
 
     std::string open_file, short_file, load_file, through_file;
-    int open_Sparam, short_Sparam, load_Sparam, through_Sparam;
+    int open_Sparam, short_Sparam, load_Sparam, through_Sparam1, through_Sparam2;
 
     void toFile(std::string filename);
     static Calkit fromFile(std::string filename);
