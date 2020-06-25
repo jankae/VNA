@@ -6,7 +6,7 @@
 A VNA can be very helpful for RF experiments so I decided to build one for my next project. I already own a [pocketVNA](https://pocketvna.com/), however I found some issues with it and didn't use it very often:
 * High thermal drift: you have to leave it running for 30-45 minutes before using it
 * Low sweep speed: Especially with averaging enabled, a sweep can take a few minutes
-* Ports are not 50Ohm terminated, see also discussion [here](https://www.eevblog.com/forum/rf-microwave/pocketvna-any-idea-what-its-like/msg1220143/#msg1220143)
+* Ports are not 50 Ohm terminated, see also discussion [here](https://www.eevblog.com/forum/rf-microwave/pocketvna-any-idea-what-its-like/msg1220143/#msg1220143)
 
 There already are some other DIY VNA projects online, especially [these](https://hforsten.com/cheap-homemade-30-mhz-6-ghz-vector-network-analyzer.html) [two](http://www.yl3akb.lv/content/vna_v2/vna_v2.php) served as inspiration.
 
@@ -67,7 +67,7 @@ The shielding serves multiple purposes:
 ![](Screenshots/ManualControl.png)
 
 ## How well does it work?
-I am really not that sure, as I have no RF equipment to compare it to. A VNA can only be as good as the calibration kit and the only calibration kit I have is the on that came with the pocketVNA, which does not have any calibration coefficients. Why is that a problem? No calibration kit is perfect and the coefficients allow the VNA to take those imperfections into account. Without the coefficients these imperfections will be propagated to the measurements. As calibration kits with coefficients easily cost more than this whole project (at least the ones I could find) this situation will probably not change soon.
+I am really not that sure, as I have no RF equipment to compare it to. A VNA can only be as good as the calibration kit and the only calibration kit I have is the on that came with the pocketVNA, which does not have any calibration coefficients. Why is that a problem? No calibration kit is perfect and the coefficients allow the VNA to take the imperfections into account. Without the coefficients these imperfections will be propagated to the measurements. As calibration kits with coefficients easily cost more than this whole project (at least the ones I could find) this situation will probably not change soon.
 
 That being said, here are a few measurements:
 * Isolation between ports with (green) and without (red) shielding (1MHz to 6GHz, 501 points, 100Hz IF bandwidth, both ports terminated into 50 Ohm):
