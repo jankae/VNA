@@ -78,3 +78,5 @@ That being said, here are a few measurements:
   * Below about 1GHz the noise for is the actual noise floor of the ADC. Above 1GHz more and more signal leaks into the other port. This leakage is a bit worse at port 1 (S12) because the HF source is placed close to the port 1 mixers. The shielding improves the isolation somewhat but not to the extend I had hoped. Interestingly there are some peaks in the isolation sweep when the shielding is used. My best guess is that they are caused by the cavities in the shielding acting as waveguides. I am hoping to improve the shielding by adding RF absorbers to some parts of the aluminium.
 * The cavity bandpass filter from [this](https://github.com/jankae/SpectrumAnalyzer) project (1.9GHz to 2.3GHz, 501 points, 1kHz IF bandwidth):
  ![](Screenshots/Filter.png)
+* A WLAN antenna that seems to be somewhat reasonable matched between 2.3GHz and 2.6GHz:
+ ![](Screenshots/Antenna.png)
