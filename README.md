@@ -8,7 +8,7 @@ A VNA can be very helpful for RF experiments so I decided to build one for my ne
 * Low sweep speed: Especially with averaging enabled, a sweep can take a few minutes
 * Ports are not 50 Ohm terminated, see also discussion [here](https://www.eevblog.com/forum/rf-microwave/pocketvna-any-idea-what-its-like/msg1220143/#msg1220143)
 
-There already are some other DIY VNA projects online, especially [these](https://hforsten.com/cheap-homemade-30-mhz-6-ghz-vector-network-analyzer.html) [two](http://www.yl3akb.lv/content/vna_v2/vna_v2.php) served as inspiration.
+There already are some other DIY VNA projects online, especially [these](https://hforsten.com/cheap-homemade-30-mhz-6-ghz-vector-network-analyzer.html) [two](http://www.yl3akb.lv/content/vna_v2/vna_v2.php) served as inspiration. Especially the first link also explains some general concepts of a VNA, what it is used for, how it works and some compromises when choosing a hardware architecture.
 
 ## Design goals
 * 1MHz to 6GHz usable frequency range. Both limits are essentially set by the specs of affordable RF ICs.
@@ -56,14 +56,14 @@ The shielding serves multiple purposes:
 
 ## PC Software
 ![](Screenshots/DefaultLayout.png)
-* Written in Qt. This was my first PC software with a GUI and it took a while (and many lines of code that was rewritten a lot) to understand the concepts. While certainly not optimal, the result is absolutely usable for me.
+* Written in Qt. This was my first PC software with a GUI and it took a while (and many lines of code that were rewritten a lot) to understand the concepts. While certainly not optimal, the result is absolutely usable for me.
 * Flexible display of measurements in charts (Smithchart/Bodeplot). Each chart can be assigned a number of traces (e.i. plot S22 and S11 in one smithchart). The charts can be resized, moved, deleted or split into more charts.
 * Import/export of touchstone files up to 4 ports. This allows saving measurements and also comparing the current measurement with others.
 * Rudimentary marker system to read S-parameters at any frequency.
 * Full control over start/center/stop frequencies, span, IF bandwidth, number of points, stimulus power level, ...
 * SOLT calibration with fully customizable calibration kit (either from coefficients or touchstone measurements):
 ![](Screenshots/CalkitDialog.png)
-* Manually control the hardware components directly (helpful for hardware debugging or using the device as a simple signal source):
+* Manually control of the hardware components (helpful for hardware debugging or using the device as a simple signal source):
 ![](Screenshots/ManualControl.png)
 
 ## How well does it work?
@@ -75,6 +75,8 @@ That being said, here are a few measurements:
   ![](Pictures/S12ShieldingEffect.png)
   * S21:
   ![](Pictures/S21ShieldingEffect.png)
-  * Below about 1GHz the noise for is the actual noise floor of the ADC. Above 1GHz more and more signal leaks into the other port. This leakage is a bit worse at port 1 (S12) because the HF source is placed close to the port 1 mixers. The shielding improves the isolation somewhat but not to the extend I had hoped. Interestingly there are some peaks in the isolation sweep when the shielding is used. My best guess is that they are caused by the cavities in the shielding acting as waveguides. I am hoping to improve the shielding by adding RF absorbers to some parts of the aluminium.
+  * Below about 1GHz the noise floor is the actual noise floor of the ADC. Above 1GHz more and more signal leaks into the other port. This leakage is a bit worse at port 1 (S12) because the HF source is placed close to the port 1 mixers. The shielding improves the isolation somewhat but not to the extend I had hoped. Interestingly there are some peaks in the isolation sweep when the shielding is used. My best guess is that they are caused by the cavities in the shielding acting as waveguides. I am hoping to improve the shielding by adding RF absorbers to some parts of the aluminium.
 * The cavity bandpass filter from [this](https://github.com/jankae/SpectrumAnalyzer) project (1.9GHz to 2.3GHz, 501 points, 1kHz IF bandwidth):
  ![](Screenshots/Filter.png)
+* A WLAN antenna that seems to be somewhat reasonable matched between 2.3GHz and 2.6GHz:
+ ![](Screenshots/Antenna.png)
