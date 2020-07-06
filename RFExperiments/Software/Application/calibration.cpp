@@ -290,6 +290,42 @@ QString Calibration::MeasurementToString(Calibration::Measurement m)
     }
 }
 
+void Calibration::addAsTraces(TraceModel &m)
+{
+    Trace *traces[12];
+    const QString traceNames[12] = {"e00", "F_e11", "e10e01", "e10e32", "F_e22", "e30", "e33", "R_e11", "e23e32", "e23e01", "R_e22", "e03"};
+    constexpr bool reflection[12] = {true, true, false, false, true, false, true, true, false, false, true, false};
+    for(int i=0;i<12;i++) {
+        traces[i] = new Trace(traceNames[i], Qt::red);
+        traces[i]->setCalibration(true);
+        traces[i]->setReflection(reflection[i]);
+    }
+    for(auto p : points) {
+        Trace::Data d;
+        d.frequency = p.frequency;
+        for(int i=0;i<12;i++) {
+            switch(i) {
+            case 0: d.S = p.fe00; break;
+            case 1: d.S = p.fe11; break;
+            case 2: d.S = p.fe10e01; break;
+            case 3: d.S = p.fe10e32; break;
+            case 4: d.S = p.fe22; break;
+            case 5: d.S = p.fe30; break;
+            case 6: d.S = p.re33; break;
+            case 7: d.S = p.re11; break;
+            case 8: d.S = p.re23e32; break;
+            case 9: d.S = p.re23e01; break;
+            case 10: d.S = p.re22; break;
+            case 11: d.S = p.re03; break;
+            }
+            traces[i]->addData(d);
+        }
+    }
+    for(int i=0;i<12;i++) {
+        m.addTrace(traces[i]);
+    }
+}
+
 ostream& operator<<(ostream &os, const Calibration &c)
 {
     os << c.points.size() << "\n";

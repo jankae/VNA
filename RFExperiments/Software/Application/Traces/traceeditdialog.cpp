@@ -15,6 +15,14 @@ TraceEditDialog::TraceEditDialog(Trace &t, QWidget *parent) :
     ui->GSource->setId(ui->bLive, 0);
     ui->GSource->setId(ui->bFile, 1);
 
+    if(t.isCalibration()) {
+        // prevent editing imported calibration traces
+        ui->bLive->setEnabled(false);
+        ui->bFile->setEnabled(false);
+        ui->CLiveType->setEnabled(false);
+        ui->CLiveParam->setEnabled(false);
+    }
+
     if(t.isTouchstone()) {
         ui->bFile->click();
         ui->touchstoneImport->setFile(t.getTouchstoneFilename());
@@ -79,24 +87,27 @@ void TraceEditDialog::on_color_clicked()
 void TraceEditDialog::on_buttonBox_accepted()
 {
     trace.setName(ui->name->text());
-    if (ui->bFile->isChecked()) {
-        auto t = ui->touchstoneImport->getTouchstone();
-        trace.fillFromTouchstone(t, ui->CParameter->currentIndex(), ui->touchstoneImport->getFilename());
-    } else {
-        Trace::LivedataType type;
-        Trace::LiveParameter param;
-        switch(ui->CLiveType->currentIndex()) {
-        case 0: type = Trace::LivedataType::Overwrite; break;
-        case 1: type = Trace::LivedataType::MaxHold; break;
-        case 2: type = Trace::LivedataType::MinHold; break;
+    if(!trace.isCalibration()) {
+        // only apply changes if it is not a calibration trace
+        if (ui->bFile->isChecked()) {
+            auto t = ui->touchstoneImport->getTouchstone();
+            trace.fillFromTouchstone(t, ui->CParameter->currentIndex(), ui->touchstoneImport->getFilename());
+        } else {
+            Trace::LivedataType type;
+            Trace::LiveParameter param;
+            switch(ui->CLiveType->currentIndex()) {
+            case 0: type = Trace::LivedataType::Overwrite; break;
+            case 1: type = Trace::LivedataType::MaxHold; break;
+            case 2: type = Trace::LivedataType::MinHold; break;
+            }
+            switch(ui->CLiveParam->currentIndex()) {
+            case 0: param = Trace::LiveParameter::S11; break;
+            case 1: param = Trace::LiveParameter::S12; break;
+            case 2: param = Trace::LiveParameter::S21; break;
+            case 3: param = Trace::LiveParameter::S22; break;
+            }
+            trace.fromLivedata(type, param);
         }
-        switch(ui->CLiveParam->currentIndex()) {
-        case 0: param = Trace::LiveParameter::S11; break;
-        case 1: param = Trace::LiveParameter::S12; break;
-        case 2: param = Trace::LiveParameter::S21; break;
-        case 3: param = Trace::LiveParameter::S22; break;
-        }
-        trace.fromLivedata(type, param);
     }
     delete this;
 }

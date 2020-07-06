@@ -34,8 +34,8 @@ protected:
 
 private slots:
     void traceColorChanged(Trace *t);
-    void markerAdded(TraceMarker *m);
-    void markerRemoved(TraceMarker *m);
+    void markerAdded(TraceMarker *m) override;
+    void markerRemoved(TraceMarker *m) override;
     void markerDataChanged(TraceMarker *m);
 private:
     QString AxisTypeToName(YAxisType type);

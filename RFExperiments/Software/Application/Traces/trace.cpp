@@ -6,9 +6,11 @@ Trace::Trace(QString name, QColor color)
     : _name(name),
       _color(color),
       _liveType(LivedataType::Overwrite),
+      reflection(false),
       visible(true),
       paused(false),
-      touchstone(false)
+      touchstone(false),
+      calibration(false)
 {
 
 }
@@ -28,9 +30,6 @@ void Trace::clear() {
 }
 
 void Trace::addData(Trace::Data d) {
-    if(paused) {
-        return;
-    }
     // add or replace data in vector while keeping it sorted with increasing frequency
     auto lower = lower_bound(_data.begin(), _data.end(), d, [](const Data &lhs, const Data &rhs) -> bool {
         return lhs.frequency < rhs.frequency;
@@ -136,6 +135,16 @@ void Trace::removeMarker(TraceMarker *m)
     emit markerRemoved(m);
 }
 
+void Trace::setReflection(bool value)
+{
+    reflection = value;
+}
+
+void Trace::setCalibration(bool value)
+{
+    calibration = value;
+}
+
 std::set<TraceMarker *> Trace::getMarkers() const
 {
     return markers;
@@ -172,6 +181,16 @@ bool Trace::isPaused()
 bool Trace::isTouchstone()
 {
     return touchstone;
+}
+
+bool Trace::isCalibration()
+{
+    return calibration;
+}
+
+bool Trace::isLive()
+{
+    return !isCalibration() && !isTouchstone() && !isPaused();
 }
 
 bool Trace::isReflection()

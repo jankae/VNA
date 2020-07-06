@@ -453,5 +453,6 @@ void TraceBodePlot::markerDataChanged(TraceMarker *m)
     auto qwtMarker = markers[m];
     qwtMarker->setXValue(m->getFrequency());
     qwtMarker->setYValue(AxisTransformation(AxisType[0], m->getData()));
+    triggerReplot();
 }
 

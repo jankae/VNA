@@ -8,6 +8,7 @@
 #include <iostream>
 #include <iomanip>
 #include "calkit.h"
+#include "Traces/tracemodel.h"
 
 class Calibration
 {
@@ -56,6 +57,8 @@ public:
     int nPoints() {
         return points.size();
     }
+
+    void addAsTraces(TraceModel &m);
 private:
     void construct12TermPoints(Calkit c);
     void constructPort1SOL(Calkit c);

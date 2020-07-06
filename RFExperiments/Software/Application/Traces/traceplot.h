@@ -40,6 +40,8 @@ protected slots:
     void newTraceAvailable(Trace *t);
     void traceDeleted(Trace *t);
     void triggerReplot();
+    virtual void markerAdded(TraceMarker *m);
+    virtual void markerRemoved(TraceMarker *m);
 
 };
 

@@ -244,6 +244,10 @@ VNA::VNA(QWidget *parent)
     auto mEditKit = new MenuAction("Edit CalKit");
     mCalibration->addItem(mEditKit);
 
+    auto mCalTraces = new MenuAction("Add coefficient traces");
+    mCalTraces->setDisabled(true);
+    mCalibration->addItem(mCalTraces);
+
     mCalibration->finalize();
     mMain->addMenu(mCalibration);
 
@@ -416,16 +420,19 @@ VNA::VNA(QWidget *parent)
     connect(mCalSOL1, &MenuAction::triggered, [=](){
         cal.constructErrorTerms(Calibration::Type::Port1SOL, calkit);
         calValid = true;
+        mCalTraces->setEnabled(true);
         average.reset();
     });
     connect(mCalSOL2, &MenuAction::triggered, [=](){
         cal.constructErrorTerms(Calibration::Type::Port2SOL, calkit);
         calValid = true;
+        mCalTraces->setEnabled(true);
         average.reset();
     });
     connect(mCalFullSOLT, &MenuAction::triggered, [=](){
         cal.constructErrorTerms(Calibration::Type::FullSOLT, calkit);
         calValid = true;
+        mCalTraces->setEnabled(true);
         average.reset();
     });
 
@@ -454,11 +461,16 @@ VNA::VNA(QWidget *parent)
             msg->setInformativeText(calInfo);
             msg->exec();
             calValid = true;
+            mCalTraces->setEnabled(true);
         }
     });
 
     connect(mEditKit, &MenuAction::triggered, [=](){
         calkit.edit();
+    });
+
+    connect(mCalTraces, &MenuAction::triggered, [=](){
+       cal.addAsTraces(traceModel);
     });
 
     // Manual control trigger

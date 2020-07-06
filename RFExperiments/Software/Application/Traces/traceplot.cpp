@@ -3,6 +3,7 @@
 constexpr QColor TracePlot::Background;
 constexpr QColor TracePlot::Border;
 constexpr QColor TracePlot::Divisions;
+#include "tracemarker.h"
 
 TracePlot::TracePlot(QWidget *parent) : QWidget(parent)
 {
@@ -19,10 +20,14 @@ void TracePlot::enableTrace(Trace *t, bool enabled)
             // connect signals
             connect(t, &Trace::dataChanged, this, &TracePlot::triggerReplot);
             connect(t, &Trace::visibilityChanged, this, &TracePlot::triggerReplot);
+            connect(t, &Trace::markerAdded, this, &TracePlot::markerAdded);
+            connect(t, &Trace::markerRemoved, this, &TracePlot::markerRemoved);
         } else {
             // disconnect from notifications
             disconnect(t, &Trace::dataChanged, this, &TracePlot::triggerReplot);
             disconnect(t, &Trace::visibilityChanged, this, &TracePlot::triggerReplot);
+            disconnect(t, &Trace::markerAdded, this, &TracePlot::markerAdded);
+            disconnect(t, &Trace::markerRemoved, this, &TracePlot::markerRemoved);
         }
         updateContextMenu();
         triggerReplot();
@@ -104,4 +109,14 @@ void TracePlot::triggerReplot()
         replot();
         lastUpdate = now;
     }
+}
+
+void TracePlot::markerAdded(TraceMarker *m)
+{
+    connect(m, &TraceMarker::dataChanged, this, &TracePlot::triggerReplot);
+}
+
+void TracePlot::markerRemoved(TraceMarker *m)
+{
+
 }

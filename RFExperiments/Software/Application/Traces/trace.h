@@ -48,6 +48,8 @@ public:
     bool resume();
     bool isPaused();
     bool isTouchstone();
+    bool isCalibration();
+    bool isLive();
     bool isReflection();
     LiveParameter liveParameter() { return _liveParam; }
     LivedataType liveType() { return _liveType; }
@@ -60,6 +62,8 @@ public:
     std::complex<double> getData(double frequency);
     int index(double frequency);
     std::set<TraceMarker *> getMarkers() const;
+    void setCalibration(bool value);
+    void setReflection(bool value);
 
 public slots:
     void setTouchstoneParameter(int value);
@@ -91,6 +95,7 @@ private:
     bool visible;
     bool paused;
     bool touchstone;
+    bool calibration;
     QString touchstoneFilename;
     int touchstoneParameter;
     std::set<TraceMarker*> markers;
