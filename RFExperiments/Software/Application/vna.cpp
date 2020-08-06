@@ -43,8 +43,8 @@ VNA::VNA(QWidget *parent)
     averages = 1;
     calValid = false;
     calMeasuring = false;
+    device = nullptr;
     calDialog.reset();
-    device.Configure(settings);
     setWindowTitle("VNA");
 
     markerModel = new TraceMarkerModel(traceModel);
@@ -475,7 +475,7 @@ VNA::VNA(QWidget *parent)
 
     // Manual control trigger
     connect(aManual, &MenuAction::triggered, [=]() {
-        auto control = new ManualControlDialog(device, this);
+        auto control = new ManualControlDialog(*device, this);
         control->show();
     });
 
@@ -526,9 +526,17 @@ VNA::VNA(QWidget *parent)
     setCentralWidget(mainWidget);
     //setLayout(mainLayout);
     qRegisterMetaType<Protocol::Datapoint>("Datapoint");
-    auto success = connect(&device, &Device::DatapointReceived, this, &VNA::NewDatapoint);
-    Q_ASSERT(success);
-    SettingsChanged();
+
+    // List available devices
+    auto devices = Device::GetDevices();
+    if(devices.size()) {
+        qDebug() << "Found devices with these serial numbers:";
+        for(auto d : devices) {
+            qDebug() << d;
+        }
+    }
+    // Attempt to autoconnect to first device available
+    ConnectToDevice();
 }
 
 void VNA::NewDatapoint(Protocol::Datapoint d)
@@ -592,8 +600,29 @@ void VNA::UpdateStatusPanel()
 
 void VNA::SettingsChanged()
 {
-    device.Configure(settings);
+    if(device) {
+        device->Configure(settings);
+    }
     average.reset();
     traceModel.clearVNAData();
     UpdateStatusPanel();
+}
+
+void VNA::ConnectToDevice(QString serial)
+{
+    try {
+        device = new Device(serial);
+        device->Configure(settings);
+        connect(device, &Device::DatapointReceived, this, &VNA::NewDatapoint);
+        connect(device, &Device::ConnectionLost, this, &VNA::DeviceConnectionLost);
+    } catch (const runtime_error e) {
+        QMessageBox::warning(this, "Error connecting to device", e.what());
+    }
+}
+
+void VNA::DeviceConnectionLost()
+{
+    delete device;
+    device = nullptr;
+    QMessageBox::warning(this, "Disconnected", "The USB connection to the device has been lost");
 }

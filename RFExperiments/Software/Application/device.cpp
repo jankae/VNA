@@ -5,7 +5,7 @@
 
 using namespace std;
 
-Device::Device()
+Device::Device(QString serial)
 {
     BOOST_LOG_TRIVIAL(debug) << "Starting device connection...";
     libusb_device **devList;
@@ -44,16 +44,24 @@ Device::Device()
             continue;
         }
 
-        char string[256];
+        char c_product[256];
+        char c_serial[256];
+        libusb_get_string_descriptor_ascii(handle, desc.iSerialNumber,
+                (unsigned char*) c_serial, sizeof(c_serial));
         ret = libusb_get_string_descriptor_ascii(handle, desc.iProduct,
-                (unsigned char*) string, sizeof(string));
+                (unsigned char*) c_product, sizeof(c_product));
         if (ret > 0) {
             /* managed to read the product string */
-            std::string product(string);
+            std::string product(c_product);
             BOOST_LOG_TRIVIAL(debug) << "Opened device: " << product;
             if (product == "VNA") {
-                m_handle = handle;
-                break;
+                // check serial number if necessary
+                auto qSerial = QString(c_serial);
+                if(serial.isEmpty() || qSerial == serial) {
+                    m_handle = handle;
+                    m_serial = qSerial;
+                    break;
+                }
             }
         } else {
             BOOST_LOG_TRIVIAL(warning) << "Failed to get product descriptor: "
@@ -64,7 +72,7 @@ Device::Device()
     libusb_free_device_list(devList, 1);
     if(!m_handle) {
         BOOST_LOG_TRIVIAL(error) << "No device found";
-        //throw std::runtime_error("No device found");
+        throw std::runtime_error("No device found");
         return;
     }
 
@@ -160,6 +168,68 @@ bool Device::SetManual(Protocol::ManualControl manual)
     }
 }
 
+std::vector<QString> Device::GetDevices()
+{
+    std::vector<QString> serials;
+
+    // TODO
+    libusb_device **devList;
+    libusb_context *context = nullptr;
+    libusb_init(&context);
+    auto ndevices = libusb_get_device_list(context, &devList);
+
+    for (ssize_t idx = 0; idx < ndevices; idx++) {
+        int ret;
+        libusb_device *device = devList[idx];
+        libusb_device_descriptor desc = {};
+
+        ret = libusb_get_device_descriptor(device, &desc);
+        if (ret) {
+            /* some error occured */
+            BOOST_LOG_TRIVIAL(error) << "Failed to get device descriptor: "
+                    << libusb_strerror((libusb_error) ret);
+            continue;
+        }
+
+        if (desc.idVendor != VID || desc.idProduct != PID) {
+            /* Not an STM virtual COM port */
+            continue;
+        }
+
+        /* Try to open the device */
+        libusb_device_handle *handle = nullptr;
+        ret = libusb_open(device, &handle);
+        if (ret) {
+            /* Failed to open */
+            BOOST_LOG_TRIVIAL(warning) << "Failed to open device: "
+                    << libusb_strerror((libusb_error) ret);
+            continue;
+        }
+
+        char c_product[256];
+        char c_serial[256];
+        libusb_get_string_descriptor_ascii(handle, desc.iSerialNumber,
+                (unsigned char*) c_serial, sizeof(c_serial));
+        ret = libusb_get_string_descriptor_ascii(handle, desc.iProduct,
+                (unsigned char*) c_product, sizeof(c_product));
+        if (ret > 0) {
+            /* managed to read the product string */
+            std::string product(c_product);
+            BOOST_LOG_TRIVIAL(debug) << "Opened device: " << product;
+            if (product == "VNA") {
+                serials.push_back(QString(c_serial));
+            }
+        } else {
+            BOOST_LOG_TRIVIAL(warning) << "Failed to get product descriptor: "
+                    << libusb_strerror((libusb_error) ret);
+        }
+        libusb_close(handle);
+    }
+    libusb_free_device_list(devList, 1);
+
+    return serials;
+}
+
 void Device::ReceiveThread()
 {
     BOOST_LOG_TRIVIAL(info) << "Receive thread started" << flush;
@@ -203,9 +273,14 @@ void Device::ReceiveThread()
         } else if (ret < 0) {
             BOOST_LOG_TRIVIAL(error) << "Error receiving data: "
                     << libusb_strerror((libusb_error) ret);
-            kill(getpid(), SIGINT);
+            emit ConnectionLost();
             return;
         }
     }
     BOOST_LOG_TRIVIAL(debug) << "Disconnected, receive thread exiting";
+}
+
+QString Device::serial() const
+{
+    return m_serial;
 }

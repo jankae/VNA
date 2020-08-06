@@ -14,13 +14,19 @@ class Device : public QObject
 {
     Q_OBJECT
 public:
-    Device();
+    // connect to a VNA device. If serial is specified only connecting to this device, otherwise to the first one found
+    Device(QString serial = QString());
     ~Device();
     bool Configure(Protocol::SweepSettings settings);
     bool SetManual(Protocol::ManualControl manual);
+    // Returns serial numbers of all connected devices
+    static std::vector<QString> GetDevices();
+    QString serial() const;
+
 signals:
     void DatapointReceived(Protocol::Datapoint);
     void StatusReceived(Protocol::Status);
+    void ConnectionLost();
 private:
     static constexpr int VID = 1155;
     static constexpr int PID = 22336;
@@ -34,6 +40,7 @@ private:
 
     libusb_device_handle *m_handle;
     libusb_context *m_context;
+    QString m_serial;
     bool m_connected;
     std::thread *m_receiveThread;
 };

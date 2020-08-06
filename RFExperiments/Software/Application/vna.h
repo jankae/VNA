@@ -30,10 +30,13 @@ private slots:
     void NewDatapoint(Protocol::Datapoint d);
 private:
     void UpdateStatusPanel();
-    Device device;
+    Device *device;
+    QString deviceSerial;
     Protocol::SweepSettings settings;
     unsigned int averages;
     void SettingsChanged();
+    void ConnectToDevice(QString serial = QString());
+    void DeviceConnectionLost();
     TraceModel traceModel;
     TraceMarkerModel *markerModel;
     Averaging average;
