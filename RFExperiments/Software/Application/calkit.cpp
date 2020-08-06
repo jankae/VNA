@@ -8,6 +8,11 @@
 using namespace std;
 
 Calkit::Calkit()
+ : ts_open(nullptr),
+   ts_short(nullptr),
+   ts_load(nullptr),
+   ts_through(nullptr),
+   ts_cached(false)
 {
     open_Z0 = 50.0;
     open_delay = 0.0;
@@ -129,48 +134,154 @@ void Calkit::edit()
 
 Calkit::Reflection Calkit::toReflection(double frequency)
 {
+    fillTouchstoneCache();
     Reflection ref;
-    auto imp_load = complex<double>(load_Z0, 0);
-    ref.Load = (imp_load - complex<double>(50.0)) / (imp_load + complex<double>(50.0));
-
-    // calculate fringing capacitance for open
-    double Cfringing = open_C0 * 1e-15 + open_C1 * 1e-27 * frequency + open_C2 * 1e-36 * pow(frequency, 2) + open_C3 * 1e-45 * pow(frequency, 3);
-    // convert to impedance
-    if (Cfringing == 0) {
-        // special case to avoid issues with infinity
-        ref.Open = complex<double>(1.0, 0);
+    if(load_measurements) {
+        ref.Load = ts_load->interpolate(frequency).S[0];
     } else {
-        auto imp_open = complex<double>(0, -1.0 / (frequency * 2 * M_PI * Cfringing));
-        ref.Open = (imp_open - complex<double>(50.0)) / (imp_open + complex<double>(50.0));
+        auto imp_load = complex<double>(load_Z0, 0);
+        ref.Load = (imp_load - complex<double>(50.0)) / (imp_load + complex<double>(50.0));
     }
-    // transform the delay into a phase shift for the given frequency
-    double open_phaseshift = -2 * M_PI * frequency * open_delay * 1e-12;
-    double open_att_db = open_loss * 1e9 * 4.3429 * open_delay * 1e-12 / open_Z0 * sqrt(frequency / 1e9);
-    double open_att = pow(10.0, -open_att_db / 10.0);
-    auto open_correction = polar<double>(open_att, open_phaseshift);
-    ref.Open *= open_correction;
 
-    // calculate inductance for short
-    double Lseries = short_L0 * 1e-12 + short_L1 * 1e-24 * frequency + short_L2 * 1e-33 * pow(frequency, 2) + short_L3 * 1e-42 * pow(frequency, 3);
-    // convert to impedance
-    auto imp_short = complex<double>(0, frequency * 2 * M_PI * Lseries);
-    ref.Short =  (imp_short - complex<double>(50.0)) / (imp_short + complex<double>(50.0));
-    // transform the delay into a phase shift for the given frequency
-    double short_phaseshift = -2 * M_PI * frequency * short_delay * 1e-12;
-    double short_att_db = short_loss * 1e9 * 4.3429 * short_delay * 1e-12 / short_Z0 * sqrt(frequency / 1e9);;
-    double short_att = pow(10.0, -short_att_db / 10.0);
-    auto short_correction = polar<double>(short_att, short_phaseshift);
-    ref.Short *= short_correction;
+    if(open_measurements) {
+        ref.Open = ts_open->interpolate(frequency).S[0];
+    } else {
+        // calculate fringing capacitance for open
+        double Cfringing = open_C0 * 1e-15 + open_C1 * 1e-27 * frequency + open_C2 * 1e-36 * pow(frequency, 2) + open_C3 * 1e-45 * pow(frequency, 3);
+        // convert to impedance
+        if (Cfringing == 0) {
+            // special case to avoid issues with infinity
+            ref.Open = complex<double>(1.0, 0);
+        } else {
+            auto imp_open = complex<double>(0, -1.0 / (frequency * 2 * M_PI * Cfringing));
+            ref.Open = (imp_open - complex<double>(50.0)) / (imp_open + complex<double>(50.0));
+        }
+        // transform the delay into a phase shift for the given frequency
+        double open_phaseshift = -2 * M_PI * frequency * open_delay * 1e-12;
+        double open_att_db = open_loss * 1e9 * 4.3429 * open_delay * 1e-12 / open_Z0 * sqrt(frequency / 1e9);
+        double open_att = pow(10.0, -open_att_db / 10.0);
+        auto open_correction = polar<double>(open_att, open_phaseshift);
+        ref.Open *= open_correction;
+    }
 
-    // calculate effect of through
-    double through_phaseshift = -2 * M_PI * frequency * through_delay * 1e-12;
-    double through_att_db = through_loss * 1e9 * 4.3429 * through_delay * 1e-12 / through_Z0 * sqrt(frequency / 1e9);;
-    double through_att = pow(10.0, -through_att_db / 10.0);
-    ref.ThroughS12 = polar<double>(through_att, through_phaseshift);
-    // Assume symmetric and perfectly matched through for other parameters
-    ref.ThroughS21 = ref.ThroughS12;
-    ref.ThroughS11 = 0.0;
-    ref.ThroughS22 = 0.0;
+    if(short_measurements) {
+        ref.Short = ts_short->interpolate(frequency).S[0];
+    } else {
+        // calculate inductance for short
+        double Lseries = short_L0 * 1e-12 + short_L1 * 1e-24 * frequency + short_L2 * 1e-33 * pow(frequency, 2) + short_L3 * 1e-42 * pow(frequency, 3);
+        // convert to impedance
+        auto imp_short = complex<double>(0, frequency * 2 * M_PI * Lseries);
+        ref.Short =  (imp_short - complex<double>(50.0)) / (imp_short + complex<double>(50.0));
+        // transform the delay into a phase shift for the given frequency
+        double short_phaseshift = -2 * M_PI * frequency * short_delay * 1e-12;
+        double short_att_db = short_loss * 1e9 * 4.3429 * short_delay * 1e-12 / short_Z0 * sqrt(frequency / 1e9);;
+        double short_att = pow(10.0, -short_att_db / 10.0);
+        auto short_correction = polar<double>(short_att, short_phaseshift);
+        ref.Short *= short_correction;
+    }
+
+    if(through_measurements) {
+        auto interp = ts_through->interpolate(frequency);
+        ref.ThroughS11 = interp.S[0];
+        ref.ThroughS12 = interp.S[1];
+        ref.ThroughS21 = interp.S[2];
+        ref.ThroughS22 = interp.S[3];
+    } else {
+        // calculate effect of through
+        double through_phaseshift = -2 * M_PI * frequency * through_delay * 1e-12;
+        double through_att_db = through_loss * 1e9 * 4.3429 * through_delay * 1e-12 / through_Z0 * sqrt(frequency / 1e9);;
+        double through_att = pow(10.0, -through_att_db / 10.0);
+        ref.ThroughS12 = polar<double>(through_att, through_phaseshift);
+        // Assume symmetric and perfectly matched through for other parameters
+        ref.ThroughS21 = ref.ThroughS12;
+        ref.ThroughS11 = 0.0;
+        ref.ThroughS22 = 0.0;
+    }
 
     return ref;
+}
+
+double Calkit::minFreq()
+{
+    fillTouchstoneCache();
+    double min = std::numeric_limits<double>::min();
+    array<Touchstone*, 4> ts_list = {ts_open, ts_short, ts_load, ts_through};
+    // find the highest minimum frequency in all measurement files
+    for(auto ts : ts_list) {
+        if(!ts) {
+            // this calibration standard is defined by coefficients, no minimum frequency
+            continue;
+        }
+        if(ts->minFreq() > min) {
+            min = ts->minFreq();
+        }
+    }
+    return min;
+}
+
+double Calkit::maxFreq()
+{
+    fillTouchstoneCache();
+    double max = std::numeric_limits<double>::max();
+    array<Touchstone*, 4> ts_list = {ts_open, ts_short, ts_load, ts_through};
+    // find the highest minimum frequency in all measurement files
+    for(auto ts : ts_list) {
+        if(!ts) {
+            // this calibration standard is defined by coefficients, no minimum frequency
+            continue;
+        }
+        if(ts->maxFreq() < max) {
+            max = ts->maxFreq();
+        }
+    }
+    return max;
+}
+
+void Calkit::clearTouchstoneCache()
+{
+    if(ts_open) {
+        delete ts_open;
+        ts_open = nullptr;
+    }
+    if(ts_short) {
+        delete ts_short;
+        ts_short = nullptr;
+    }
+    if(ts_load) {
+        delete ts_load;
+        ts_load = nullptr;
+    }
+    if(ts_through) {
+        delete ts_through;
+        ts_through = nullptr;
+    }
+    ts_cached = false;
+}
+
+void Calkit::fillTouchstoneCache()
+{
+    if(ts_cached) {
+        return;
+    }
+    if(open_measurements) {
+        ts_open = new Touchstone(1);
+        *ts_open = Touchstone::fromFile(open_file);
+        ts_open->reduceTo1Port(open_Sparam);
+    }
+    if(short_measurements) {
+        ts_short = new Touchstone(1);
+        *ts_short = Touchstone::fromFile(short_file);
+        ts_open->reduceTo1Port(short_Sparam);
+    }
+    if(load_measurements) {
+        ts_load = new Touchstone(1);
+        *ts_load = Touchstone::fromFile(load_file);
+        ts_open->reduceTo1Port(load_Sparam);
+    }
+    if(through_measurements) {
+        ts_through = new Touchstone(2);
+        *ts_through = Touchstone::fromFile(through_file);
+        ts_through->reduceTo2Port(through_Sparam1, through_Sparam2);
+    }
+    ts_cached = true;
 }

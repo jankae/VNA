@@ -6,7 +6,7 @@ Trace::Trace(QString name, QColor color)
     : _name(name),
       _color(color),
       _liveType(LivedataType::Overwrite),
-      reflection(false),
+      reflection(true),
       visible(true),
       paused(false),
       touchstone(false),
@@ -102,6 +102,7 @@ void Trace::fillFromTouchstone(Touchstone &t, int parameter, QString filename)
         reflection = false;
     }
     touchstone = true;
+    emit typeChanged(this);
 }
 
 void Trace::fromLivedata(Trace::LivedataType type, LiveParameter param)
@@ -114,6 +115,7 @@ void Trace::fromLivedata(Trace::LivedataType type, LiveParameter param)
     } else {
         reflection = false;
     }
+    emit typeChanged(this);
 }
 
 void Trace::setColor(QColor color) {

@@ -295,6 +295,33 @@ double Touchstone::maxFreq()
     }
 }
 
+Touchstone::Datapoint Touchstone::interpolate(double frequency)
+{
+    if(m_datapoints.size() == 0) {
+        throw runtime_error("Trying to interpolate empty touchstone data");
+    }
+    // Check if requested frequency is outside of points and return first/last datapoint respectively
+    if(frequency <= m_datapoints.front().frequency) {
+        return m_datapoints.front();
+    } else if(frequency >= m_datapoints.back().frequency) {
+        return m_datapoints.back();
+    }
+    // frequency within points, interpolate
+    auto lower = lower_bound(m_datapoints.begin(), m_datapoints.end(), frequency, [](const Datapoint &lhs, double rhs) -> bool {
+        return lhs.frequency < rhs;
+    });
+    auto lowPoint = *lower;
+    advance(lower, 1);
+    auto highPoint = *lower;
+    double alpha = (frequency - lowPoint.frequency) / (highPoint.frequency - lowPoint.frequency);
+    Datapoint ret;
+    ret.frequency = frequency;
+    for(unsigned int i=0;i<lowPoint.S.size();i++) {
+        ret.S.push_back(lowPoint.S[i] * (1.0-alpha) + highPoint.S[i] * alpha);
+    }
+    return ret;
+}
+
 void Touchstone::reduceTo2Port(unsigned int port1, unsigned int port2)
 {
     if (port1 >= m_ports || port2 >= m_ports || port1 == port2) {

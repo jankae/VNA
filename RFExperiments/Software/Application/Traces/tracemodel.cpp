@@ -122,7 +122,7 @@ void TraceModel::clearVNAData()
 void TraceModel::addVNAData(Protocol::Datapoint d)
 {
     for(auto t : traces) {
-        if (!t->isLive()) {
+        if (t->isLive()) {
             Trace::Data td;
             td.frequency = d.frequency;
             switch(t->liveParameter()) {

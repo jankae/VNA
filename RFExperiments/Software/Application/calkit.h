@@ -3,9 +3,11 @@
 
 #include <string>
 #include <complex>
+#include "touchstone.h"
 
 class Calkit
 {
+    friend class CalkitDialog;
 public:
     Calkit();
 
@@ -17,6 +19,13 @@ public:
         std::complex<double> ThroughS11, ThroughS12, ThroughS21, ThroughS22;
     };
 
+    void toFile(std::string filename);
+    static Calkit fromFile(std::string filename);
+    void edit();
+    Reflection toReflection(double frequency);
+    double minFreq();
+    double maxFreq();
+private:
     double open_Z0, open_delay, open_loss, open_C0, open_C1, open_C2, open_C3;
     double short_Z0, short_delay, short_loss, short_L0, short_L1, short_L2, short_L3;
     double load_Z0;
@@ -31,13 +40,11 @@ public:
     std::string open_file, short_file, load_file, through_file;
     int open_Sparam, short_Sparam, load_Sparam, through_Sparam1, through_Sparam2;
 
-    void toFile(std::string filename);
-    static Calkit fromFile(std::string filename);
-    void edit();
-    Reflection toReflection(double frequency);
-private:
+    Touchstone *ts_open, *ts_short, *ts_load, *ts_through;
+    bool ts_cached;
 
-
+    void clearTouchstoneCache();
+    void fillTouchstoneCache();
 };
 
 #endif // CALKIT_H

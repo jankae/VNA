@@ -37,6 +37,7 @@ CalkitDialog::CalkitDialog(Calkit &c, QWidget *parent) :
     ui->load_touchstone->setPorts(1);
     ui->through_touchstone->setPorts(2);
 
+    editKit.clearTouchstoneCache();
     ownKit = editKit;
     updateEntries();
 

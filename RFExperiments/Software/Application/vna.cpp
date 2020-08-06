@@ -497,12 +497,12 @@ VNA::VNA(QWidget *parent)
 //    statusWidget->setFixedWidth(150);
     auto statusDock = new QDockWidget("Status");
     statusDock->setWidget(statusWidget);
-//    statusDock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+    statusDock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::LeftDockWidgetArea, statusDock);
 
     auto tracesDock = new QDockWidget("Traces");
     tracesDock->setWidget(tw);
-//    tracesDock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+    tracesDock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::LeftDockWidgetArea, tracesDock);
 
 //    mainLayout->addWidget(statusWidget);
@@ -512,7 +512,7 @@ VNA::VNA(QWidget *parent)
 //    menuWidget->setFixedWidth(180);
     auto menuDock = new QDockWidget("Menu");
     menuDock->setWidget(menuWidget);
-//    menuDock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+    menuDock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::RightDockWidgetArea, menuDock);
 //    mainLayout->addWidget(menuWidget);
 

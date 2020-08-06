@@ -118,6 +118,7 @@ private:
                                     std::complex<double> match,
                                     std::complex<double> tracking);
     std::map<Measurement, std::vector<Protocol::Datapoint>> measurements;
+    double minFreq, maxFreq;
     std::vector<Point> points;
 };
 

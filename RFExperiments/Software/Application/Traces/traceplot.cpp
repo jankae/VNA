@@ -1,8 +1,8 @@
 #include "traceplot.h"
 
-constexpr QColor TracePlot::Background;
-constexpr QColor TracePlot::Border;
-constexpr QColor TracePlot::Divisions;
+const QColor TracePlot::Background = QColor(0,0,0);
+const QColor TracePlot::Border = QColor(255,255,255);
+const QColor TracePlot::Divisions = QColor(255,255,255);
 #include "tracemarker.h"
 
 TracePlot::TracePlot(QWidget *parent) : QWidget(parent)
@@ -90,6 +90,7 @@ void TracePlot::newTraceAvailable(Trace *t)
         traces[t] = false;
         connect(t, &Trace::deleted, this, &TracePlot::traceDeleted);
         connect(t, &Trace::nameChanged, this, &TracePlot::updateContextMenu);
+        connect(t, &Trace::typeChanged, this, &TracePlot::updateContextMenu);
     }
     updateContextMenu();
 }

@@ -76,6 +76,7 @@ public slots:
 private:
 signals:
     void cleared(Trace *t);
+    void typeChanged(Trace *t);
     void dataAdded(Trace *t, Data d);
     void deleted(Trace *t);
     void visibilityChanged(Trace *t);

@@ -116,7 +116,7 @@ void ValueInput::AddToInput(QString a)
 
 void ValueInput::ChangeSign()
 {
-    if(input.front() == '-') {
+    if(input.at(0) == '-') {
         input.remove(0, 1);
     } else {
         input.prepend('-');
@@ -127,7 +127,7 @@ void ValueInput::ChangeSign()
 void ValueInput::Backspace()
 {
     if(input.size() > 0) {
-        if(input.back() == '.') {
+        if(input.at(input.size()-1) == '.') {
             bDot->setEnabled(true);
         }
         input.chop(1);

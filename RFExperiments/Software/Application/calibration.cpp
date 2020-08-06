@@ -1,5 +1,6 @@
 #include "calibration.h"
 #include <algorithm>
+#include <QMessageBox>
 
 using namespace std;
 
@@ -63,6 +64,11 @@ bool Calibration::calculationPossible(Calibration::Type type)
 bool Calibration::constructErrorTerms(Calibration::Type type, Calkit c)
 {
     if(!calculationPossible(type)) {
+        return false;
+    }
+    if(minFreq < c.minFreq() || maxFreq > c.maxFreq()) {
+        // Calkit does not support complete calibration range
+        QMessageBox::critical(nullptr, "Unable to perform calibration", "The calibration kit does not support the complete span. Please choose a different calibration kit or a narrower span.");
         return false;
     }
     switch(type) {
@@ -377,6 +383,8 @@ bool Calibration::SanityCheckSamples(std::vector<Calibration::Measurement> &requ
             }
         }
     }
+    minFreq = freqs.front();
+    maxFreq = freqs.back();
     return true;
 }
 

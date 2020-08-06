@@ -16,8 +16,8 @@ double Unit::FromString(QString string, QString unit, QString prefixes)
     }
     // check if last char is a valid prefix
     double factor = 1.0;
-    if(prefixes.contains(string.back())) {
-        QChar prefix = string.back();
+    if(prefixes.contains(string.at(string.size()-1))) {
+        QChar prefix = string.at(string.size()-1);
         factor = SIPrefixToFactor(prefix.toLatin1());
         string.chop(1);
     }
@@ -40,7 +40,7 @@ QString Unit::ToString(double value, QString unit, QString prefixes, int precisi
             sValue.append('-');
             value = -value;
         }
-        int preDotDigits = log10(value) + 1;
+        int preDotDigits = log10(value) + 2;
         int prefixIndex = prefixes.indexOf(' ');
         while(preDotDigits > 3 && prefixIndex < prefixes.length() - 1) {
             value /= 1000.0;

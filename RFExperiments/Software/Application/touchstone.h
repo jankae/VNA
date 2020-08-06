@@ -35,6 +35,7 @@ public:
     double maxFreq();
     unsigned int points() { return m_datapoints.size(); };
     Datapoint point(int index) { return m_datapoints.at(index); };
+    Datapoint interpolate(double frequency);
     // remove all paramaters except the ones regarding port1 and port2 (port cnt starts at 0)
     void reduceTo2Port(unsigned int port1, unsigned int port2);
     // remove all paramaters except the ones from port (port cnt starts at 0)
