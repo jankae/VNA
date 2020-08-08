@@ -13,7 +13,7 @@ TraceMarker::TraceMarker()
 TraceMarker::~TraceMarker()
 {
     if(parentTrace) {
-        emit parentTrace->markerRemoved(this);
+        parentTrace->removeMarker(this);
     }
     emit deleted(this);
 }

@@ -53,7 +53,7 @@ QString Unit::ToString(double value, QString unit, QString prefixes, int precisi
             prefixIndex--;
         }
         stringstream ss;
-        ss << std::fixed << std::setprecision(precision) << value;
+        ss << std::fixed << std::setprecision(precision - preDotDigits + 1) << value;
         sValue.append(QString::fromStdString(ss.str()));
         sValue.append(prefixes[prefixIndex]);
     }

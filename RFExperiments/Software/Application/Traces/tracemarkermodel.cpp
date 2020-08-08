@@ -37,7 +37,6 @@ void TraceMarkerModel::addMarker(TraceMarker *t)
     beginInsertRows(QModelIndex(), markers.size(), markers.size());
     markers.push_back(t);
     endInsertRows();
-    connect(t, &TraceMarker::deleted, this, qOverload<TraceMarker*>(&TraceMarkerModel::removeMarker));
     connect(t, &TraceMarker::dataChanged, this, &TraceMarkerModel::markerDataChanged);
     emit markerAdded(t);
 }
@@ -195,6 +194,9 @@ QWidget *TraceChooserDelegate::createEditor(QWidget *parent, const QStyleOptionV
 {
     auto model = (TraceMarkerModel*) index.model();
     auto c = new QComboBox(parent);
+    connect(c, qOverload<int>(&QComboBox::currentIndexChanged), [c](int index) {
+        c->clearFocus();
+    });
     auto traces = model->getModel().getTraces();
     for(auto t : traces) {
         c->addItem(t->name(), QVariant::fromValue<Trace*>(t));

@@ -163,6 +163,7 @@ void TraceBodePlot::setXAxis(double min, double max)
 //    scalediv.setTicks(QwtScaleDiv::MajorTick, tickList);
     QwtScaleDiv scalediv(min, max, QList<double>(), QList<double>(), tickList);
     plot->setAxisScaleDiv(QwtPlot::xBottom, scalediv);
+    triggerReplot();
 }
 
 void TraceBodePlot::setYAxisType(int axis, TraceBodePlot::YAxisType type)
@@ -196,9 +197,6 @@ void TraceBodePlot::setYAxisType(int axis, TraceBodePlot::YAxisType type)
                 }
             }
         }
-
-        updateContextMenu();
-        triggerReplot();
     }
     // enable/disable y axis
     auto qwtaxis = axis == 0 ? QwtPlot::yLeft : QwtPlot::yRight;
@@ -215,6 +213,7 @@ void TraceBodePlot::setYAxisType(int axis, TraceBodePlot::YAxisType type)
         plot->setAxisScale(qwtaxis, 1, 10, 1);
         break;
     }
+    updateContextMenu();
     triggerReplot();
 }
 
@@ -229,11 +228,7 @@ void TraceBodePlot::enableTrace(Trace *t, bool enabled)
 
 void TraceBodePlot::updateContextMenu()
 {
-    if(contextmenu) {
-        delete contextmenu;
-        contextmenu = nullptr;
-    }
-    contextmenu = new QMenu();
+    contextmenu->clear();
     for(int axis = 0;axis < 2;axis++) {
         QMenu *axisMenu;
         if(axis == 0) {
@@ -287,8 +282,7 @@ void TraceBodePlot::updateContextMenu()
     auto close = new QAction("Close");
     contextmenu->addAction(close);
     connect(close, &QAction::triggered, [=]() {
-        emit deleted(this);
-        delete this;
+        markedForDeletion = true;
     });
 }
 
@@ -436,6 +430,7 @@ void TraceBodePlot::markerAdded(TraceMarker *m)
     markers[m] = qwtMarker;
     markerDataChanged(m);
     qwtMarker->attach(plot);
+    triggerReplot();
 }
 
 void TraceBodePlot::markerRemoved(TraceMarker *m)
@@ -446,6 +441,7 @@ void TraceBodePlot::markerRemoved(TraceMarker *m)
         delete markers[m];
         markers.erase(m);
     }
+    triggerReplot();
 }
 
 void TraceBodePlot::markerDataChanged(TraceMarker *m)

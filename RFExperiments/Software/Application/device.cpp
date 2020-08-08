@@ -172,7 +172,7 @@ std::vector<QString> Device::GetDevices()
 {
     std::vector<QString> serials;
 
-    // TODO
+    // TODO remove duplicate code (almost identical to constructor)
     libusb_device **devList;
     libusb_context *context = nullptr;
     libusb_init(&context);

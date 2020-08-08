@@ -7,8 +7,12 @@
 #include <QToolBar>
 #include <QMenu>
 #include <QToolButton>
+#include <QActionGroup>
 #include "valueinput.h"
 #include <QSpinBox>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QSettings>
 #include <algorithm>
 #include "Menu/menu.h"
 #include "Menu/menuaction.h"
@@ -31,6 +35,7 @@
 #include <QDockWidget>
 #include "Traces/markerwidget.h"
 #include "Tools/impedancematchdialog.h"
+#include "ui_main.h"
 
 using namespace std;
 
@@ -38,6 +43,8 @@ constexpr Protocol::SweepSettings VNA::defaultSweep;
 
 VNA::VNA(QWidget *parent)
     : QMainWindow(parent)
+    , deviceActionGroup(new QActionGroup(this))
+    , ui(new Ui::MainWindow)
 {
     settings = defaultSweep;
     averages = 1;
@@ -45,6 +52,17 @@ VNA::VNA(QWidget *parent)
     calMeasuring = false;
     device = nullptr;
     calDialog.reset();
+
+    ui->setupUi(this);
+    CreateToolbars();
+    // UI connections
+    connect(ui->actionUpdate_Device_List, &QAction::triggered, this, &VNA::UpdateDeviceList);
+    connect(ui->actionDisconnect, &QAction::triggered, this, &VNA::DisconnectDevice);
+    connect(ui->actionQuit, &QAction::triggered, this, &VNA::close);
+    connect(ui->actionManual_Control, &QAction::triggered, this, &VNA::StartManualControl);
+    connect(ui->actionImpedance_Matching, &QAction::triggered, this, &VNA::StartImpedanceMatching);
+
+
     setWindowTitle("VNA");
 
     markerModel = new TraceMarkerModel(traceModel);
@@ -261,85 +279,21 @@ VNA::VNA(QWidget *parent)
 
     mMain->finalize();
 
-    auto updateMenuValues = [=]() {
-        if(settings.f_stop > 6000000000) {
-            settings.f_stop = 6000000000;
-        }
-        if(settings.f_start > settings.f_stop) {
-            settings.f_start = settings.f_stop;
-        }
-        mStart->setValueQuiet(settings.f_start);
-        mStop->setValueQuiet(settings.f_stop);
-        mSpanWidth->setValueQuiet(settings.f_stop - settings.f_start);
-        mCenter->setValueQuiet((settings.f_stop + settings.f_start)/2);
-    };
-
     // Frequency and span connections
-    connect(mCenter, &MenuValue::valueChanged, [=](double newval){
-        auto old_span = settings.f_stop - settings.f_start;
-        if (newval > old_span / 2) {
-            settings.f_start = newval - old_span / 2;
-            settings.f_stop = newval + old_span / 2;
-        } else {
-            settings.f_start = 0;
-            settings.f_stop = 2 * newval;
-        }
-        updateMenuValues();
-        SettingsChanged();
-    });
-    connect(mStart, &MenuValue::valueChanged, [=](double newval){
-        settings.f_start = newval;
-        if(settings.f_stop < newval) {
-            settings.f_stop = newval;
-        }
-        updateMenuValues();
-        SettingsChanged();
-    });
-    connect(mStop, &MenuValue::valueChanged, [=](double newval){
-        settings.f_stop = newval;
-        if(settings.f_start > newval) {
-            settings.f_start = newval;
-        }
-        updateMenuValues();
-        SettingsChanged();
-    });
-    connect(mSpanWidth, &MenuValue::valueChanged, [=](double newval){
-        auto old_center = (settings.f_start + settings.f_stop) / 2;
-        if(old_center > newval / 2) {
-            settings.f_start = old_center - newval / 2;
-        } else {
-            settings.f_start = 0;
-        }
-        settings.f_stop = old_center + newval / 2;
-        updateMenuValues();
-        SettingsChanged();
-    });
-    connect(mSpanZoomIn, &MenuAction::triggered, [=](){
-        auto center = (settings.f_start + settings.f_stop) / 2;
-        auto old_span = settings.f_stop - settings.f_start;
-        settings.f_start = center - old_span / 4;
-        settings.f_stop = center + old_span / 4;
-        updateMenuValues();
-        SettingsChanged();
-    });
-    connect(mSpanZoomOut, &MenuAction::triggered, [=](){
-        auto center = (settings.f_start + settings.f_stop) / 2;
-        auto old_span = settings.f_stop - settings.f_start;
-        if(center > old_span) {
-            settings.f_start = center - old_span;
-        } else {
-            settings.f_start = 0;
-        }
-        settings.f_stop = center + old_span;
-        updateMenuValues();
-        SettingsChanged();
-    });
-    connect(mSpanFull, &MenuAction::triggered, [=](){
-        settings.f_start = 0;
-        settings.f_stop = 6000000000;
-        updateMenuValues();
-        SettingsChanged();
-    });
+    // setting values
+    connect(mCenter, &MenuValue::valueChanged, this, &VNA::SetCenterFreq);
+    connect(mStart, &MenuValue::valueChanged, this, &VNA::SetStartFreq);
+    connect(mStop, &MenuValue::valueChanged, this, &VNA::SetStopFreq);
+    connect(mSpanWidth, &MenuValue::valueChanged, this, &VNA::SetSpan);
+    connect(mSpanZoomIn, &MenuAction::triggered, this, &VNA::SpanZoomIn);
+    connect(mSpanZoomOut, &MenuAction::triggered, this, &VNA::SpanZoomOut);
+    connect(mSpanFull, &MenuAction::triggered, this, &VNA::SetFullSpan);
+    // readback and update line edits
+    connect(this, &VNA::startFreqChanged, mStart, &MenuValue::setValueQuiet);
+    connect(this, &VNA::stopFreqChanged, mStop, &MenuValue::setValueQuiet);
+    connect(this, &VNA::centerFreqChanged, mCenter, &MenuValue::setValueQuiet);
+    connect(this, &VNA::spanChanged, mSpanWidth, &MenuValue::setValueQuiet);
+
     connect(mPoints, &MenuValue::valueChanged, [=](double newval){
         settings.points = newval;
         SettingsChanged();
@@ -474,15 +428,8 @@ VNA::VNA(QWidget *parent)
     });
 
     // Manual control trigger
-    connect(aManual, &MenuAction::triggered, [=]() {
-        auto control = new ManualControlDialog(*device, this);
-        control->show();
-    });
-
-    connect(aMatchDialog, &MenuAction::triggered, [=]() {
-        auto dialog = new ImpedanceMatchDialog(*markerModel);
-        dialog->show();
-    });
+    connect(aManual, &MenuAction::triggered, this, &VNA::StartManualControl);
+    connect(aMatchDialog, &MenuAction::triggered, this, &VNA::StartImpedanceMatching);
 
     setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
     setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
@@ -497,12 +444,12 @@ VNA::VNA(QWidget *parent)
 //    statusWidget->setFixedWidth(150);
     auto statusDock = new QDockWidget("Status");
     statusDock->setWidget(statusWidget);
-    statusDock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+//    statusDock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::LeftDockWidgetArea, statusDock);
 
     auto tracesDock = new QDockWidget("Traces");
     tracesDock->setWidget(tw);
-    tracesDock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+//    tracesDock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::LeftDockWidgetArea, tracesDock);
 
 //    mainLayout->addWidget(statusWidget);
@@ -512,7 +459,7 @@ VNA::VNA(QWidget *parent)
 //    menuWidget->setFixedWidth(180);
     auto menuDock = new QDockWidget("Menu");
     menuDock->setWidget(menuWidget);
-    menuDock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+//    menuDock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::RightDockWidgetArea, menuDock);
 //    mainLayout->addWidget(menuWidget);
 
@@ -524,19 +471,27 @@ VNA::VNA(QWidget *parent)
     addDockWidget(Qt::BottomDockWidgetArea, markerDock);
 
     setCentralWidget(mainWidget);
-    //setLayout(mainLayout);
+
+    QSettings settings("VNA", "Application");
+    restoreGeometry(settings.value("geometry").toByteArray());
+    restoreState(settings.value("windowState").toByteArray());
+
     qRegisterMetaType<Protocol::Datapoint>("Datapoint");
 
-    // List available devices
-    auto devices = Device::GetDevices();
-    if(devices.size()) {
-        qDebug() << "Found devices with these serial numbers:";
-        for(auto d : devices) {
-            qDebug() << d;
-        }
-    }
+    ConstrainAndUpdateFrequencies();
+
     // Attempt to autoconnect to first device available
     ConnectToDevice();
+    // List available devices
+    UpdateDeviceList();
+}
+
+void VNA::closeEvent(QCloseEvent *event)
+{
+    QSettings settings("VNA", "Application");
+    settings.setValue("geometry", saveGeometry());
+    settings.setValue("windowState", saveState());
+    QMainWindow::closeEvent(event);
 }
 
 void VNA::NewDatapoint(Protocol::Datapoint d)
@@ -605,24 +560,248 @@ void VNA::SettingsChanged()
     }
     average.reset();
     traceModel.clearVNAData();
+    for(auto t : traceModel.getTraces()) {
+
+    }
     UpdateStatusPanel();
+    TracePlot::UpdateSpan(settings.f_start, settings.f_stop);
 }
 
 void VNA::ConnectToDevice(QString serial)
 {
+    if(device) {
+        DisconnectDevice();
+    }
     try {
         device = new Device(serial);
         device->Configure(settings);
         connect(device, &Device::DatapointReceived, this, &VNA::NewDatapoint);
         connect(device, &Device::ConnectionLost, this, &VNA::DeviceConnectionLost);
+        ui->actionDisconnect->setEnabled(true);
+        ui->actionManual_Control->setEnabled(true);
     } catch (const runtime_error e) {
         QMessageBox::warning(this, "Error connecting to device", e.what());
+        UpdateDeviceList();
+    }
+}
+
+void VNA::DisconnectDevice()
+{
+    delete device;
+    device = nullptr;
+    ui->actionDisconnect->setEnabled(false);
+    ui->actionManual_Control->setEnabled(false);
+    if(deviceActionGroup->checkedAction()) {
+        deviceActionGroup->checkedAction()->setChecked(false);
     }
 }
 
 void VNA::DeviceConnectionLost()
 {
-    delete device;
-    device = nullptr;
+    DisconnectDevice();
     QMessageBox::warning(this, "Disconnected", "The USB connection to the device has been lost");
+    UpdateDeviceList();
+}
+
+void VNA::CreateToolbars()
+{
+
+    // Sweep toolbar
+    auto tb_sweep = new QToolBar("Sweep", this);
+    auto eStart = new SIUnitEdit("Hz", " kMG", 6);
+    eStart->setFixedWidth(100);
+    eStart->setToolTip("Start frequency");
+    connect(eStart, &SIUnitEdit::valueChanged, this, &VNA::SetStartFreq);
+    connect(this, &VNA::startFreqChanged, eStart, &SIUnitEdit::setValueQuiet);
+    tb_sweep->addWidget(eStart);
+
+    auto eCenter = new SIUnitEdit("Hz", " kMG", 6);
+    eCenter->setFixedWidth(100);
+    eCenter->setToolTip("Center frequency");
+    connect(eCenter, &SIUnitEdit::valueChanged, this, &VNA::SetCenterFreq);
+    connect(this, &VNA::centerFreqChanged, eCenter, &SIUnitEdit::setValueQuiet);
+    tb_sweep->addWidget(eCenter);
+
+    auto eStop = new SIUnitEdit("Hz", " kMG", 6);
+    eStop->setFixedWidth(100);
+    eStop->setToolTip("Stop frequency");
+    connect(eStop, &SIUnitEdit::valueChanged, this, &VNA::SetStopFreq);
+    connect(this, &VNA::stopFreqChanged, eStop, &SIUnitEdit::setValueQuiet);
+    tb_sweep->addWidget(eStop);
+
+    auto eSpan = new SIUnitEdit("Hz", " kMG", 6);
+    eSpan->setFixedWidth(100);
+    eSpan->setToolTip("Span");
+    connect(eSpan, &SIUnitEdit::valueChanged, this, &VNA::SetSpan);
+    connect(this, &VNA::spanChanged, eSpan, &SIUnitEdit::setValueQuiet);
+    tb_sweep->addWidget(eSpan);
+
+    auto bFull = new QPushButton(QIcon::fromTheme("zoom-fit-best"), "");
+    bFull->setToolTip("Full span");
+    connect(bFull, &QPushButton::clicked, this, &VNA::SetFullSpan);
+    tb_sweep->addWidget(bFull);
+
+    auto bZoomIn = new QPushButton(QIcon::fromTheme("zoom-in"), "");
+    bZoomIn->setToolTip("Zoom in");
+    connect(bZoomIn, &QPushButton::clicked, this, &VNA::SpanZoomIn);
+    tb_sweep->addWidget(bZoomIn);
+
+    auto bZoomOut = new QPushButton(QIcon::fromTheme("zoom-out"), "");
+    bZoomOut->setToolTip("Zoom out");
+    connect(bZoomOut, &QPushButton::clicked, this, &VNA::SpanZoomOut);
+    tb_sweep->addWidget(bZoomOut);
+
+    addToolBar(tb_sweep);
+
+    // Reference toolbar
+    auto tb_reference = new QToolBar("Reference", this);
+    tb_reference->addWidget(new QLabel("Ref:"));
+    toolbars.referenceType = new QComboBox();
+    toolbars.referenceType->addItem("Int");
+    toolbars.referenceType->addItem("Ext");
+    auto refInAuto = new QCheckBox("Auto");
+    refInAuto->setChecked(true);
+    toolbars.referenceType->setEnabled(false);
+    connect(refInAuto, &QCheckBox::clicked, [this](bool checked) {
+        // TODO change device settings
+        toolbars.referenceType->setEnabled(!checked);
+    });
+    tb_reference->addWidget(toolbars.referenceType);
+    tb_reference->addWidget(refInAuto);
+    tb_reference->addSeparator();
+    tb_reference->addWidget(new QLabel("Ref out:"));
+    auto refOutEnabled = new QCheckBox();
+    auto refOutFreq = new QComboBox();
+    refOutFreq->addItem("10 MHz");
+    refOutFreq->addItem("100 MHz");
+    tb_reference->addWidget(refOutEnabled);
+    tb_reference->addWidget(refOutFreq);
+
+    addToolBar(tb_reference);
+}
+
+void VNA::UpdateDeviceList()
+{
+    ui->menuConnect_to->clear();
+    auto devices = Device::GetDevices();
+    if(devices.size()) {
+        for(auto d : devices) {
+            auto connectAction = ui->menuConnect_to->addAction(d);
+            deviceActionGroup->addAction(connectAction);
+            connectAction->setCheckable(true);
+            if(device && d == device->serial()) {
+                connectAction->setChecked(true);
+            }
+            connect(connectAction, &QAction::triggered, [this, connectAction, d]() {
+               ConnectToDevice(d);
+               if(device) {
+                   // connectAction might have been unchecked if it was a reconnect to the already connected device
+                   connectAction->setChecked(true);
+               }
+            });
+        }
+        ui->menuConnect_to->setEnabled(true);
+    } else {
+        // no devices available, disable connection option
+        ui->menuConnect_to->setEnabled(false);
+    }
+}
+
+void VNA::StartManualControl()
+{
+    auto control = new ManualControlDialog(*device, this);
+    control->show();
+}
+
+void VNA::StartImpedanceMatching()
+{
+    auto dialog = new ImpedanceMatchDialog(*markerModel);
+    dialog->show();
+}
+
+void VNA::SetStartFreq(double freq)
+{
+    settings.f_start = freq;
+    if(settings.f_stop < freq) {
+        settings.f_stop = freq;
+    }
+    ConstrainAndUpdateFrequencies();
+}
+
+void VNA::SetStopFreq(double freq)
+{
+    settings.f_stop = freq;
+    if(settings.f_start > freq) {
+        settings.f_start = freq;
+    }
+    ConstrainAndUpdateFrequencies();
+}
+
+void VNA::SetCenterFreq(double freq)
+{
+    auto old_span = settings.f_stop - settings.f_start;
+    if (freq > old_span / 2) {
+        settings.f_start = freq - old_span / 2;
+        settings.f_stop = freq + old_span / 2;
+    } else {
+        settings.f_start = 0;
+        settings.f_stop = 2 * freq;
+    }
+    ConstrainAndUpdateFrequencies();
+}
+
+void VNA::SetSpan(double span)
+{
+    auto old_center = (settings.f_start + settings.f_stop) / 2;
+    if(old_center > span / 2) {
+        settings.f_start = old_center - span / 2;
+    } else {
+        settings.f_start = 0;
+    }
+    settings.f_stop = old_center + span / 2;
+    ConstrainAndUpdateFrequencies();
+}
+
+void VNA::SetFullSpan()
+{
+    settings.f_start = 0;
+    settings.f_stop = maxFreq;
+    ConstrainAndUpdateFrequencies();
+}
+
+void VNA::SpanZoomIn()
+{
+    auto center = (settings.f_start + settings.f_stop) / 2;
+    auto old_span = settings.f_stop - settings.f_start;
+    settings.f_start = center - old_span / 4;
+    settings.f_stop = center + old_span / 4;
+    ConstrainAndUpdateFrequencies();
+}
+
+void VNA::SpanZoomOut()
+{
+    auto center = (settings.f_start + settings.f_stop) / 2;
+    auto old_span = settings.f_stop - settings.f_start;
+    if(center > old_span) {
+        settings.f_start = center - old_span;
+    } else {
+        settings.f_start = 0;
+    }
+    settings.f_stop = center + old_span;
+    ConstrainAndUpdateFrequencies();
+}
+
+void VNA::ConstrainAndUpdateFrequencies()
+{
+    if(settings.f_stop > maxFreq) {
+        settings.f_stop = maxFreq;
+    }
+    if(settings.f_start > settings.f_stop) {
+        settings.f_start = settings.f_stop;
+    }
+    emit startFreqChanged(settings.f_start);
+    emit stopFreqChanged(settings.f_stop);
+    emit spanChanged(settings.f_stop - settings.f_start);
+    emit centerFreqChanged((settings.f_stop + settings.f_start)/2);
+    SettingsChanged();
 }

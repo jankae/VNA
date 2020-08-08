@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>166</width>
+    <width>206</width>
     <height>268</height>
    </rect>
   </property>
@@ -92,8 +92,7 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset resource="../icons.qrc">
-         <normaloff>:/icons/add.png</normaloff>:/icons/add.png</iconset>
+        <iconset theme="list-add"/>
        </property>
        <property name="iconSize">
         <size>
@@ -118,8 +117,7 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset resource="../icons.qrc">
-         <normaloff>:/icons/delete.png</normaloff>:/icons/delete.png</iconset>
+        <iconset theme="list-remove"/>
        </property>
       </widget>
      </item>
@@ -166,8 +164,7 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset resource="../icons.qrc">
-         <normaloff>:/icons/edit.png</normaloff>:/icons/edit.png</iconset>
+        <iconset theme="accessories-text-editor"/>
        </property>
       </widget>
      </item>

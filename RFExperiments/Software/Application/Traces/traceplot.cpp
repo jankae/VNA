@@ -5,11 +5,21 @@ const QColor TracePlot::Border = QColor(255,255,255);
 const QColor TracePlot::Divisions = QColor(255,255,255);
 #include "tracemarker.h"
 
+std::set<TracePlot*> TracePlot::plots;
+
 TracePlot::TracePlot(QWidget *parent) : QWidget(parent)
 {
-    contextmenu = nullptr;
+    contextmenu = new QMenu();
+    markedForDeletion = false;
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     lastUpdate = QTime::currentTime();
+    plots.insert(this);
+}
+
+TracePlot::~TracePlot()
+{
+    plots.erase(this);
+    delete contextmenu;
 }
 
 void TracePlot::enableTrace(Trace *t, bool enabled)
@@ -38,6 +48,13 @@ void TracePlot::mouseDoubleClickEvent(QMouseEvent *event) {
     emit doubleClicked(this);
 }
 
+void TracePlot::UpdateSpan(double fmin, double fmax)
+{
+    for(auto p : plots) {
+        p->setXAxis(fmin, fmax);
+    }
+}
+
 void TracePlot::initializeTraceInfo(TraceModel &model)
 {
     // Populate already present traces
@@ -53,15 +70,15 @@ void TracePlot::initializeTraceInfo(TraceModel &model)
 void TracePlot::contextMenuEvent(QContextMenuEvent *event)
 {
     contextmenu->exec(event->globalPos());
+    if(markedForDeletion) {
+        emit deleted(this);
+        delete this;
+    }
 }
 
 void TracePlot::updateContextMenu()
 {
-    if(contextmenu) {
-        delete contextmenu;
-        contextmenu = nullptr;
-    }
-    contextmenu = new QMenu();
+    contextmenu->clear();
     contextmenu->addSection("Traces");
     // Populate context menu
     for(auto t : traces) {
@@ -79,9 +96,13 @@ void TracePlot::updateContextMenu()
     auto close = new QAction("Close");
     contextmenu->addAction(close);
     connect(close, &QAction::triggered, [=]() {
-        emit deleted(this);
-        delete this;
+        markedForDeletion = true;
     });
+}
+
+std::set<TracePlot *> TracePlot::getPlots()
+{
+    return plots;
 }
 
 void TracePlot::newTraceAvailable(Trace *t)
@@ -115,9 +136,10 @@ void TracePlot::triggerReplot()
 void TracePlot::markerAdded(TraceMarker *m)
 {
     connect(m, &TraceMarker::dataChanged, this, &TracePlot::triggerReplot);
+    triggerReplot();
 }
 
 void TracePlot::markerRemoved(TraceMarker *m)
 {
-
+    triggerReplot();
 }

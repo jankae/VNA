@@ -90,6 +90,7 @@ FORMS += \
     Traces/traceimportdialog.ui \
     Traces/tracewidget.ui \
     calkitdialog.ui \
+    main.ui \
     manualcontroldialog.ui
 
 DISTFILES +=

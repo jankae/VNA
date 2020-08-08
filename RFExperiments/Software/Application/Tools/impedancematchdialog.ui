@@ -116,7 +116,10 @@
           <item row="0" column="1">
            <widget class="SIUnitEdit" name="mReal">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -130,7 +133,10 @@
           <item row="1" column="1">
            <widget class="SIUnitEdit" name="mImag">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -144,7 +150,10 @@
           <item row="2" column="1">
            <widget class="SIUnitEdit" name="mLoss">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -261,7 +270,10 @@
               <item>
                <widget class="SIUnitEdit" name="lValue">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -355,7 +367,10 @@
               <item>
                <widget class="SIUnitEdit" name="cValue">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -435,8 +450,8 @@
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="lGroup"/>
   <buttongroup name="zGroup"/>
   <buttongroup name="cGroup"/>
+  <buttongroup name="lGroup"/>
  </buttongroups>
 </ui>

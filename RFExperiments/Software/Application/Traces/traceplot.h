@@ -12,10 +12,14 @@ class TracePlot : public QWidget
     Q_OBJECT
 public:
     TracePlot( QWidget *parent = nullptr);
+    ~TracePlot();
 
     virtual void enableTrace(Trace *t, bool enabled);
     void mouseDoubleClickEvent(QMouseEvent *event) override;
     virtual void setXAxis(double min, double max){};
+
+    static std::set<TracePlot *> getPlots();
+    static void UpdateSpan(double fmin, double fmax);
 
 signals:
     void doubleClicked(QWidget *w);
@@ -35,6 +39,9 @@ protected:
     std::map<Trace*, bool> traces;
     QMenu *contextmenu;
     QTime lastUpdate;
+    bool markedForDeletion;
+
+    static std::set<TracePlot*> plots;
 
 protected slots:
     void newTraceAvailable(Trace *t);
