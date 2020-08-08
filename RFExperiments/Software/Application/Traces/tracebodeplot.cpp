@@ -409,8 +409,18 @@ void TraceBodePlot::traceColorChanged(Trace *t)
                 } else {
                     curves[axis][t].curve->setPen(t->color(), 1.0, Qt::DashLine);
                 }
+                for(auto m : t->getMarkers()) {
+                    if(markers.count(m)) {
+                        markers[m]->attach(plot);
+                    }
+                }
             } else {
                 curves[axis][t].curve->setPen(t->color(), 0.0, Qt::NoPen);
+                for(auto m : t->getMarkers()) {
+                    if(markers.count(m)) {
+                        markers[m]->detach();
+                    }
+                }
             }
         }
     }
