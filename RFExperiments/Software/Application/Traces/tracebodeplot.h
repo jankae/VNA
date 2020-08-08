@@ -10,6 +10,7 @@
 
 class TraceBodePlot : public TracePlot
 {
+    friend class BodeplotAxisDialog;
     Q_OBJECT
 public:
     TraceBodePlot(TraceModel &model, QWidget *parent = nullptr);
@@ -24,7 +25,8 @@ public:
     };
 
     virtual void setXAxis(double min, double max) override;
-    void setYAxisType(int axis, YAxisType type);
+    void setYAxis(int axis, YAxisType type, bool log, bool autorange, double min, double max, double div);
+    void setXAxis(bool autorange, double min, double max, double div);
     void enableTrace(Trace *t, bool enabled) override;
 
 protected:
@@ -41,10 +43,23 @@ private:
     QString AxisTypeToName(YAxisType type);
     void enableTraceAxis(Trace *t, int axis, bool enabled);
     bool supported(Trace *t, YAxisType type);
+    void updateXAxis();
     QwtSeriesData<QPointF> *createQwtSeriesData(Trace &t, int axis);
 
     std::set<Trace*> tracesAxis[2];
-    YAxisType AxisType[2];
+
+    class Axis {
+    public:
+        YAxisType type;
+        bool log;
+        bool autorange;
+        double rangeMin;
+        double rangeMax;
+        double rangeDiv;
+    };
+    Axis YAxis[2];
+    Axis XAxis;
+    double sweep_fmin, sweep_fmax;
 
     using CurveData = struct {
         QwtPlotCurve *curve;

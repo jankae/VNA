@@ -163,12 +163,8 @@ VNA::VNA(QWidget *parent)
     tracesmith2->enableTrace(tS22, true);
 
     auto tracebode1 = new TraceBodePlot(traceModel);
-    tracebode1->setYAxisType(0, TraceBodePlot::YAxisType::Magnitude);
-    tracebode1->setYAxisType(1, TraceBodePlot::YAxisType::Phase);
     tracebode1->enableTrace(tS12, true);
     auto tracebode2 = new TraceBodePlot(traceModel);
-    tracebode2->setYAxisType(0, TraceBodePlot::YAxisType::Magnitude);
-    tracebode2->setYAxisType(1, TraceBodePlot::YAxisType::Phase);
     tracebode2->enableTrace(tS21, true);
 
     auto tiles = new TileWidget(traceModel);

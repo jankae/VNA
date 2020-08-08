@@ -13,6 +13,7 @@
 #include <qwt_symbol.h>
 #include <qwt_plot_picker.h>
 #include <qwt_picker_machine.h>
+#include "bodeplotaxisdialog.h"
 
 using namespace std;
 
@@ -139,8 +140,12 @@ TraceBodePlot::TraceBodePlot(TraceModel &model, QWidget *parent)
     initializeTraceInfo(model);
     setAutoFillBackground(true);
 
-    setYAxisType(0, YAxisType::Disabled);
-    setYAxisType(1, YAxisType::Disabled);
+    // Setup default axis
+    setYAxis(0, YAxisType::Magnitude, false, false, -120, 20, 10);
+    setYAxis(1, YAxisType::Phase, false, false, -180, 180, 30);
+    // enable autoscaling and set for full span (no information about actual span available yet)
+    setXAxis(0, 6000000000);
+    setXAxis(true, 0, 6000000000, 600000000);
 }
 
 TraceBodePlot::~TraceBodePlot()
@@ -154,22 +159,15 @@ TraceBodePlot::~TraceBodePlot()
 
 void TraceBodePlot::setXAxis(double min, double max)
 {
-    //plot->setAxisScale(QwtPlot::xBottom, min, max);
-    QList<double> tickList;
-    for(double tick = min;tick <= max;tick+= (max-min)/10) {
-        tickList.append(tick);
-    }
-//    auto scalediv = plot->axisScaleDiv(QwtPlot::xBottom);
-//    scalediv.setTicks(QwtScaleDiv::MajorTick, tickList);
-    QwtScaleDiv scalediv(min, max, QList<double>(), QList<double>(), tickList);
-    plot->setAxisScaleDiv(QwtPlot::xBottom, scalediv);
-    triggerReplot();
+    sweep_fmin = min;
+    sweep_fmax = max;
+    updateXAxis();
 }
 
-void TraceBodePlot::setYAxisType(int axis, TraceBodePlot::YAxisType type)
+void TraceBodePlot::setYAxis(int axis, TraceBodePlot::YAxisType type, bool log, bool autorange, double min, double max, double div)
 {
-    if(AxisType[axis] != type) {
-        AxisType[axis] = type;
+    if(YAxis[axis].type != type) {
+        YAxis[axis].type = type;
         // remove traces that are active but not supported with the new axis type
         bool erased = false;
         do {
@@ -198,29 +196,36 @@ void TraceBodePlot::setYAxisType(int axis, TraceBodePlot::YAxisType type)
             }
         }
     }
+    YAxis[axis].log = log;
+    YAxis[axis].autorange = autorange;
+    YAxis[axis].rangeMin = min;
+    YAxis[axis].rangeMax = max;
+    YAxis[axis].rangeDiv = div;
     // enable/disable y axis
     auto qwtaxis = axis == 0 ? QwtPlot::yLeft : QwtPlot::yRight;
     plot->enableAxis(qwtaxis, type != YAxisType::Disabled);
-    // TODO add autoscaling
-    switch(type) {
-    case YAxisType::Magnitude:
-        plot->setAxisScale(qwtaxis, -120, 20, 10);
-        break;
-    case YAxisType::Phase:
-        plot->setAxisScale(qwtaxis, -180, 180, 30);
-        break;
-    case YAxisType::VSWR:
-        plot->setAxisScale(qwtaxis, 1, 10, 1);
-        break;
+    if(autorange) {
+        plot->setAxisAutoScale(qwtaxis, true);
+    } else {
+        plot->setAxisScale(qwtaxis, min, max, div);
     }
     updateContextMenu();
-    triggerReplot();
+    replot();
+}
+
+void TraceBodePlot::setXAxis(bool autorange, double min, double max, double div)
+{
+    XAxis.autorange = autorange;
+    XAxis.rangeMin = min;
+    XAxis.rangeMax = max;
+    XAxis.rangeDiv = div;
+    updateXAxis();
 }
 
 void TraceBodePlot::enableTrace(Trace *t, bool enabled)
 {
     for(int axis = 0;axis < 2;axis++) {
-        if(supported(t, AxisType[axis])) {
+        if(supported(t, YAxis[axis].type)) {
             enableTraceAxis(t, axis, enabled);
         }
     }
@@ -229,31 +234,37 @@ void TraceBodePlot::enableTrace(Trace *t, bool enabled)
 void TraceBodePlot::updateContextMenu()
 {
     contextmenu->clear();
+//    for(int axis = 0;axis < 2;axis++) {
+//        QMenu *axisMenu;
+//        if(axis == 0) {
+//            axisMenu = contextmenu->addMenu("Primary Axis");
+//        } else {
+//            axisMenu = contextmenu->addMenu("Secondary Axis");
+//        }
+//        auto group = new QActionGroup(this);
+//        for(int i=0;i<(int) YAxisType::Last;i++) {
+//            auto action = new QAction(AxisTypeToName((YAxisType) i));
+//            action->setCheckable(true);
+//            group->addAction(action);
+//            if(YAxis[axis].type == (YAxisType) i) {
+//                action->setChecked(true);
+//            }
+//            connect(action, &QAction::triggered, [=](bool active) {
+//                if(active) {
+//                    setYAxisType(axis, (YAxisType) i);
+//                }
+//            });
+//        }
+//        axisMenu->addActions(group->actions());
+//    }
+    auto setup = new QAction("Axis setup...");
+    connect(setup, &QAction::triggered, [this]() {
+        auto setup = new BodeplotAxisDialog(this);
+        setup->show();
+    });
+    contextmenu->addAction(setup);
     for(int axis = 0;axis < 2;axis++) {
-        QMenu *axisMenu;
-        if(axis == 0) {
-            axisMenu = contextmenu->addMenu("Primary Axis");
-        } else {
-            axisMenu = contextmenu->addMenu("Secondary Axis");
-        }
-        auto group = new QActionGroup(this);
-        for(int i=0;i<(int) YAxisType::Last;i++) {
-            auto action = new QAction(AxisTypeToName((YAxisType) i));
-            action->setCheckable(true);
-            group->addAction(action);
-            if(AxisType[axis] == (YAxisType) i) {
-                action->setChecked(true);
-            }
-            connect(action, &QAction::triggered, [=](bool active) {
-                if(active) {
-                    setYAxisType(axis, (YAxisType) i);
-                }
-            });
-        }
-        axisMenu->addActions(group->actions());
-    }
-    for(int axis = 0;axis < 2;axis++) {
-        if(AxisType[axis] == YAxisType::Disabled) {
+        if(YAxis[axis].type == YAxisType::Disabled) {
             continue;
         }
         if(axis == 0) {
@@ -263,7 +274,7 @@ void TraceBodePlot::updateContextMenu()
         }
         for(auto t : traces) {
             // Skip traces that are not applicable for the selected axis type
-            if(!supported(t.first, AxisType[axis])) {
+            if(!supported(t.first, YAxis[axis].type)) {
                 continue;
             }
 
@@ -364,7 +375,7 @@ void TraceBodePlot::enableTraceAxis(Trace *t, int axis, bool enabled)
         }
 
         updateContextMenu();
-        triggerReplot();
+        replot();
     }
 }
 
@@ -384,9 +395,24 @@ bool TraceBodePlot::supported(Trace *t, TraceBodePlot::YAxisType type)
     return true;
 }
 
+void TraceBodePlot::updateXAxis()
+{
+    if(XAxis.autorange) {
+        QList<double> tickList;
+        for(double tick = sweep_fmin;tick <= sweep_fmax;tick+= (sweep_fmax-sweep_fmin)/10) {
+            tickList.append(tick);
+        }
+        QwtScaleDiv scalediv(sweep_fmin, sweep_fmax, QList<double>(), QList<double>(), tickList);
+        plot->setAxisScaleDiv(QwtPlot::xBottom, scalediv);
+    } else {
+        plot->setAxisScale(QwtPlot::xBottom, XAxis.rangeMin, XAxis.rangeMax, XAxis.rangeDiv);
+    }
+    triggerReplot();
+}
+
 QwtSeriesData<QPointF> *TraceBodePlot::createQwtSeriesData(Trace &t, int axis)
 {
-    switch(AxisType[axis]) {
+    switch(YAxis[axis].type) {
     case YAxisType::Magnitude:
         return new QwtTraceSeries<YAxisType::Magnitude>(t);
     case YAxisType::Phase:
@@ -458,7 +484,7 @@ void TraceBodePlot::markerDataChanged(TraceMarker *m)
 {
     auto qwtMarker = markers[m];
     qwtMarker->setXValue(m->getFrequency());
-    qwtMarker->setYValue(AxisTransformation(AxisType[0], m->getData()));
+    qwtMarker->setYValue(AxisTransformation(YAxis[0].type, m->getData()));
     triggerReplot();
 }
 

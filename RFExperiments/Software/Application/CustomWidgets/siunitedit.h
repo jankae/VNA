@@ -10,9 +10,9 @@ public:
     SIUnitEdit(QString unit = QString(), QString prefixes = " ", int precision = 0, QWidget *parent = nullptr);
     SIUnitEdit(QWidget *parent);
 
-    void setUnit(QString unit) { this->unit = unit; }
-    void setPrefixes(QString prefixes) { this->prefixes = prefixes; }
-    void setPrecision(int precision) { this->precision = precision; }
+    void setUnit(QString unit) { this->unit = unit; setValueQuiet(_value); }
+    void setPrefixes(QString prefixes) { this->prefixes = prefixes; setValueQuiet(_value); }
+    void setPrecision(int precision) { this->precision = precision; setValueQuiet(_value); }
     double value() { return _value; }
 public slots:
     void setValue(double value);
