@@ -17,7 +17,7 @@ public:
     ~ManualControlDialog();
 
 public slots:
-    void NewStatus(Protocol::Status status);
+    void NewStatus(Protocol::ManualStatus status);
 
 private:
     void UpdateDevice();

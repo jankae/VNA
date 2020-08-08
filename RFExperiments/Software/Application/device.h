@@ -8,7 +8,8 @@
 #include <QObject>
 
 Q_DECLARE_METATYPE(Protocol::Datapoint);
-Q_DECLARE_METATYPE(Protocol::Status);
+Q_DECLARE_METATYPE(Protocol::ManualStatus);
+Q_DECLARE_METATYPE(Protocol::DeviceInfo);
 
 class Device : public QObject
 {
@@ -22,10 +23,13 @@ public:
     // Returns serial numbers of all connected devices
     static std::vector<QString> GetDevices();
     QString serial() const;
+    Protocol::DeviceInfo getLastInfo() const;
+    QString getLastDeviceInfoString();
 
 signals:
     void DatapointReceived(Protocol::Datapoint);
-    void StatusReceived(Protocol::Status);
+    void ManualStatusReceived(Protocol::ManualStatus);
+    void DeviceInfoUpdated();
     void ConnectionLost();
 private:
     static constexpr int VID = 1155;
@@ -43,6 +47,8 @@ private:
     QString m_serial;
     bool m_connected;
     std::thread *m_receiveThread;
+    Protocol::DeviceInfo lastInfo;
+    bool lastInfoValid;
 };
 
 #endif // DEVICE_H

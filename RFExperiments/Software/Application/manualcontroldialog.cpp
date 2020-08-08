@@ -144,8 +144,8 @@ ManualControlDialog::ManualControlDialog(Device &dev, QWidget *parent) :
     MakeReadOnly(ui->refmag);
     MakeReadOnly(ui->refphase);
 
-    qRegisterMetaType<Protocol::Status>("Status");
-    connect(&dev, &Device::StatusReceived, this, &ManualControlDialog::NewStatus);
+    qRegisterMetaType<Protocol::ManualStatus>("Status");
+    connect(&dev, &Device::ManualStatusReceived, this, &ManualControlDialog::NewStatus);
 
     connect(ui->SourceCE, &QCheckBox::toggled, [=](bool) { UpdateDevice(); });
     connect(ui->SourceRFEN, &QCheckBox::toggled, [=](bool) { UpdateDevice(); });
@@ -183,7 +183,7 @@ ManualControlDialog::~ManualControlDialog()
     delete ui;
 }
 
-void ManualControlDialog::NewStatus(Protocol::Status status)
+void ManualControlDialog::NewStatus(Protocol::ManualStatus status)
 {
     // ADC values
     ui->port1min->setText(QString::number(status.port1min));

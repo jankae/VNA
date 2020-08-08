@@ -12,6 +12,7 @@ Device::Device(QString serial)
     m_context = nullptr;
     m_handle = nullptr;
     m_connected = false;
+    lastInfoValid = false;
     libusb_init(&m_context);
 //    libusb_set_debug(m_context, 4);
     auto ndevices = libusb_get_device_list(m_context, &devList);
@@ -266,7 +267,11 @@ void Device::ReceiveThread()
                         emit DatapointReceived(packet.datapoint);
                     } else if(packet.type == Protocol::PacketType::Status) {
                         BOOST_LOG_TRIVIAL(debug) << "Got status" << std::flush;
-                        emit StatusReceived(packet.status);
+                        emit ManualStatusReceived(packet.status);
+                    } else if(packet.type == Protocol::PacketType::DeviceInfo) {
+                        lastInfo = packet.info;
+                        lastInfoValid = true;
+                        emit DeviceInfoUpdated();
                     }
                 } while (handled_len > 0);
             }
@@ -278,6 +283,34 @@ void Device::ReceiveThread()
         }
     }
     BOOST_LOG_TRIVIAL(debug) << "Disconnected, receive thread exiting";
+}
+
+Protocol::DeviceInfo Device::getLastInfo() const
+{
+    return lastInfo;
+}
+
+QString Device::getLastDeviceInfoString()
+{
+    QString ret;
+    if(!lastInfoValid) {
+        ret.append("No device information available yet");
+    } else {
+        ret.append("HW Rev.");
+        ret.append(lastInfo.HW_Revision);
+        ret.append(" FW "+QString::number(lastInfo.FW_major)+"."+QString::number(lastInfo.FW_minor).rightJustified(2, '0'));
+        ret.append(" Temps: "+QString::number(lastInfo.temperatures.source)+"°C/"+QString::number(lastInfo.temperatures.LO1)+"°C/"+QString::number(lastInfo.temperatures.MCU)+"°C");
+        ret.append(" Reference:");
+        if(lastInfo.extRefInUse) {
+            ret.append("External");
+        } else {
+            ret.append("Internal");
+            if(lastInfo.extRefAvailable) {
+                ret.append(" (External available)");
+            }
+        }
+    }
+    return ret;
 }
 
 QString Device::serial() const

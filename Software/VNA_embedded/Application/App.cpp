@@ -23,6 +23,11 @@ static FPGA::SamplingResult statusResult;
 static volatile bool newManual = false;
 static Protocol::ManualControl manual;
 
+// TODO set proper values
+#define HW_REVISION			'A'
+#define FW_MAJOR			0
+#define FW_MINOR			01
+
 void VNACallback(Protocol::Datapoint res) {
 	result = res;
 	newResult = true;
@@ -70,6 +75,29 @@ void App_Start() {
 				LOG_INFO("PLL temperatures: %u/%u", tempSource, tempLO);
 				// Read ADC min/max
 				auto limits = FPGA::GetADCLimits();
+#define ADC_LIMIT 		30000
+				// Compile info packet
+				packet.type = Protocol::PacketType::DeviceInfo;
+				packet.info.FPGA_configured = 1;
+				if(limits.P1min < -ADC_LIMIT || limits.P1max > ADC_LIMIT
+						|| limits.P2min < -ADC_LIMIT || limits.P2max > ADC_LIMIT
+						|| limits.Rmin < -ADC_LIMIT || limits.Rmax > ADC_LIMIT) {
+					packet.info.ADC_overload = true;
+				} else {
+					packet.info.ADC_overload = false;
+				}
+				packet.info.FW_major = FW_MAJOR;
+				packet.info.FW_minor = FW_MINOR;
+				packet.info.HW_Revision = HW_REVISION;
+				auto status = FPGA::GetStatus();
+				packet.info.LO1_locked = (status & (int) FPGA::Interrupt::LO1Unlock) ? 0 : 1;
+				packet.info.source_locked = (status & (int) FPGA::Interrupt::SourceUnlock) ? 0 : 1;
+				packet.info.extRefAvailable = 0;
+				packet.info.extRefInUse = 0;
+				packet.info.temperatures.LO1 = tempLO;
+				packet.info.temperatures.source = tempSource;
+				packet.info.temperatures.MCU = 0;
+				Communication::Send(packet);
 				FPGA::ResetADCLimits();
 				LOG_INFO("ADC limits: P1: %d/%d P2: %d/%d R: %d/%d",
 						limits.P1min, limits.P1max, limits.P2min, limits.P2max,

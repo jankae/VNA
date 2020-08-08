@@ -47,7 +47,16 @@ static uint16_t EncodeSweepSettings(Protocol::SweepSettings d, uint8_t *buf,
 		return sizeof(d);
 	}
 }
-static uint16_t EncodeStatus(Protocol::Status d, uint8_t *buf,
+static uint16_t EncodeDeviceInfo(Protocol::DeviceInfo d, uint8_t *buf,
+                                                   uint16_t bufSize) {
+    if (bufSize < sizeof(d)) {
+        return 0;
+    } else {
+        memcpy(buf, &d, sizeof(d));
+        return sizeof(d);
+    }
+}
+static uint16_t EncodeStatus(Protocol::ManualStatus d, uint8_t *buf,
                                      uint16_t bufSize) {
     if (bufSize < sizeof(d)) {
         return 0;
@@ -75,8 +84,13 @@ static Protocol::SweepSettings DecodeSweepSettings(uint8_t *buf) {
 	memcpy(&d, buf, sizeof(d));
 	return d;
 }
-static Protocol::Status DecodeStatus(uint8_t *buf) {
-    Protocol::Status d;
+static Protocol::DeviceInfo DecodeDeviceInfo(uint8_t *buf) {
+    Protocol::DeviceInfo d;
+    memcpy(&d, buf, sizeof(d));
+    return d;
+}
+static Protocol::ManualStatus DecodeStatus(uint8_t *buf) {
+    Protocol::ManualStatus d;
     memcpy(&d, buf, sizeof(d));
     return d;
 }
@@ -136,6 +150,9 @@ uint16_t Protocol::DecodeBuffer(uint8_t *buf, uint16_t len, PacketInfo *info) {
 	case PacketType::SweepSettings:
 		info->settings = DecodeSweepSettings(&data[4]);
 		break;
+    case PacketType::DeviceInfo:
+        info->info = DecodeDeviceInfo(&data[4]);
+        break;
     case PacketType::Status:
         info->status = DecodeStatus(&data[4]);
         break;
@@ -156,6 +173,9 @@ uint16_t Protocol::EncodePacket(PacketInfo packet, uint8_t *dest, uint16_t dests
 	case PacketType::SweepSettings:
 		payload_size = EncodeSweepSettings(packet.settings, &dest[4], destsize - 4);
 		break;
+    case PacketType::DeviceInfo:
+        payload_size = EncodeDeviceInfo(packet.info, &dest[4], destsize - 4);
+        break;
     case PacketType::Status:
         payload_size = EncodeStatus(packet.status, &dest[4], destsize - 4);
         break;

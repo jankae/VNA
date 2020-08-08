@@ -54,6 +54,16 @@ VNA::VNA(QWidget *parent)
     calDialog.reset();
 
     ui->setupUi(this);
+//    ui->statusbar->insertPermanentWidget(0, &lDeviceStatus);
+//    ui->statusbar->insertPermanentWidget(1, new QPushButton("Test"));
+    ui->statusbar->addWidget(&lConnectionStatus);
+    auto div1 = new QFrame;
+    div1->setFrameShape(QFrame::VLine);
+    ui->statusbar->addWidget(div1);
+    ui->statusbar->addWidget(&lDeviceInfo);
+    ui->statusbar->addWidget(new QLabel, 1);
+    //ui->statusbar->setStyleSheet("QStatusBar::item { border: 1px solid black; };");
+
     CreateToolbars();
     // UI connections
     connect(ui->actionUpdate_Device_List, &QAction::triggered, this, &VNA::UpdateDeviceList);
@@ -301,7 +311,7 @@ VNA::VNA(QWidget *parent)
             newval = -42.0;
         }
         mdbm->setValueQuiet(newval);
-        settings.mdbm_excitation = newval * 100;
+        settings.cdbm_excitation = newval * 100;
         SettingsChanged();
     });
     connect(mBandwidth, &MenuValue::valueChanged, [=](double newval){
@@ -570,26 +580,36 @@ void VNA::ConnectToDevice(QString serial)
     }
     try {
         device = new Device(serial);
+        lConnectionStatus.setText("Connected to " + device->serial());
+        lDeviceInfo.setText(device->getLastDeviceInfoString());
         device->Configure(settings);
         connect(device, &Device::DatapointReceived, this, &VNA::NewDatapoint);
         connect(device, &Device::ConnectionLost, this, &VNA::DeviceConnectionLost);
+        connect(device, &Device::DeviceInfoUpdated, [this]() {
+           lDeviceInfo.setText(device->getLastDeviceInfoString());
+        });
         ui->actionDisconnect->setEnabled(true);
         ui->actionManual_Control->setEnabled(true);
     } catch (const runtime_error e) {
         QMessageBox::warning(this, "Error connecting to device", e.what());
+        DisconnectDevice();
         UpdateDeviceList();
     }
 }
 
 void VNA::DisconnectDevice()
 {
-    delete device;
-    device = nullptr;
+    if(device) {
+        delete device;
+        device = nullptr;
+    }
     ui->actionDisconnect->setEnabled(false);
     ui->actionManual_Control->setEnabled(false);
     if(deviceActionGroup->checkedAction()) {
         deviceActionGroup->checkedAction()->setChecked(false);
     }
+    lConnectionStatus.setText("No device connected");
+    lDeviceInfo.setText("No device information available yet");
 }
 
 void VNA::DeviceConnectionLost()

@@ -18,10 +18,27 @@ using SweepSettings = struct _sweepSettings {
 	uint64_t f_stop;
 	uint16_t points;
         uint32_t if_bandwidth;
-        int16_t mdbm_excitation; // in 1/100 dbm
+        int16_t cdbm_excitation; // in 1/100 dbm
 } __attribute__((packed));
 
-using Status = struct _status {
+using DeviceInfo = struct _deviceInfo {
+    uint16_t FW_major;
+    uint16_t FW_minor;
+    char HW_Revision;
+    uint8_t extRefAvailable:1;
+    uint8_t extRefInUse:1;
+    uint8_t FPGA_configured:1;
+    uint8_t source_locked:1;
+    uint8_t LO1_locked:1;
+    uint8_t ADC_overload:1;
+    struct {
+        uint8_t source;
+        uint8_t LO1;
+        uint8_t MCU;
+    } temperatures;
+} __attribute__((packed));
+
+using ManualStatus = struct _manualstatus {
         int16_t port1min, port1max;
         int16_t port2min, port2max;
         int16_t refmin, refmax;
@@ -68,8 +85,9 @@ enum class PacketType : uint8_t {
 	None,
 	Datapoint,
 	SweepSettings,
-        Status,
-        ManualControl,
+    Status,
+    ManualControl,
+    DeviceInfo,
 };
 
 using PacketInfo = struct _packetinfo {
@@ -77,8 +95,9 @@ using PacketInfo = struct _packetinfo {
 	union {
 		Datapoint datapoint;
 		SweepSettings settings;
-                ManualControl manual;
-                Status status;
+        DeviceInfo info;
+        ManualControl manual;
+        ManualStatus status;
 	};
 };
 

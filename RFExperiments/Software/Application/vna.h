@@ -33,7 +33,7 @@ private:
         .f_stop = (uint64_t) maxFreq,
         .points = 501,
         .if_bandwidth = 1000,
-        .mdbm_excitation = 0,
+        .cdbm_excitation = 0,
     };
 private slots:
     void NewDatapoint(Protocol::Datapoint d);
@@ -86,6 +86,10 @@ private:
     QLabel lStart, lCenter, lStop, lSpan, lPoints, lBandwidth;
     QLabel lCalibration;
     QLabel lAverages;
+
+    // Status bar widgets
+    QLabel lConnectionStatus;
+    QLabel lDeviceInfo;
 
     Ui::MainWindow *ui;
 signals:
