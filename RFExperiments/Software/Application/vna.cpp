@@ -35,6 +35,7 @@
 #include <QDockWidget>
 #include "Traces/markerwidget.h"
 #include "Tools/impedancematchdialog.h"
+#include "Calibration/calibrationtracedialog.h"
 #include "ui_main.h"
 
 using namespace std;
@@ -71,6 +72,15 @@ VNA::VNA(QWidget *parent)
     connect(ui->actionQuit, &QAction::triggered, this, &VNA::close);
     connect(ui->actionManual_Control, &QAction::triggered, this, &VNA::StartManualControl);
     connect(ui->actionImpedance_Matching, &QAction::triggered, this, &VNA::StartImpedanceMatching);
+    connect(ui->actionEdit_Calibration_Kit, &QAction::triggered, [=](){
+        calkit.edit();
+    });
+    connect(ui->actionTracedata, &QAction::triggered, [=](){
+       auto dialog = new CalibrationTraceDialog(&cal);
+       connect(dialog, &CalibrationTraceDialog::triggerMeasurement, this, &VNA::StartCalibrationMeasurement);
+       connect(this, &VNA::CalibrationMeasurementComplete, dialog, &CalibrationTraceDialog::measurementComplete);
+       dialog->show();
+    });
 
 
     setWindowTitle("VNA");
@@ -216,7 +226,7 @@ VNA::VNA(QWidget *parent)
     mAcquisition->addItem(mdbm);
     auto mPoints = new MenuValue("Points", settings.points, "", " ");
     mAcquisition->addItem(mPoints);
-    auto mBandwidth = new MenuValue("IF Bandwidth", settings.if_bandwidth, "Hz", " k", 2);
+    auto mBandwidth = new MenuValue("IF Bandwidth", settings.if_bandwidth, "Hz", " k", 3);
     mAcquisition->addItem(mBandwidth);
     auto mAverages = new MenuValue("Averages", averages);
     mAcquisition->addItem(mAverages);
@@ -300,100 +310,58 @@ VNA::VNA(QWidget *parent)
     connect(this, &VNA::centerFreqChanged, mCenter, &MenuValue::setValueQuiet);
     connect(this, &VNA::spanChanged, mSpanWidth, &MenuValue::setValueQuiet);
 
+    // Acquisition connections
+    // setting values
     connect(mPoints, &MenuValue::valueChanged, [=](double newval){
-        settings.points = newval;
-        SettingsChanged();
+        SetPoints(newval);
     });
-    connect(mdbm, &MenuValue::valueChanged, [=](double newval){
-        if(newval > -10.0) {
-            newval = -10.0;
-        } else if(newval < -42.0) {
-            newval = -42.0;
-        }
-        mdbm->setValueQuiet(newval);
-        settings.cdbm_excitation = newval * 100;
-        SettingsChanged();
-    });
-    connect(mBandwidth, &MenuValue::valueChanged, [=](double newval){
-       settings.if_bandwidth = newval;
-       SettingsChanged();
-    });
+    connect(mdbm, &MenuValue::valueChanged, this, &VNA::SetSourceLevel);
+    connect(mBandwidth, &MenuValue::valueChanged, this, &VNA::SetIFBandwidth);
     connect(mAverages, &MenuValue::valueChanged, [=](double newval){
-       averages = newval;
-       average.setAverages(averages);
-       SettingsChanged();
+       SetAveraging(newval);
+    });
+    // readback and update line edits
+    connect(this, &VNA::sourceLevelChanged, mdbm, &MenuValue::setValueQuiet);
+    connect(this, &VNA::pointsChanged, [=](int newval) {
+        mPoints->setValueQuiet(newval);
+    });
+    connect(this, &VNA::IFBandwidthChanged, mBandwidth, &MenuValue::setValueQuiet);
+    connect(this, &VNA::averagingChanged, [=](int newval) {
+        mAverages->setValueQuiet(newval);
     });
 
-    // Calibration connections
-    auto startCalibration = [=](Calibration::Measurement m, MenuAction *menu) {
-        // Trigger sweep to start from beginning
-        SettingsChanged();
-        calMeasurement = m;
-        // Delete any already captured data of this measurement
-        cal.clearMeasurement(m);
-        calWaitFirst = true;
-        calMeasuring = true;
-        QString text = "Measuring \"";
-        text.append(Calibration::MeasurementToString(m));
-        text.append("\" parameters.");
-//        calDialog = new QProgressDialog(text, "Abort", 0, settings.points);
-        calDialog.setRange(0, settings.points);
-        calDialog.setLabelText(text);
-        calDialog.setCancelButtonText("Abort");
-        calDialog.setWindowTitle("Taking calibration measurement...");
-        calDialog.setValue(0);
-        calDialog.setWindowModality(Qt::ApplicationModal);
-        // always show the dialog
-        calDialog.setMinimumDuration(0);
-        menu->AddSubline("Measured at " + QDateTime::currentDateTime().toString("hh:mm:ss"));
-        connect(&calDialog, &QProgressDialog::canceled, [=]() {
-            // the user aborted the calibration measurement
-            calMeasuring = false;
-            cal.clearMeasurement(calMeasurement);
-            menu->RemoveSubline();
-        });
-    };
     connect(mCalPort1Open, &MenuAction::triggered, [=](){
-       startCalibration(Calibration::Measurement::Port1Open, mCalPort1Open);
+       StartCalibrationMeasurement(Calibration::Measurement::Port1Open);
     });
     connect(mCalPort1Short, &MenuAction::triggered, [=](){
-       startCalibration(Calibration::Measurement::Port1Short, mCalPort1Short);
+       StartCalibrationMeasurement(Calibration::Measurement::Port1Short);
     });
     connect(mCalPort1Load, &MenuAction::triggered, [=](){
-       startCalibration(Calibration::Measurement::Port1Load, mCalPort1Load);
+       StartCalibrationMeasurement(Calibration::Measurement::Port1Load);
     });
     connect(mCalPort2Open, &MenuAction::triggered, [=](){
-       startCalibration(Calibration::Measurement::Port2Open, mCalPort2Open);
+       StartCalibrationMeasurement(Calibration::Measurement::Port2Open);
     });
     connect(mCalPort2Short, &MenuAction::triggered, [=](){
-       startCalibration(Calibration::Measurement::Port2Short, mCalPort2Short);
+       StartCalibrationMeasurement(Calibration::Measurement::Port2Short);
     });
     connect(mCalPort2Load, &MenuAction::triggered, [=](){
-       startCalibration(Calibration::Measurement::Port2Load, mCalPort2Load);
+       StartCalibrationMeasurement(Calibration::Measurement::Port2Load);
     });
     connect(mCalThrough, &MenuAction::triggered, [=](){
-       startCalibration(Calibration::Measurement::Through, mCalThrough);
+       StartCalibrationMeasurement(Calibration::Measurement::Through);
     });
     connect(mCalIsolation, &MenuAction::triggered, [=](){
-       startCalibration(Calibration::Measurement::Isolation, mCalIsolation);
+       StartCalibrationMeasurement(Calibration::Measurement::Isolation);
     });
     connect(mCalSOL1, &MenuAction::triggered, [=](){
-        cal.constructErrorTerms(Calibration::Type::Port1SOL, calkit);
-        calValid = true;
-        mCalTraces->setEnabled(true);
-        average.reset();
+        ApplyCalibration(Calibration::Type::Port1SOL);
     });
     connect(mCalSOL2, &MenuAction::triggered, [=](){
-        cal.constructErrorTerms(Calibration::Type::Port2SOL, calkit);
-        calValid = true;
-        mCalTraces->setEnabled(true);
-        average.reset();
+        ApplyCalibration(Calibration::Type::Port2SOL);
     });
     connect(mCalFullSOLT, &MenuAction::triggered, [=](){
-        cal.constructErrorTerms(Calibration::Type::FullSOLT, calkit);
-        calValid = true;
-        mCalTraces->setEnabled(true);
-        average.reset();
+        ApplyCalibration(Calibration::Type::FullSOLT);
     });
 
     connect(mCalSave, &MenuAction::triggered, [=](){
@@ -478,7 +446,33 @@ VNA::VNA(QWidget *parent)
 
     setCentralWidget(mainWidget);
 
+    // status and menu dock hidden by default
+    menuDock->close();
+    statusDock->close();
+
+    // fill dock/toolbar hide/show menu and set initial state if available
     QSettings settings("VNA", "Application");
+    ui->menuDocks->clear();
+    for(auto d : findChildren<QDockWidget*>()) {
+        ui->menuDocks->addAction(d->toggleViewAction());
+        bool hidden = settings.value("dock_"+d->windowTitle(), d->isHidden()).toBool();
+        if(hidden) {
+            d->close();
+        } else {
+            d->show();
+        }
+    }
+    ui->menuToolbars->clear();
+    for(auto t : findChildren<QToolBar*>()) {
+        ui->menuToolbars->addAction(t->toggleViewAction());
+        bool hidden = settings.value("toolbar_"+t->windowTitle(), t->isHidden()).toBool();
+        if(hidden) {
+            t->close();
+        } else {
+            t->show();
+        }
+    }
+
     restoreGeometry(settings.value("geometry").toByteArray());
     restoreState(settings.value("windowState").toByteArray());
 
@@ -495,6 +489,14 @@ VNA::VNA(QWidget *parent)
 void VNA::closeEvent(QCloseEvent *event)
 {
     QSettings settings("VNA", "Application");
+    // save dock/toolbar visibility
+    for(auto d : findChildren<QDockWidget*>()) {
+        settings.setValue("dock_"+d->windowTitle(), d->isHidden());
+    }
+    ui->menuToolbars->clear();
+    for(auto t : findChildren<QToolBar*>()) {
+        settings.setValue("toolbar_"+t->windowTitle(), t->isHidden());
+    }
     settings.setValue("geometry", saveGeometry());
     settings.setValue("windowState", saveState());
     QMainWindow::closeEvent(event);
@@ -508,6 +510,7 @@ void VNA::NewDatapoint(Protocol::Datapoint d)
             cal.addMeasurement(calMeasurement, d);
             if(d.pointNum == settings.points - 1) {
                 calMeasuring = false;
+                emit CalibrationMeasurementComplete(calMeasurement);
                 // Check if applying calibration is available
                 if(cal.calculationPossible(Calibration::Type::Port1SOL)) {
                     mCalSOL1->setEnabled(true);
@@ -542,20 +545,21 @@ void VNA::UpdateStatusPanel()
     lPoints.setText(QString::number(settings.points));
     lBandwidth.setText(Unit::ToString(settings.if_bandwidth, "Hz", " k", 2));
     lAverages.setText(QString::number(average.getLevel()) + "/" + QString::number(averages));
-    switch(cal.getInterpolation(settings)) {
-    case Calibration::InterpolationType::NoCalibration:
+    if(calValid) {
+        switch(cal.getInterpolation(settings)) {
+        case Calibration::InterpolationType::Extrapolate:
+            lCalibration.setText("Enabled/Extrapolating");
+            break;
+        case Calibration::InterpolationType::Interpolate:
+            lCalibration.setText("Enabled/Interpolating");
+            break;
+        case Calibration::InterpolationType::Exact:
+        case Calibration::InterpolationType::Unchanged:
+            lCalibration.setText("Enabled");
+            break;
+        }
+    } else {
         lCalibration.setText("Off");
-        break;
-    case Calibration::InterpolationType::Extrapolate:
-        lCalibration.setText("Enabled/Extrapolating");
-        break;
-    case Calibration::InterpolationType::Interpolate:
-        lCalibration.setText("Enabled/Interpolating");
-        break;
-    case Calibration::InterpolationType::Exact:
-    case Calibration::InterpolationType::Unchanged:
-        lCalibration.setText("Enabled");
-        break;
     }
 }
 
@@ -567,7 +571,7 @@ void VNA::SettingsChanged()
     average.reset();
     traceModel.clearVNAData();
     for(auto t : traceModel.getTraces()) {
-
+        // TODO ???
     }
     UpdateStatusPanel();
     TracePlot::UpdateSpan(settings.f_start, settings.f_stop);
@@ -621,7 +625,6 @@ void VNA::DeviceConnectionLost()
 
 void VNA::CreateToolbars()
 {
-
     // Sweep toolbar
     auto tb_sweep = new QToolBar("Sweep", this);
     auto eStart = new SIUnitEdit("Hz", " kMG", 6);
@@ -629,6 +632,7 @@ void VNA::CreateToolbars()
     eStart->setToolTip("Start frequency");
     connect(eStart, &SIUnitEdit::valueChanged, this, &VNA::SetStartFreq);
     connect(this, &VNA::startFreqChanged, eStart, &SIUnitEdit::setValueQuiet);
+    tb_sweep->addWidget(new QLabel("Start:"));
     tb_sweep->addWidget(eStart);
 
     auto eCenter = new SIUnitEdit("Hz", " kMG", 6);
@@ -636,6 +640,7 @@ void VNA::CreateToolbars()
     eCenter->setToolTip("Center frequency");
     connect(eCenter, &SIUnitEdit::valueChanged, this, &VNA::SetCenterFreq);
     connect(this, &VNA::centerFreqChanged, eCenter, &SIUnitEdit::setValueQuiet);
+    tb_sweep->addWidget(new QLabel("Center:"));
     tb_sweep->addWidget(eCenter);
 
     auto eStop = new SIUnitEdit("Hz", " kMG", 6);
@@ -643,6 +648,7 @@ void VNA::CreateToolbars()
     eStop->setToolTip("Stop frequency");
     connect(eStop, &SIUnitEdit::valueChanged, this, &VNA::SetStopFreq);
     connect(this, &VNA::stopFreqChanged, eStop, &SIUnitEdit::setValueQuiet);
+    tb_sweep->addWidget(new QLabel("Stop:"));
     tb_sweep->addWidget(eStop);
 
     auto eSpan = new SIUnitEdit("Hz", " kMG", 6);
@@ -650,6 +656,7 @@ void VNA::CreateToolbars()
     eSpan->setToolTip("Span");
     connect(eSpan, &SIUnitEdit::valueChanged, this, &VNA::SetSpan);
     connect(this, &VNA::spanChanged, eSpan, &SIUnitEdit::setValueQuiet);
+    tb_sweep->addWidget(new QLabel("Span:"));
     tb_sweep->addWidget(eSpan);
 
     auto bFull = new QPushButton(QIcon::fromTheme("zoom-fit-best"), "");
@@ -668,6 +675,42 @@ void VNA::CreateToolbars()
     tb_sweep->addWidget(bZoomOut);
 
     addToolBar(tb_sweep);
+
+    // Acquisition toolbar
+    auto tb_acq = new QToolBar("Acquisition", this);
+    auto dbm = new QDoubleSpinBox();
+    dbm->setValue(settings.cdbm_excitation * 100);
+    dbm->setFixedWidth(95);
+    dbm->setRange(-42.0, -10.0);
+    dbm->setSingleStep(0.25);
+    dbm->setSuffix("dbm");
+    dbm->setToolTip("Stimulus level");
+    connect(dbm, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &VNA::SetSourceLevel);
+    connect(this, &VNA::sourceLevelChanged, dbm, &QDoubleSpinBox::setValue);
+    tb_acq->addWidget(new QLabel("Level:"));
+    tb_acq->addWidget(dbm);
+
+    auto points = new QSpinBox();
+    points->setFixedWidth(55);
+    points->setRange(1, 4501);
+    points->setValue(settings.points);
+    points->setSingleStep(100);
+    points->setToolTip("Points/sweep");
+    connect(points, qOverload<int>(&QSpinBox::valueChanged), this, &VNA::SetPoints);
+    connect(this, &VNA::pointsChanged, points, &QSpinBox::setValue);
+    tb_acq->addWidget(new QLabel("Points:"));
+    tb_acq->addWidget(points);
+
+    auto eBandwidth = new SIUnitEdit("Hz", " k", 3);
+    eBandwidth->setValueQuiet(settings.if_bandwidth);
+    eBandwidth->setFixedWidth(70);
+    eBandwidth->setToolTip("IF bandwidth");
+    connect(eBandwidth, &SIUnitEdit::valueChanged, this, &VNA::SetIFBandwidth);
+    connect(this, &VNA::IFBandwidthChanged, eBandwidth, &SIUnitEdit::setValueQuiet);
+    tb_acq->addWidget(new QLabel("IF BW:"));
+    tb_acq->addWidget(eBandwidth);
+
+    addToolBar(tb_acq);
 
     // Reference toolbar
     auto tb_reference = new QToolBar("Reference", this);
@@ -694,6 +737,69 @@ void VNA::CreateToolbars()
     tb_reference->addWidget(refOutFreq);
 
     addToolBar(tb_reference);
+
+    // Calibration toolbar (and populate calibration menu)
+    auto tb_cal = new QToolBar("Calibration");
+    tb_cal->addWidget(new QLabel("Calibration:"));
+    auto cbEnableCal = new QCheckBox;
+    tb_cal->addWidget(cbEnableCal);
+    auto cbType = new QComboBox();
+    auto calMenuGroup = new QActionGroup(this);
+    calMenuGroup->addAction(ui->actionCalDisabled);
+    for(auto type : Calibration::Types()) {
+        cbType->addItem(Calibration::TypeToString(type), (int) type);
+        auto menuAction = new QAction(Calibration::TypeToString(type));
+        calMenuGroup->addAction(menuAction);
+        connect(menuAction, &QAction::triggered, [=](){
+            ApplyCalibration(type);
+        });
+        connect(this, &VNA::CalibrationApplied, [=](Calibration::Type applied){
+             if(type == applied) {
+                 menuAction->setChecked(true);
+             }
+        });
+        menuAction->setCheckable(true);
+        ui->menuCalibration->insertAction(ui->actionCalDisabled, menuAction);
+    }
+
+    auto calToolbarLambda = [=]() {
+        if(cbEnableCal->isChecked()) {
+            // Get requested calibration type from combobox
+            ApplyCalibration((Calibration::Type) cbType->itemData(cbType->currentIndex()).toInt());
+        } else {
+            DisableCalibration();
+        }
+    };
+
+    // Calibration connections
+    connect(cbEnableCal, &QCheckBox::stateChanged, calToolbarLambda);
+    connect(cbType, qOverload<int>(&QComboBox::currentIndexChanged), calToolbarLambda);
+    connect(this, &VNA::CalibrationDisabled, [=](){
+        cbType->blockSignals(true);
+        cbEnableCal->blockSignals(true);
+        ui->actionCalDisabled->setChecked(true);
+        cbEnableCal->setCheckState(Qt::CheckState::Unchecked);
+        cbType->blockSignals(false);
+        cbEnableCal->blockSignals(false);
+    });
+    connect(ui->actionCalDisabled, &QAction::triggered, this, &VNA::DisableCalibration);
+    connect(this, &VNA::CalibrationApplied, [=](Calibration::Type applied){
+        cbType->blockSignals(true);
+        cbEnableCal->blockSignals(true);
+        for(int i=0;i<cbType->count();i++) {
+            if(cbType->itemData(i).toInt() == (int) applied) {
+                cbType->setCurrentIndex(i);
+                break;
+            }
+        }
+        cbEnableCal->setCheckState(Qt::CheckState::Checked);
+        cbType->blockSignals(false);
+        cbEnableCal->blockSignals(false);
+    });
+
+    tb_cal->addWidget(cbType);
+
+    addToolBar(tb_cal);
 }
 
 void VNA::UpdateDeviceList()
@@ -805,6 +911,108 @@ void VNA::SpanZoomOut()
     }
     settings.f_stop = center + old_span;
     ConstrainAndUpdateFrequencies();
+}
+
+void VNA::SetSourceLevel(double level)
+{
+    // TODO remove hardcoded limits
+    if(level > -10.0) {
+        level = -10.0;
+    } else if(level < -42.0) {
+        level = -42.0;
+    }
+    emit sourceLevelChanged(level);
+    settings.cdbm_excitation = level * 100;
+    SettingsChanged();
+}
+
+void VNA::SetPoints(unsigned int points)
+{
+    // TODO remove hardcoded limits
+    if (points < 1) {
+        points = 1;
+    } else if(points > 4501) {
+        points = 4501;
+    }
+    emit pointsChanged(points);
+    settings.points = points;
+    SettingsChanged();
+}
+
+void VNA::SetIFBandwidth(double bandwidth)
+{
+    settings.if_bandwidth = bandwidth;
+    emit IFBandwidthChanged(bandwidth);
+    SettingsChanged();
+}
+
+void VNA::SetAveraging(unsigned int averages)
+{
+    this->averages = averages;
+    average.setAverages(averages);
+    emit averagingChanged(averages);
+    SettingsChanged();
+}
+
+void VNA::DisableCalibration(bool force)
+{
+    if(calValid || force) {
+        calValid = false;
+        emit CalibrationDisabled();
+        average.reset();
+    }
+}
+
+void VNA::ApplyCalibration(Calibration::Type type)
+{
+    if(cal.calculationPossible(type)) {
+        try {
+            cal.constructErrorTerms(type, calkit);
+            calValid = true;
+            average.reset();
+            emit CalibrationApplied(type);
+        } catch (runtime_error e) {
+            QMessageBox::critical(this, "Calibration failure", e.what());
+            DisableCalibration(true);
+        }
+    } else {
+        // Not all required traces available
+        // TODO start tracedata dialog with required traces
+        QMessageBox::information(this, "Missing calibration traces", "Not all calibration traces for this type of calibration have been measured. The calibration can be enabled after the missing traces have been acquired.");
+        DisableCalibration(true);
+        auto traceDialog = new CalibrationTraceDialog(&cal, type);
+        connect(traceDialog, &CalibrationTraceDialog::triggerMeasurement, this, &VNA::StartCalibrationMeasurement);
+        connect(traceDialog, &CalibrationTraceDialog::applyCalibration, this, &VNA::ApplyCalibration);
+        connect(this, &VNA::CalibrationMeasurementComplete, traceDialog, &CalibrationTraceDialog::measurementComplete);
+        traceDialog->show();
+    }
+}
+
+void VNA::StartCalibrationMeasurement(Calibration::Measurement m)
+{
+    // Trigger sweep to start from beginning
+    SettingsChanged();
+    calMeasurement = m;
+    // Delete any already captured data of this measurement
+    cal.clearMeasurement(m);
+    calWaitFirst = true;
+    calMeasuring = true;
+    QString text = "Measuring \"";
+    text.append(Calibration::MeasurementToString(m));
+    text.append("\" parameters.");
+    calDialog.setRange(0, settings.points);
+    calDialog.setLabelText(text);
+    calDialog.setCancelButtonText("Abort");
+    calDialog.setWindowTitle("Taking calibration measurement...");
+    calDialog.setValue(0);
+    calDialog.setWindowModality(Qt::ApplicationModal);
+    // always show the dialog
+    calDialog.setMinimumDuration(0);
+    connect(&calDialog, &QProgressDialog::canceled, [=]() {
+        // the user aborted the calibration measurement
+        calMeasuring = false;
+        cal.clearMeasurement(calMeasurement);
+    });
 }
 
 void VNA::ConstrainAndUpdateFrequencies()

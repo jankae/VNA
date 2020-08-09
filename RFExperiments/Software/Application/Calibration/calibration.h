@@ -9,6 +9,7 @@
 #include <iomanip>
 #include "calkit.h"
 #include "Traces/tracemodel.h"
+#include <QDateTime>
 
 class Calibration
 {
@@ -33,7 +34,9 @@ public:
         Port1SOL,
         Port2SOL,
         FullSOLT,
+        None,
     };
+
 
     bool calculationPossible(Type type);
     bool constructErrorTerms(Type type, Calkit c);
@@ -51,6 +54,19 @@ public:
     InterpolationType getInterpolation(Protocol::SweepSettings settings);
 
     static QString MeasurementToString(Measurement m);
+    static QString TypeToString(Type t);
+
+    class MeasurementInfo {
+    public:
+        QString name, prerequisites;
+        double fmin, fmax;
+        unsigned int points;
+        QDateTime timestamp;
+    };
+
+    static const std::vector<Type> Types();
+    static const std::vector<Measurement> Measurements(Type type = Type::None);
+    MeasurementInfo getMeasurementInfo(Measurement m);
 
     friend std::ostream& operator<<(std::ostream& os, const Calibration& c);
     friend std::istream& operator >> (std::istream &in, Calibration& c);
@@ -117,7 +133,13 @@ private:
                                     std::complex<double> directivity,
                                     std::complex<double> match,
                                     std::complex<double> tracking);
-    std::map<Measurement, std::vector<Protocol::Datapoint>> measurements;
+    class MeasurementData {
+    public:
+        QDateTime timestamp;
+        std::vector<Protocol::Datapoint> datapoints;
+    };
+
+    std::map<Measurement, MeasurementData> measurements;
     double minFreq, maxFreq;
     std::vector<Point> points;
 };

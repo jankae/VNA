@@ -36,8 +36,14 @@ bool SIUnitEdit::eventFilter(QObject *obj, QEvent *event)
     if (event->type() == QEvent::KeyPress) {
         int key = static_cast<QKeyEvent *>(event)->key();
         if(key == Qt::Key_Escape) {
+            // abort editing process and set old value
             setValueQuiet(_value);
             return true;
+        }
+        if(key == Qt::Key_Return) {
+            // use new value without prefix
+           parseNewValue(1.0);
+           return true;
         }
         auto mod = static_cast<QKeyEvent *>(event)->modifiers();
         if (!(mod & Qt::ShiftModifier)) {

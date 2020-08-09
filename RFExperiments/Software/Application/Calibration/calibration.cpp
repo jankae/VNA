@@ -7,31 +7,33 @@ using namespace std;
 Calibration::Calibration()
 {
     // Creator vectors for measurements
-    measurements[Measurement::Port1Open] = vector<Protocol::Datapoint>();
-    measurements[Measurement::Port1Short] = vector<Protocol::Datapoint>();
-    measurements[Measurement::Port1Load] = vector<Protocol::Datapoint>();
-    measurements[Measurement::Port2Open] = vector<Protocol::Datapoint>();
-    measurements[Measurement::Port2Short] = vector<Protocol::Datapoint>();
-    measurements[Measurement::Port2Load] = vector<Protocol::Datapoint>();
-    measurements[Measurement::Isolation] = vector<Protocol::Datapoint>();
-    measurements[Measurement::Through] = vector<Protocol::Datapoint>();
+    measurements[Measurement::Port1Open].datapoints = vector<Protocol::Datapoint>();
+    measurements[Measurement::Port1Short].datapoints = vector<Protocol::Datapoint>();
+    measurements[Measurement::Port1Load].datapoints = vector<Protocol::Datapoint>();
+    measurements[Measurement::Port2Open].datapoints = vector<Protocol::Datapoint>();
+    measurements[Measurement::Port2Short].datapoints = vector<Protocol::Datapoint>();
+    measurements[Measurement::Port2Load].datapoints = vector<Protocol::Datapoint>();
+    measurements[Measurement::Isolation].datapoints = vector<Protocol::Datapoint>();
+    measurements[Measurement::Through].datapoints = vector<Protocol::Datapoint>();
 }
 
 void Calibration::clearMeasurements()
 {
     for(auto m : measurements) {
-        m.second.clear();
+        m.second.datapoints.clear();
     }
 }
 
 void Calibration::clearMeasurement(Calibration::Measurement type)
 {
-    measurements[type].clear();
+    measurements[type].datapoints.clear();
+    measurements[type].timestamp = QDateTime();
 }
 
 void Calibration::addMeasurement(Calibration::Measurement type, Protocol::Datapoint &d)
 {
-    measurements[type].push_back(d);
+    measurements[type].datapoints.push_back(d);
+    measurements[type].timestamp = QDateTime::currentDateTime();
 }
 
 bool Calibration::calculationPossible(Calibration::Type type)
@@ -57,6 +59,8 @@ bool Calibration::calculationPossible(Calibration::Type type)
         requiredMeasurements.push_back(Measurement::Port2Load);
         requiredMeasurements.push_back(Measurement::Through);
         break;
+    case Type::None:
+        return false;
     }
     return SanityCheckSamples(requiredMeasurements);
 }
@@ -103,26 +107,26 @@ void Calibration::construct12TermPoints(Calkit c)
 
     // If we get here the calibration measurements are all okay
     points.clear();
-    for(unsigned int i = 0;i<measurements[Measurement::Port1Open].size();i++) {
+    for(unsigned int i = 0;i<measurements[Measurement::Port1Open].datapoints.size();i++) {
         Point p;
-        p.frequency = measurements[Measurement::Port1Open][i].frequency;
+        p.frequency = measurements[Measurement::Port1Open].datapoints[i].frequency;
         // extract required complex reflection/transmission factors from datapoints
-        auto S11_open = complex<double>(measurements[Measurement::Port1Open][i].real_S11, measurements[Measurement::Port1Open][i].imag_S11);
-        auto S11_short = complex<double>(measurements[Measurement::Port1Short][i].real_S11, measurements[Measurement::Port1Short][i].imag_S11);
-        auto S11_load = complex<double>(measurements[Measurement::Port1Load][i].real_S11, measurements[Measurement::Port1Load][i].imag_S11);
-        auto S22_open = complex<double>(measurements[Measurement::Port2Open][i].real_S22, measurements[Measurement::Port2Open][i].imag_S22);
-        auto S22_short = complex<double>(measurements[Measurement::Port2Short][i].real_S22, measurements[Measurement::Port2Short][i].imag_S22);
-        auto S22_load = complex<double>(measurements[Measurement::Port2Load][i].real_S22, measurements[Measurement::Port2Load][i].imag_S22);
+        auto S11_open = complex<double>(measurements[Measurement::Port1Open].datapoints[i].real_S11, measurements[Measurement::Port1Open].datapoints[i].imag_S11);
+        auto S11_short = complex<double>(measurements[Measurement::Port1Short].datapoints[i].real_S11, measurements[Measurement::Port1Short].datapoints[i].imag_S11);
+        auto S11_load = complex<double>(measurements[Measurement::Port1Load].datapoints[i].real_S11, measurements[Measurement::Port1Load].datapoints[i].imag_S11);
+        auto S22_open = complex<double>(measurements[Measurement::Port2Open].datapoints[i].real_S22, measurements[Measurement::Port2Open].datapoints[i].imag_S22);
+        auto S22_short = complex<double>(measurements[Measurement::Port2Short].datapoints[i].real_S22, measurements[Measurement::Port2Short].datapoints[i].imag_S22);
+        auto S22_load = complex<double>(measurements[Measurement::Port2Load].datapoints[i].real_S22, measurements[Measurement::Port2Load].datapoints[i].imag_S22);
         auto S21_isolation = complex<double>(0,0);
         auto S12_isolation = complex<double>(0,0);
         if(isolation_measured) {
-            S21_isolation = complex<double>(measurements[Measurement::Isolation][i].real_S21, measurements[Measurement::Isolation][i].imag_S21);
-            S12_isolation = complex<double>(measurements[Measurement::Isolation][i].real_S12, measurements[Measurement::Isolation][i].imag_S12);
+            S21_isolation = complex<double>(measurements[Measurement::Isolation].datapoints[i].real_S21, measurements[Measurement::Isolation].datapoints[i].imag_S21);
+            S12_isolation = complex<double>(measurements[Measurement::Isolation].datapoints[i].real_S12, measurements[Measurement::Isolation].datapoints[i].imag_S12);
         }
-        auto S11_through = complex<double>(measurements[Measurement::Through][i].real_S11, measurements[Measurement::Through][i].imag_S11);
-        auto S21_through = complex<double>(measurements[Measurement::Through][i].real_S21, measurements[Measurement::Through][i].imag_S21);
-        auto S22_through = complex<double>(measurements[Measurement::Through][i].real_S22, measurements[Measurement::Through][i].imag_S22);
-        auto S12_through = complex<double>(measurements[Measurement::Through][i].real_S12, measurements[Measurement::Through][i].imag_S12);
+        auto S11_through = complex<double>(measurements[Measurement::Through].datapoints[i].real_S11, measurements[Measurement::Through].datapoints[i].imag_S11);
+        auto S21_through = complex<double>(measurements[Measurement::Through].datapoints[i].real_S21, measurements[Measurement::Through].datapoints[i].imag_S21);
+        auto S22_through = complex<double>(measurements[Measurement::Through].datapoints[i].real_S22, measurements[Measurement::Through].datapoints[i].imag_S22);
+        auto S12_through = complex<double>(measurements[Measurement::Through].datapoints[i].real_S12, measurements[Measurement::Through].datapoints[i].imag_S12);
 
         auto actual = c.toReflection(p.frequency);
         // Forward calibration
@@ -156,13 +160,13 @@ void Calibration::constructPort1SOL(Calkit c)
 
     // If we get here the calibration measurements are all okay
     points.clear();
-    for(unsigned int i = 0;i<measurements[Measurement::Port1Open].size();i++) {
+    for(unsigned int i = 0;i<measurements[Measurement::Port1Open].datapoints.size();i++) {
         Point p;
-        p.frequency = measurements[Measurement::Port1Open][i].frequency;
+        p.frequency = measurements[Measurement::Port1Open].datapoints[i].frequency;
         // extract required complex reflection/transmission factors from datapoints
-        auto S11_open = complex<double>(measurements[Measurement::Port1Open][i].real_S11, measurements[Measurement::Port1Open][i].imag_S11);
-        auto S11_short = complex<double>(measurements[Measurement::Port1Short][i].real_S11, measurements[Measurement::Port1Short][i].imag_S11);
-        auto S11_load = complex<double>(measurements[Measurement::Port1Load][i].real_S11, measurements[Measurement::Port1Load][i].imag_S11);
+        auto S11_open = complex<double>(measurements[Measurement::Port1Open].datapoints[i].real_S11, measurements[Measurement::Port1Open].datapoints[i].imag_S11);
+        auto S11_short = complex<double>(measurements[Measurement::Port1Short].datapoints[i].real_S11, measurements[Measurement::Port1Short].datapoints[i].imag_S11);
+        auto S11_load = complex<double>(measurements[Measurement::Port1Load].datapoints[i].real_S11, measurements[Measurement::Port1Load].datapoints[i].imag_S11);
         // OSL port1
         auto actual = c.toReflection(p.frequency);
         // See page 19 of http://www2.electron.frba.utn.edu.ar/~jcecconi/Bibliografia/04%20-%20Param_S_y_VNA/Network_Analyzer_Error_Models_and_Calibration_Methods.pdf
@@ -193,13 +197,13 @@ void Calibration::constructPort2SOL(Calkit c)
 
     // If we get here the calibration measurements are all okay
     points.clear();
-    for(unsigned int i = 0;i<measurements[Measurement::Port2Open].size();i++) {
+    for(unsigned int i = 0;i<measurements[Measurement::Port2Open].datapoints.size();i++) {
         Point p;
-        p.frequency = measurements[Measurement::Port2Open][i].frequency;
+        p.frequency = measurements[Measurement::Port2Open].datapoints[i].frequency;
         // extract required complex reflection/transmission factors from datapoints
-        auto S22_open = complex<double>(measurements[Measurement::Port2Open][i].real_S22, measurements[Measurement::Port2Open][i].imag_S22);
-        auto S22_short = complex<double>(measurements[Measurement::Port2Short][i].real_S22, measurements[Measurement::Port2Short][i].imag_S22);
-        auto S22_load = complex<double>(measurements[Measurement::Port2Load][i].real_S22, measurements[Measurement::Port2Load][i].imag_S22);
+        auto S22_open = complex<double>(measurements[Measurement::Port2Open].datapoints[i].real_S22, measurements[Measurement::Port2Open].datapoints[i].imag_S22);
+        auto S22_short = complex<double>(measurements[Measurement::Port2Short].datapoints[i].real_S22, measurements[Measurement::Port2Short].datapoints[i].imag_S22);
+        auto S22_load = complex<double>(measurements[Measurement::Port2Load].datapoints[i].real_S22, measurements[Measurement::Port2Load].datapoints[i].imag_S22);
         // OSL port2
         auto actual = c.toReflection(p.frequency);
         // See page 19 of http://www2.electron.frba.utn.edu.ar/~jcecconi/Bibliografia/04%20-%20Param_S_y_VNA/Network_Analyzer_Error_Models_and_Calibration_Methods.pdf
@@ -296,6 +300,83 @@ QString Calibration::MeasurementToString(Calibration::Measurement m)
     }
 }
 
+QString Calibration::TypeToString(Calibration::Type t)
+{
+    switch(t) {
+    case Type::Port1SOL: return "Port 1"; break;
+    case Type::Port2SOL: return "Port 2"; break;
+    case Type::FullSOLT: return "SOLT"; break;
+    }
+}
+
+const std::vector<Calibration::Type> Calibration::Types()
+{
+    const std::vector<Calibration::Type> ret = {Type::Port1SOL, Type::Port2SOL, Type::FullSOLT};
+    return ret;
+}
+
+const std::vector<Calibration::Measurement> Calibration::Measurements(Calibration::Type type)
+{
+    switch(type) {
+    case Type::FullSOLT:
+    case Type::None:
+        return {Measurement::Port1Short, Measurement::Port1Open, Measurement::Port1Load, Measurement::Port2Short, Measurement::Port2Open, Measurement::Port2Load, Measurement::Through, Measurement::Isolation};
+        break;
+    case Type::Port1SOL:
+        return {Measurement::Port1Short, Measurement::Port1Open, Measurement::Port1Load};
+        break;
+    case Type::Port2SOL:
+        return {Measurement::Port2Short, Measurement::Port2Open, Measurement::Port2Load};
+        break;
+    }
+}
+
+Calibration::MeasurementInfo Calibration::getMeasurementInfo(Calibration::Measurement m)
+{
+    MeasurementInfo info;
+    switch(m) {
+    case Measurement::Port1Short:
+        info.name = "Port 1 short";
+        info.prerequisites = "Short standard connected to port 1, port 2 open";
+        break;
+    case Measurement::Port1Open:
+        info.name = "Port 1 open";
+        info.prerequisites = "Open standard connected to port 1, port 2 open";
+        break;
+    case Measurement::Port1Load:
+        info.name = "Port 1 load";
+        info.prerequisites = "Load standard connected to port 1, port 2 open";
+        break;
+    case Measurement::Port2Short:
+        info.name = "Port 2 short";
+        info.prerequisites = "Port 1 open, short standard connected to port 2";
+        break;
+    case Measurement::Port2Open:
+        info.name = "Port 2 open";
+        info.prerequisites = "Port 1 open, open standard connected to port 2";
+        break;
+    case Measurement::Port2Load:
+        info.name = "Port 2 load";
+        info.prerequisites = "Port 1 open, load standard connected to port 2";
+        break;
+    case Measurement::Through:
+        info.name = "Through";
+        info.prerequisites = "Port 1 connected to port 2 via through standard";
+        break;
+    case Measurement::Isolation:
+        info.name = "Isolation";
+        info.prerequisites = "Both ports terminated into 50 ohm";
+    }
+    info.points = measurements[m].datapoints.size();
+    if(info.points > 0) {
+        info.fmin = measurements[m].datapoints.front().frequency;
+        info.fmax = measurements[m].datapoints.back().frequency;
+        info.points = measurements[m].datapoints.size();
+    }
+    info.timestamp = measurements[m].timestamp;
+    return info;
+}
+
 void Calibration::addAsTraces(TraceModel &m)
 {
     Trace *traces[12];
@@ -362,22 +443,22 @@ bool Calibration::SanityCheckSamples(std::vector<Calibration::Measurement> &requ
     vector<uint64_t> freqs;
     for(auto type : requiredMeasurements) {
         auto m = measurements[type];
-        if(m.size() == 0) {
+        if(m.datapoints.size() == 0) {
             // empty required measurement
             return false;
         }
         if(freqs.size() == 0) {
             // this is the first measurement, create frequency vector
-            for(auto p : m) {
+            for(auto p : m.datapoints) {
                 freqs.push_back(p.frequency);
             }
         } else {
             // compare with already assembled frequency vector
-            if(m.size() != freqs.size()) {
+            if(m.datapoints.size() != freqs.size()) {
                 return false;
             }
             for(unsigned int i=0;i<freqs.size();i++) {
-                if(m[i].frequency != freqs[i]) {
+                if(m.datapoints[i].frequency != freqs[i]) {
                     return false;
                 }
             }

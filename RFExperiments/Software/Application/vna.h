@@ -7,7 +7,7 @@
 #include <QComboBox>
 #include "device.h"
 #include "Traces/traceplot.h"
-#include "calibration.h"
+#include "Calibration/calibration.h"
 #include <QProgressDialog>
 #include "Menu/menuaction.h"
 #include "Traces/tracemodel.h"
@@ -42,6 +42,7 @@ private slots:
     void UpdateDeviceList();
     void StartManualControl();
     void StartImpedanceMatching();
+    // Sweep control
     void SetStartFreq(double freq);
     void SetStopFreq(double freq);
     void SetCenterFreq(double freq);
@@ -49,13 +50,25 @@ private slots:
     void SetFullSpan();
     void SpanZoomIn();
     void SpanZoomOut();
-    void ConstrainAndUpdateFrequencies();
+    // Acquisition control
+    void SetSourceLevel(double level);
+    void SetPoints(unsigned int points);
+    void SetIFBandwidth(double bandwidth);
+    void SetAveraging(unsigned int averages);
+    // Calibration
+    void DisableCalibration(bool force = false);
+    void ApplyCalibration(Calibration::Type type);
+    void StartCalibrationMeasurement(Calibration::Measurement m);
+
+signals:
+    void CalibrationMeasurementComplete(Calibration::Measurement m);
 
 private:
     void UpdateStatusPanel();
     void SettingsChanged();
     void DeviceConnectionLost();
     void CreateToolbars();
+    void ConstrainAndUpdateFrequencies();
 
     struct {
         QComboBox *referenceType;
@@ -98,6 +111,14 @@ signals:
     void stopFreqChanged(double freq);
     void centerFreqChanged(double freq);
     void spanChanged(double span);
+
+    void sourceLevelChanged(double level);
+    void pointsChanged(unsigned int points);
+    void IFBandwidthChanged(double bandwidth);
+    void averagingChanged(unsigned int averages);
+
+    void CalibrationDisabled();
+    void CalibrationApplied(Calibration::Type type);
 };
 
 #endif // VNA_H

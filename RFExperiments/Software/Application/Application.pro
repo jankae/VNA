@@ -1,5 +1,10 @@
 HEADERS += \
     ../RFExperiments/Application/Communication/Protocol.hpp \
+    Calibration/calibration.h \
+    Calibration/calibrationtracedialog.h \
+    Calibration/calkit.h \
+    Calibration/calkitdialog.h \
+    Calibration/measurementmodel.h \
     CustomWidgets/siunitedit.h \
     CustomWidgets/tilewidget.h \
     CustomWidgets/toggleswitch.h \
@@ -25,9 +30,6 @@ HEADERS += \
     Traces/tracesmithchart.h \
     Traces/tracewidget.h \
     averaging.h \
-    calibration.h \
-    calkit.h \
-    calkitdialog.h \
     device.h \
     manualcontroldialog.h \
     qwtplotpiecewisecurve.h \
@@ -38,6 +40,11 @@ HEADERS += \
 
 SOURCES += \
     ../RFExperiments/Application/Communication/Protocol.cpp \
+    Calibration/calibration.cpp \
+    Calibration/calibrationtracedialog.cpp \
+    Calibration/calkit.cpp \
+    Calibration/calkitdialog.cpp \
+    Calibration/measurementmodel.cpp \
     CustomWidgets/siunitedit.cpp \
     CustomWidgets/tilewidget.cpp \
     CustomWidgets/toggleswitch.cpp \
@@ -63,9 +70,6 @@ SOURCES += \
     Traces/tracesmithchart.cpp \
     Traces/tracewidget.cpp \
     averaging.cpp \
-    calibration.cpp \
-    calkit.cpp \
-    calkitdialog.cpp \
     device.cpp \
     main.cpp \
     manualcontroldialog.cpp \
@@ -83,6 +87,8 @@ LIBS += -L/usr/lib/ -lqwt-qt5
 QT += widgets charts
 
 FORMS += \
+    Calibration/calibrationtracedialog.ui \
+    Calibration/calkitdialog.ui \
     CustomWidgets/tilewidget.ui \
     CustomWidgets/touchstoneimport.ui \
     Tools/impedancematchdialog.ui \
@@ -92,7 +98,6 @@ FORMS += \
     Traces/traceexportdialog.ui \
     Traces/traceimportdialog.ui \
     Traces/tracewidget.ui \
-    calkitdialog.ui \
     main.ui \
     manualcontroldialog.ui
 

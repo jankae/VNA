@@ -2,6 +2,7 @@
 #include <math.h>
 #include <sstream>
 #include <iomanip>
+#include <QDebug>
 
 using namespace std;
 
@@ -33,7 +34,10 @@ QString Unit::ToString(double value, QString unit, QString prefixes, int precisi
 {
     // change label text
     QString sValue;
-    if(value == 0.0) {
+    if(isnan(value) || isinf(value)) {
+        sValue.append("NaN");
+        return sValue;
+    } else if(value == 0.0) {
         sValue.append("0 ");
     } else {
         if(value < 0) {
@@ -53,7 +57,17 @@ QString Unit::ToString(double value, QString unit, QString prefixes, int precisi
             prefixIndex--;
         }
         stringstream ss;
-        ss << std::fixed << std::setprecision(precision - preDotDigits + 1) << value;
+        ss << std::fixed;
+        if(preDotDigits >= 0) {
+            if(precision - preDotDigits + 1 < 0) {
+                ss << std::setprecision(0);
+            } else {
+                ss << std::setprecision(precision - preDotDigits + 1);
+            }
+        } else {
+            ss << std::setprecision(precision - 1);
+        }
+        ss << value;
         sValue.append(QString::fromStdString(ss.str()));
         sValue.append(prefixes[prefixIndex]);
     }

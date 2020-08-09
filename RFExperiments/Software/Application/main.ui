@@ -38,7 +38,7 @@
       <bool>false</bool>
      </property>
      <property name="title">
-      <string>Connect to...</string>
+      <string>Connect to</string>
      </property>
      <addaction name="actionDummy"/>
     </widget>
@@ -54,14 +54,45 @@
     </property>
     <addaction name="actionImpedance_Matching"/>
    </widget>
+   <widget class="QMenu" name="menuWindow">
+    <property name="title">
+     <string>Window</string>
+    </property>
+    <widget class="QMenu" name="menuDocks">
+     <property name="title">
+      <string>Docks</string>
+     </property>
+     <addaction name="actionDummy_2"/>
+    </widget>
+    <widget class="QMenu" name="menuToolbars">
+     <property name="title">
+      <string>Toolbars</string>
+     </property>
+     <addaction name="actionDummy_3"/>
+    </widget>
+    <addaction name="menuDocks"/>
+    <addaction name="menuToolbars"/>
+   </widget>
+   <widget class="QMenu" name="menuCalibration">
+    <property name="title">
+     <string>Calibration</string>
+    </property>
+    <addaction name="actionCalDisabled"/>
+    <addaction name="separator"/>
+    <addaction name="actionTracedata"/>
+    <addaction name="actionEdit_Calibration_Kit"/>
+   </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuTools"/>
    <addaction name="menuDevice"/>
+   <addaction name="menuCalibration"/>
+   <addaction name="menuTools"/>
+   <addaction name="menuWindow"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionQuit">
    <property name="icon">
-    <iconset theme="application-exit"/>
+    <iconset theme="application-exit">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Quit</string>
@@ -72,7 +103,8 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset theme="view-refresh"/>
+    <iconset theme="view-refresh">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Update Device List</string>
@@ -102,6 +134,34 @@
    </property>
    <property name="text">
     <string>Manual Control</string>
+   </property>
+  </action>
+  <action name="actionDummy_2">
+   <property name="text">
+    <string>Dummy</string>
+   </property>
+  </action>
+  <action name="actionDummy_3">
+   <property name="text">
+    <string>Dummy</string>
+   </property>
+  </action>
+  <action name="actionCalDisabled">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Disabled</string>
+   </property>
+  </action>
+  <action name="actionTracedata">
+   <property name="text">
+    <string>Calibration Data</string>
+   </property>
+  </action>
+  <action name="actionEdit_Calibration_Kit">
+   <property name="text">
+    <string>Edit Calibration Kit</string>
    </property>
   </action>
  </widget>
