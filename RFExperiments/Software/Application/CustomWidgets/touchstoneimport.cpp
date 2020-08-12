@@ -2,6 +2,7 @@
 #include "ui_touchstoneimport.h"
 #include <QFileDialog>
 #include <QDebug>
+#include <QtGlobal>
 
 using namespace std;
 

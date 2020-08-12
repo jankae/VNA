@@ -79,12 +79,13 @@ SOURCES += \
     valueinput.cpp \
     vna.cpp
 
-LIBS += -lboost_log -lusb-1.0
-DEFINES += BOOST_ALL_DYN_LINK
-INCLUDEPATH += /usr/include/qwt
-LIBS += -L/usr/lib/ -lqwt-qt5
+LIBS += -lusb-1.0
+unix:INCLUDEPATH += /usr/include/qwt
+unix:LIBS += -L/usr/lib/ -lqwt-qt5
+win32:INCLUDEPATH += C:\Qwt-6.1.4\include
+win32:LIBS += -LC:\Qwt-6.1.4\lib -lqwt
 
-QT += widgets charts
+QT += widgets
 
 FORMS += \
     Calibration/calibrationtracedialog.ui \
@@ -105,3 +106,5 @@ DISTFILES +=
 
 RESOURCES += \
     icons.qrc
+
+CONFIG += c++14

@@ -6,6 +6,7 @@
 #include <QFileDialog>
 #include <fstream>
 #include <touchstone.h>
+#include <QtGlobal>
 
 using namespace std;
 

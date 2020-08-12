@@ -1,13 +1,13 @@
 #include "device.h"
 
 #include <signal.h>
-#include <boost/log/trivial.hpp>
+#include <QDebug>
 
 using namespace std;
 
 Device::Device(QString serial)
 {
-    BOOST_LOG_TRIVIAL(debug) << "Starting device connection...";
+    qDebug() << "Starting device connection...";
     libusb_device **devList;
     m_context = nullptr;
     m_handle = nullptr;
@@ -25,7 +25,7 @@ Device::Device(QString serial)
         ret = libusb_get_device_descriptor(device, &desc);
         if (ret) {
             /* some error occured */
-            BOOST_LOG_TRIVIAL(error) << "Failed to get device descriptor: "
+            qCritical() << "Failed to get device descriptor: "
                     << libusb_strerror((libusb_error) ret);
             continue;
         }
@@ -40,7 +40,7 @@ Device::Device(QString serial)
         ret = libusb_open(device, &handle);
         if (ret) {
             /* Failed to open */
-            BOOST_LOG_TRIVIAL(warning) << "Failed to open device: "
+            qWarning() << "Failed to open device: "
                     << libusb_strerror((libusb_error) ret);
             continue;
         }
@@ -53,8 +53,8 @@ Device::Device(QString serial)
                 (unsigned char*) c_product, sizeof(c_product));
         if (ret > 0) {
             /* managed to read the product string */
-            std::string product(c_product);
-            BOOST_LOG_TRIVIAL(debug) << "Opened device: " << product;
+            QString product(c_product);
+            qDebug() << "Opened device: " << product;
             if (product == "VNA") {
                 // check serial number if necessary
                 auto qSerial = QString(c_serial);
@@ -65,14 +65,14 @@ Device::Device(QString serial)
                 }
             }
         } else {
-            BOOST_LOG_TRIVIAL(warning) << "Failed to get product descriptor: "
+            qWarning() << "Failed to get product descriptor: "
                     << libusb_strerror((libusb_error) ret);
         }
         libusb_close(handle);
     }
     libusb_free_device_list(devList, 1);
     if(!m_handle) {
-        BOOST_LOG_TRIVIAL(error) << "No device found";
+        qCritical() << "No device found";
         throw std::runtime_error("No device found");
         return;
     }
@@ -85,12 +85,12 @@ Device::Device(QString serial)
         }
         int ret = libusb_claim_interface(m_handle, if_num);
         if (ret < 0) {
-            BOOST_LOG_TRIVIAL(error) << "Failed to claim interface: "
+            qCritical() << "Failed to claim interface: "
                     << libusb_strerror((libusb_error) ret);
             throw std::runtime_error("Failed to claim interface");
         }
     }
-    BOOST_LOG_TRIVIAL(info) << "USB connection established" << flush;
+    qInfo() << "USB connection established" << flush;
     m_connected = true;
     m_receiveThread = new std::thread(ReceiveTrampoline, this);
 }
@@ -103,14 +103,14 @@ Device::~Device()
         for (int if_num = 1; if_num < 2; if_num++) {
             int ret = libusb_release_interface(m_handle, if_num);
             if (ret < 0) {
-                BOOST_LOG_TRIVIAL(error) << "Error releasing interface" << libusb_error_name(ret);
+                qCritical() << "Error releasing interface" << libusb_error_name(ret);
             }
             // TODO this doesn't work
             if (libusb_kernel_driver_active(m_handle, if_num)) {
-                BOOST_LOG_TRIVIAL(debug) << "Reattaching CDC ACM kernel driver." << endl;
+                qDebug() << "Reattaching CDC ACM kernel driver." << endl;
                 ret = libusb_attach_kernel_driver(m_handle, if_num);
                 if (ret < 0) {
-                    BOOST_LOG_TRIVIAL(error) << "Error reattaching CDC ACM kernel driver: "
+                    qCritical() << "Error reattaching CDC ACM kernel driver: "
                             << libusb_error_name(ret);
                 }
             }
@@ -128,13 +128,13 @@ bool Device::Configure(Protocol::SweepSettings settings)
         p.settings = settings;
         unsigned int length = Protocol::EncodePacket(p, buffer, sizeof(buffer));
         if(!length) {
-            BOOST_LOG_TRIVIAL(error) << "Failed to encode packet";
+            qCritical() << "Failed to encode packet";
             return false;
         }
         int actual_length;
         auto ret = libusb_bulk_transfer(m_handle, EP_Out_Addr, buffer, length, &actual_length, 0);
         if(ret < 0) {
-            BOOST_LOG_TRIVIAL(error) << "Error sending data: "
+            qCritical() << "Error sending data: "
                                     << libusb_strerror((libusb_error) ret);
             return false;
         }
@@ -153,13 +153,13 @@ bool Device::SetManual(Protocol::ManualControl manual)
         p.manual = manual;
         unsigned int length = Protocol::EncodePacket(p, buffer, sizeof(buffer));
         if(!length) {
-            BOOST_LOG_TRIVIAL(error) << "Failed to encode packet";
+            qCritical() << "Failed to encode packet";
             return false;
         }
         int actual_length;
         auto ret = libusb_bulk_transfer(m_handle, EP_Out_Addr, buffer, length, &actual_length, 0);
         if(ret < 0) {
-            BOOST_LOG_TRIVIAL(error) << "Error sending data: "
+            qCritical() << "Error sending data: "
                                     << libusb_strerror((libusb_error) ret);
             return false;
         }
@@ -187,7 +187,7 @@ std::vector<QString> Device::GetDevices()
         ret = libusb_get_device_descriptor(device, &desc);
         if (ret) {
             /* some error occured */
-            BOOST_LOG_TRIVIAL(error) << "Failed to get device descriptor: "
+            qCritical() << "Failed to get device descriptor: "
                     << libusb_strerror((libusb_error) ret);
             continue;
         }
@@ -202,7 +202,7 @@ std::vector<QString> Device::GetDevices()
         ret = libusb_open(device, &handle);
         if (ret) {
             /* Failed to open */
-            BOOST_LOG_TRIVIAL(warning) << "Failed to open device: "
+            qWarning() << "Failed to open device: "
                     << libusb_strerror((libusb_error) ret);
             continue;
         }
@@ -215,13 +215,13 @@ std::vector<QString> Device::GetDevices()
                 (unsigned char*) c_product, sizeof(c_product));
         if (ret > 0) {
             /* managed to read the product string */
-            std::string product(c_product);
-            BOOST_LOG_TRIVIAL(debug) << "Opened device: " << product;
+            QString product(c_product);
+            qDebug() << "Opened device: " << product;
             if (product == "VNA") {
                 serials.push_back(QString(c_serial));
             }
         } else {
-            BOOST_LOG_TRIVIAL(warning) << "Failed to get product descriptor: "
+            qWarning() << "Failed to get product descriptor: "
                     << libusb_strerror((libusb_error) ret);
         }
         libusb_close(handle);
@@ -233,7 +233,7 @@ std::vector<QString> Device::GetDevices()
 
 void Device::ReceiveThread()
 {
-    BOOST_LOG_TRIVIAL(info) << "Receive thread started" << flush;
+    qInfo() << "Receive thread started" << flush;
     constexpr int timeout = 100;
     unsigned char recbuf[2048];
     unsigned int inputCnt = 0;
@@ -266,7 +266,7 @@ void Device::ReceiveThread()
                         //BOOST_LOG_TRIVIAL(debug) << "Got new datapoint: " << packet.datapoint.pointNum << std::flush;
                         emit DatapointReceived(packet.datapoint);
                     } else if(packet.type == Protocol::PacketType::Status) {
-                        BOOST_LOG_TRIVIAL(debug) << "Got status" << std::flush;
+                        qDebug() << "Got status";
                         emit ManualStatusReceived(packet.status);
                     } else if(packet.type == Protocol::PacketType::DeviceInfo) {
                         lastInfo = packet.info;
@@ -276,13 +276,13 @@ void Device::ReceiveThread()
                 } while (handled_len > 0);
             }
         } else if (ret < 0) {
-            BOOST_LOG_TRIVIAL(error) << "Error receiving data: "
+            qCritical() << "Error receiving data: "
                     << libusb_strerror((libusb_error) ret);
             emit ConnectionLost();
             return;
         }
     }
-    BOOST_LOG_TRIVIAL(debug) << "Disconnected, receive thread exiting";
+    qDebug() << "Disconnected, receive thread exiting";
 }
 
 Protocol::DeviceInfo Device::getLastInfo() const
