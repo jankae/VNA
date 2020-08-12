@@ -15,6 +15,8 @@ Calibration::Calibration()
     measurements[Measurement::Port2Load].datapoints = vector<Protocol::Datapoint>();
     measurements[Measurement::Isolation].datapoints = vector<Protocol::Datapoint>();
     measurements[Measurement::Through].datapoints = vector<Protocol::Datapoint>();
+
+    type = Type::None;
 }
 
 void Calibration::clearMeasurements()
@@ -86,7 +88,14 @@ bool Calibration::constructErrorTerms(Calibration::Type type, Calkit c)
         construct12TermPoints(c);
         break;
     }
+    this->type = type;
     return true;
+}
+
+void Calibration::resetErrorTerms()
+{
+    type = Type::None;
+    points.clear();
 }
 
 void Calibration::construct12TermPoints(Calkit c)
@@ -224,6 +233,10 @@ void Calibration::constructPort2SOL(Calkit c)
 
 void Calibration::correctMeasurement(Protocol::Datapoint &d)
 {
+    if(type == Type::None) {
+        // No calibration data, do nothing
+        return;
+    }
     // Convert measurements to complex variables
     auto S11m = complex<double>(d.real_S11, d.imag_S11);
     auto S21m = complex<double>(d.real_S21, d.imag_S21);

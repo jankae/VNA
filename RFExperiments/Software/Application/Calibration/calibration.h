@@ -40,6 +40,7 @@ public:
 
     bool calculationPossible(Type type);
     bool constructErrorTerms(Type type, Calkit c);
+    void resetErrorTerms();
 
     void correctMeasurement(Protocol::Datapoint &d);
 
@@ -138,6 +139,7 @@ private:
         QDateTime timestamp;
         std::vector<Protocol::Datapoint> datapoints;
     };
+    Type type;
 
     std::map<Measurement, MeasurementData> measurements;
     double minFreq, maxFreq;

@@ -49,7 +49,8 @@
           <string>Measure</string>
          </property>
          <property name="icon">
-          <iconset theme="media-playback-start"/>
+          <iconset theme="media-playback-start">
+           <normaloff>.</normaloff>.</iconset>
          </property>
         </widget>
        </item>
@@ -59,7 +60,21 @@
           <string>Delete</string>
          </property>
          <property name="icon">
-          <iconset theme="edit-delete"/>
+          <iconset theme="edit-delete">
+           <normaloff>.</normaloff>.</iconset>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDialogButtonBox" name="buttonBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="standardButtons">
+          <set>QDialogButtonBox::Open|QDialogButtonBox::Save</set>
          </property>
         </widget>
        </item>
