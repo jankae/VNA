@@ -24,7 +24,6 @@
 #include "stm32l4xx_hal.h"
 #include "usbd_def.h"
 #include "usbd_core.h"
-#include "usbd_cdc.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -541,27 +540,6 @@ void HAL_PCDEx_LPM_Callback(PCD_HandleTypeDef *hpcd, PCD_LPM_MsgTypeDef msg)
 void USBD_LL_Delay(uint32_t Delay)
 {
   HAL_Delay(Delay);
-}
-
-/**
-  * @brief  Static single allocation.
-  * @param  size: Size of allocated memory
-  * @retval None
-  */
-void *USBD_static_malloc(uint32_t size)
-{
-  static uint32_t mem[(sizeof(USBD_CDC_HandleTypeDef)/4)+1];/* On 32-bit boundary */
-  return mem;
-}
-
-/**
-  * @brief  Dummy memory free
-  * @param  p: Pointer to allocated  memory address
-  * @retval None
-  */
-void USBD_static_free(void *p)
-{
-
 }
 
 /* USER CODE BEGIN 5 */

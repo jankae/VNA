@@ -12,10 +12,12 @@
 extern "C" {
 #endif
 
+#include <stdint.h>
 #include <stdbool.h>
-#include "usbd_cdc.h"
 
-void usb_init(usbd_cdc_callback_t callback);
+typedef void(*usbd_callback_t)(const uint8_t *buf, uint16_t len);
+
+void usb_init(usbd_callback_t callback);
 bool usb_transmit(const uint8_t *data, uint16_t length);
 
 

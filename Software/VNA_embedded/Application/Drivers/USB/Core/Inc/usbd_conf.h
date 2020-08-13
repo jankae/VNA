@@ -153,8 +153,6 @@
   */
 
 /* Exported functions -------------------------------------------------------*/
-void *USBD_static_malloc(uint32_t size);
-void USBD_static_free(void *p);
 
 /**
   * @}
