@@ -25,7 +25,7 @@
 #include <QDateTime>
 #include "unit.h"
 #include "CustomWidgets/toggleswitch.h"
-#include "manualcontroldialog.h"
+#include "Device/manualcontroldialog.h"
 #include "Traces/tracemodel.h"
 #include "Traces/tracewidget.h"
 #include "Traces/tracesmithchart.h"
@@ -444,6 +444,10 @@ VNA::VNA(QWidget *parent)
 //    markerDock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::BottomDockWidgetArea, markerDock);
 
+    auto logDock = new QDockWidget("Device Log");
+    logDock->setWidget(&deviceLog);
+    addDockWidget(Qt::BottomDockWidgetArea, logDock);
+
     setCentralWidget(mainWidget);
 
     // status and menu dock hidden by default
@@ -588,6 +592,7 @@ void VNA::ConnectToDevice(QString serial)
         lDeviceInfo.setText(device->getLastDeviceInfoString());
         device->Configure(settings);
         connect(device, &Device::DatapointReceived, this, &VNA::NewDatapoint);
+        connect(device, &Device::LogLineReceived, &deviceLog, &DeviceLog::addLine);
         connect(device, &Device::ConnectionLost, this, &VNA::DeviceConnectionLost);
         connect(device, &Device::DeviceInfoUpdated, [this]() {
            lDeviceInfo.setText(device->getLastDeviceInfoString());

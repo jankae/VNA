@@ -68,9 +68,12 @@ static uint16_t fifo_space() {
 	return LOG_SENDBUF_LENGTH - used - 1;
 }
 
+static log_redirect_t redirect;
+
 void Log_Init() {
 	fifo_write = 0;
 	fifo_read = 0;
+	redirect = NULL;
 #ifdef LOG_USE_MUTEXES
 	mutex = xSemaphoreCreateMutexStatic(&xMutex);
 #endif
@@ -79,6 +82,11 @@ void Log_Init() {
 	HAL_NVIC_SetPriority(NVIC_ISR, 5, 0);
 	HAL_NVIC_EnableIRQ(NVIC_ISR);
 }
+
+void Log_SetRedirect(log_redirect_t redirect_function) {
+	redirect = redirect_function;
+}
+
 void _log_write(const char *module, const char *level, const char *fmt, ...) {
 	int written = 0;
 	va_list args;
@@ -94,6 +102,9 @@ void _log_write(const char *module, const char *level, const char *fmt, ...) {
 			fmt, args);
 	written += snprintf(&fifo[fifo_write + written], MAX_LINE_LENGTH - written,
 			"\r\n");
+	if(redirect) {
+		redirect(&fifo[fifo_write], written);
+	}
 	// check if line still fits into ring buffer
 #ifdef LOG_BLOCKING
 	while (written > fifo_space()) {

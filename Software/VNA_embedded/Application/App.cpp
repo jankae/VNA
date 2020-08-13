@@ -41,6 +41,8 @@ void VNAStatusCallback(FPGA::SamplingResult res) {
 void App_Start() {
 	usb_init(communication_usb_input);
 	Log_Init();
+	// Pass on logging output to USB
+	Log_SetRedirect(usb_log);
 	LOG_INFO("Start");
 	Exti::Init();
 	if (!VNA::Init()) {

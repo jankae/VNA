@@ -1,7 +1,7 @@
 #ifndef CALIBRATION_H
 #define CALIBRATION_H
 
-#include "device.h"
+#include "Device/device.h"
 #include <complex>
 #include <vector>
 #include <map>

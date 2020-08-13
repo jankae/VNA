@@ -2,7 +2,7 @@
 #define AVERAGING_H
 
 
-#include "device.h"
+#include "Device/device.h"
 #include <deque>
 #include <complex>
 

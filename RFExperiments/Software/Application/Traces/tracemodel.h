@@ -4,7 +4,7 @@
 #include <QAbstractTableModel>
 #include "trace.h"
 #include <vector>
-#include "device.h"
+#include "Device/device.h"
 
 class TraceModel : public QAbstractTableModel
 {

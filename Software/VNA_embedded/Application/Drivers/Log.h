@@ -52,7 +52,11 @@ extern "C" {
 #define LOG_DEBUG(fmt, ...)
 #endif
 
+#include <stdint.h>
+
 void Log_Init();
+typedef void (*log_redirect_t)(const char *line, uint16_t length);
+void Log_SetRedirect(log_redirect_t redirect_function);
 void _log_write(const char *module, const char *level, const char *fmt, ...);
 
 #ifdef __cplusplus

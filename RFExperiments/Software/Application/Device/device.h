@@ -11,6 +11,31 @@ Q_DECLARE_METATYPE(Protocol::Datapoint);
 Q_DECLARE_METATYPE(Protocol::ManualStatus);
 Q_DECLARE_METATYPE(Protocol::DeviceInfo);
 
+class USBInBuffer : public QObject {
+    Q_OBJECT;
+public:
+    USBInBuffer(libusb_device_handle *handle, unsigned char endpoint, int buffer_size);
+    ~USBInBuffer();
+
+    void removeBytes(int handled_bytes);
+    int getReceived() const;
+    uint8_t *getBuffer() const;
+
+signals:
+    void DataReceived();
+    void TransferError();
+
+private:
+    void Callback(libusb_transfer *transfer);
+    static void CallbackTrampoline(libusb_transfer *transfer);
+    libusb_transfer *transfer;
+    unsigned char *buffer;
+    int buffer_size;
+    int received_size;
+    bool inCallback;
+};
+
+
 class Device : public QObject
 {
     Q_OBJECT
@@ -31,11 +56,17 @@ signals:
     void ManualStatusReceived(Protocol::ManualStatus);
     void DeviceInfoUpdated();
     void ConnectionLost();
+    void LogLineReceived(QString line);
+private slots:
+    void ReceivedData();
+    void ReceivedLog();
+
 private:
     static constexpr int VID = 0x0483;
     static constexpr int PID = 0x564e;
-    static constexpr int EP_Out_Addr = 0x01;
-    static constexpr int EP_In_Addr = 0x81;
+    static constexpr int EP_Data_Out_Addr = 0x01;
+    static constexpr int EP_Data_In_Addr = 0x81;
+    static constexpr int EP_Log_In_Addr = 0x82;
 
     void ReceiveThread();
     static void ReceiveTrampoline(Device *dev) {
@@ -44,6 +75,10 @@ private:
 
     libusb_device_handle *m_handle;
     libusb_context *m_context;
+    USBInBuffer *dataBuffer;
+    USBInBuffer *logBuffer;
+
+
     QString m_serial;
     bool m_connected;
     std::thread *m_receiveThread;

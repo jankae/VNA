@@ -5,7 +5,7 @@
 #include <QMainWindow>
 #include <QGridLayout>
 #include <QComboBox>
-#include "device.h"
+#include "Device/device.h"
 #include "Traces/traceplot.h"
 #include "Calibration/calibration.h"
 #include <QProgressDialog>
@@ -13,6 +13,7 @@
 #include "Traces/tracemodel.h"
 #include "Traces/tracemarkermodel.h"
 #include "averaging.h"
+#include "Device/devicelog.h"
 
 namespace Ui {
 class MainWindow;
@@ -75,6 +76,7 @@ private:
     } toolbars;
 
     Device *device;
+    DeviceLog deviceLog;
     QString deviceSerial;
     QActionGroup *deviceActionGroup;
     Protocol::SweepSettings settings;

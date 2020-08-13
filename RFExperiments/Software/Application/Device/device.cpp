@@ -2,6 +2,7 @@
 
 #include <signal.h>
 #include <QDebug>
+#include <QString>
 
 using namespace std;
 
@@ -80,9 +81,6 @@ Device::Device(QString serial)
     // Found the correct device, now connect
     /* claim the interfaces */
     for (int if_num = 0; if_num < 1; if_num++) {
-//        if (libusb_kernel_driver_active(m_handle, if_num)) {
-//            libusb_detach_kernel_driver(m_handle, if_num);
-//        }
         int ret = libusb_claim_interface(m_handle, if_num);
         if (ret < 0) {
             qCritical() << "Failed to claim interface: "
@@ -93,29 +91,27 @@ Device::Device(QString serial)
     qInfo() << "USB connection established" << flush;
     m_connected = true;
     m_receiveThread = new std::thread(ReceiveTrampoline, this);
+    dataBuffer = new USBInBuffer(m_handle, EP_Data_In_Addr, 2048);
+    logBuffer = new USBInBuffer(m_handle, EP_Log_In_Addr, 2048);
+    connect(dataBuffer, &USBInBuffer::DataReceived, this, &Device::ReceivedData, Qt::DirectConnection);
+    connect(dataBuffer, &USBInBuffer::TransferError, this, &Device::ConnectionLost);
+    connect(logBuffer, &USBInBuffer::DataReceived, this, &Device::ReceivedLog, Qt::DirectConnection);
 }
 
 Device::~Device()
 {
     if(m_connected) {
+        delete dataBuffer;
+        delete logBuffer;
         m_connected = false;
-        m_receiveThread->join();
         for (int if_num = 0; if_num < 1; if_num++) {
             int ret = libusb_release_interface(m_handle, if_num);
             if (ret < 0) {
                 qCritical() << "Error releasing interface" << libusb_error_name(ret);
             }
-//            // TODO this doesn't work
-//            if (libusb_kernel_driver_active(m_handle, if_num)) {
-//                qDebug() << "Reattaching CDC ACM kernel driver." << endl;
-//                ret = libusb_attach_kernel_driver(m_handle, if_num);
-//                if (ret < 0) {
-//                    qCritical() << "Error reattaching CDC ACM kernel driver: "
-//                            << libusb_error_name(ret);
-//                }
-//            }
         }
         libusb_close(m_handle);
+        m_receiveThread->join();
     }
 }
 
@@ -132,7 +128,7 @@ bool Device::Configure(Protocol::SweepSettings settings)
             return false;
         }
         int actual_length;
-        auto ret = libusb_bulk_transfer(m_handle, EP_Out_Addr, buffer, length, &actual_length, 0);
+        auto ret = libusb_bulk_transfer(m_handle, EP_Data_Out_Addr, buffer, length, &actual_length, 0);
         if(ret < 0) {
             qCritical() << "Error sending data: "
                                     << libusb_strerror((libusb_error) ret);
@@ -157,7 +153,7 @@ bool Device::SetManual(Protocol::ManualControl manual)
             return false;
         }
         int actual_length;
-        auto ret = libusb_bulk_transfer(m_handle, EP_Out_Addr, buffer, length, &actual_length, 0);
+        auto ret = libusb_bulk_transfer(m_handle, EP_Data_Out_Addr, buffer, length, &actual_length, 0);
         if(ret < 0) {
             qCritical() << "Error sending data: "
                                     << libusb_strerror((libusb_error) ret);
@@ -234,53 +230,8 @@ std::vector<QString> Device::GetDevices()
 void Device::ReceiveThread()
 {
     qInfo() << "Receive thread started" << flush;
-    constexpr int timeout = 100;
-    unsigned char recbuf[2048];
-    unsigned int inputCnt = 0;
     while (m_connected) {
-        int actual_length;
-        unsigned char data[64];
-        auto ret = libusb_bulk_transfer(m_handle, EP_In_Addr, data,
-                sizeof(data), &actual_length, timeout);
-        if (ret == LIBUSB_ERROR_TIMEOUT || ret == LIBUSB_SUCCESS) {
-            if (actual_length > 0) {
-                if (inputCnt + actual_length < sizeof(recbuf)) {
-                    // add received data to input buffer
-                    memcpy(&recbuf[inputCnt], data, actual_length);
-                    inputCnt += actual_length;
-                }
-                Protocol::PacketInfo packet;
-                uint16_t handled_len;
-                do {
-                    handled_len = Protocol::DecodeBuffer(recbuf, inputCnt, &packet);
-                    if (handled_len == inputCnt) {
-                        // complete input buffer used up, reset counter
-                        inputCnt = 0;
-                    } else {
-                        // only used part of the buffer, move up remaining bytes
-                        uint16_t remaining = inputCnt - handled_len;
-                        memmove(recbuf, &recbuf[handled_len], remaining);
-                        inputCnt = remaining;
-                    }
-                    if(packet.type == Protocol::PacketType::Datapoint) {
-                        //BOOST_LOG_TRIVIAL(debug) << "Got new datapoint: " << packet.datapoint.pointNum << std::flush;
-                        emit DatapointReceived(packet.datapoint);
-                    } else if(packet.type == Protocol::PacketType::Status) {
-                        qDebug() << "Got status";
-                        emit ManualStatusReceived(packet.status);
-                    } else if(packet.type == Protocol::PacketType::DeviceInfo) {
-                        lastInfo = packet.info;
-                        lastInfoValid = true;
-                        emit DeviceInfoUpdated();
-                    }
-                } while (handled_len > 0);
-            }
-        } else if (ret < 0) {
-            qCritical() << "Error receiving data: "
-                    << libusb_strerror((libusb_error) ret);
-            emit ConnectionLost();
-            return;
-        }
+        libusb_handle_events(m_context);
     }
     qDebug() << "Disconnected, receive thread exiting";
 }
@@ -313,7 +264,123 @@ QString Device::getLastDeviceInfoString()
     return ret;
 }
 
+void Device::ReceivedData()
+{
+    Protocol::PacketInfo packet;
+    uint16_t handled_len;
+    do {
+        handled_len = Protocol::DecodeBuffer(dataBuffer->getBuffer(), dataBuffer->getReceived(), &packet);
+        dataBuffer->removeBytes(handled_len);
+        if(packet.type == Protocol::PacketType::Datapoint) {
+            emit DatapointReceived(packet.datapoint);
+        } else if(packet.type == Protocol::PacketType::Status) {
+            qDebug() << "Got status";
+            emit ManualStatusReceived(packet.status);
+        } else if(packet.type == Protocol::PacketType::DeviceInfo) {
+            lastInfo = packet.info;
+            lastInfoValid = true;
+            emit DeviceInfoUpdated();
+        }
+    } while (handled_len > 0);
+}
+
+void Device::ReceivedLog()
+{
+    uint16_t handled_len;
+    do {
+        handled_len = 0;
+        auto firstLinebreak = (uint8_t*) memchr(logBuffer->getBuffer(), '\n', logBuffer->getReceived());
+        if(firstLinebreak) {
+            handled_len = firstLinebreak - logBuffer->getBuffer();
+            auto line = QString::fromLatin1((const char*) logBuffer->getBuffer(), handled_len - 1);
+            emit LogLineReceived(line);
+            logBuffer->removeBytes(handled_len + 1);
+        }
+    } while(handled_len > 0);
+}
+
 QString Device::serial() const
 {
     return m_serial;
 }
+
+USBInBuffer::USBInBuffer(libusb_device_handle *handle, unsigned char endpoint, int buffer_size) :
+    buffer_size(buffer_size),
+    received_size(0),
+    inCallback(false)
+{
+    buffer = new unsigned char[buffer_size];
+    transfer = libusb_alloc_transfer(0);
+    libusb_fill_bulk_transfer(transfer, handle, endpoint, buffer, 64, CallbackTrampoline, this, 100);
+    libusb_submit_transfer(transfer);
+}
+
+USBInBuffer::~USBInBuffer()
+{
+    while(transfer) {
+        libusb_cancel_transfer(transfer);
+    }
+    delete buffer;
+}
+
+void USBInBuffer::removeBytes(int handled_bytes)
+{
+    if(!inCallback) {
+        throw runtime_error("Removing of bytes is only allowed from within receive callback");
+    }
+    if(handled_bytes >= received_size) {
+        received_size = 0;
+    } else {
+        // not removing all bytes, have to move remaining data to the beginning of the buffer
+        memmove(buffer, &buffer[handled_bytes], received_size - handled_bytes);
+        received_size -= handled_bytes;
+    }
+}
+
+int USBInBuffer::getReceived() const
+{
+    return received_size;
+}
+
+void USBInBuffer::Callback(libusb_transfer *transfer)
+{
+    switch(transfer->status) {
+    case LIBUSB_TRANSFER_COMPLETED:
+        received_size += transfer->actual_length;
+        inCallback = true;
+        emit DataReceived();
+        inCallback = false;
+        break;
+    case LIBUSB_TRANSFER_ERROR:
+    case LIBUSB_TRANSFER_NO_DEVICE:
+    case LIBUSB_TRANSFER_OVERFLOW:
+    case LIBUSB_TRANSFER_STALL:
+        qCritical() << "LIBUSB_TRANSFER_ERROR";
+        emit TransferError();
+        break;
+    case LIBUSB_TRANSFER_TIMED_OUT:
+        // nothing to do
+        break;
+    case LIBUSB_TRANSFER_CANCELLED:
+        // destructor called, do not resubmit
+        libusb_free_transfer(transfer);
+        this->transfer = nullptr;
+        return;
+        break;
+    }
+    // Resubmit the transfer
+    transfer->buffer = &buffer[received_size];
+    libusb_submit_transfer(transfer);
+}
+
+void USBInBuffer::CallbackTrampoline(libusb_transfer *transfer)
+{
+    auto usb = (USBInBuffer*) transfer->user_data;
+    usb->Callback(transfer);
+}
+
+uint8_t *USBInBuffer::getBuffer() const
+{
+    return buffer;
+}
+

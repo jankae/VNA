@@ -9,6 +9,9 @@ HEADERS += \
     CustomWidgets/tilewidget.h \
     CustomWidgets/toggleswitch.h \
     CustomWidgets/touchstoneimport.h \
+    Device/device.h \
+    Device/devicelog.h \
+    Device/manualcontroldialog.h \
     Menu/menu.h \
     Menu/menuaction.h \
     Menu/menubool.h \
@@ -30,8 +33,6 @@ HEADERS += \
     Traces/tracesmithchart.h \
     Traces/tracewidget.h \
     averaging.h \
-    device.h \
-    manualcontroldialog.h \
     qwtplotpiecewisecurve.h \
     touchstone.h \
     unit.h \
@@ -49,6 +50,9 @@ SOURCES += \
     CustomWidgets/tilewidget.cpp \
     CustomWidgets/toggleswitch.cpp \
     CustomWidgets/touchstoneimport.cpp \
+    Device/device.cpp \
+    Device/devicelog.cpp \
+    Device/manualcontroldialog.cpp \
     Menu/menu.cpp \
     Menu/menuaction.cpp \
     Menu/menubool.cpp \
@@ -70,9 +74,7 @@ SOURCES += \
     Traces/tracesmithchart.cpp \
     Traces/tracewidget.cpp \
     averaging.cpp \
-    device.cpp \
     main.cpp \
-    manualcontroldialog.cpp \
     qwtplotpiecewisecurve.cpp \
     touchstone.cpp \
     unit.cpp \
@@ -92,6 +94,8 @@ FORMS += \
     Calibration/calkitdialog.ui \
     CustomWidgets/tilewidget.ui \
     CustomWidgets/touchstoneimport.ui \
+    Device/devicelog.ui \
+    Device/manualcontroldialog.ui \
     Tools/impedancematchdialog.ui \
     Traces/bodeplotaxisdialog.ui \
     Traces/markerwidget.ui \
@@ -99,8 +103,7 @@ FORMS += \
     Traces/traceexportdialog.ui \
     Traces/traceimportdialog.ui \
     Traces/tracewidget.ui \
-    main.ui \
-    manualcontroldialog.ui
+    main.ui
 
 DISTFILES +=
 

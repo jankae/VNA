@@ -19,6 +19,7 @@ typedef void(*usbd_callback_t)(const uint8_t *buf, uint16_t len);
 
 void usb_init(usbd_callback_t callback);
 bool usb_transmit(const uint8_t *data, uint16_t length);
+void usb_log(const char *log, uint16_t length);
 
 
 #ifdef __cplusplus
