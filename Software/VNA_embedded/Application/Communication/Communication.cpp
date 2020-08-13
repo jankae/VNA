@@ -2,17 +2,19 @@
 
 #include "stm.hpp"
 #include "../App.h"
+#include <string.h>
+#include "USB/usb.h"
 
 static uint8_t inputBuffer[1024];
 uint16_t inputCnt = 0;
 static uint8_t outputBuffer[1024];
 
-#include "usbd_def.h"
-#include "usbd_cdc_if.h"
+//#include "usbd_def.h"
+//#include "usbd_cdc_if.h"
 
-extern USBD_HandleTypeDef hUsbDeviceFS;
+//extern USBD_HandleTypeDef hUsbDeviceFS;
 
-void Communication::Input(uint8_t *buf, uint16_t len) {
+void Communication::Input(const uint8_t *buf, uint16_t len) {
 	if (inputCnt + len < sizeof(inputBuffer)) {
 		// add received data to input buffer
 		memcpy(&inputBuffer[inputCnt], buf, len);
@@ -43,18 +45,21 @@ void Communication::Input(uint8_t *buf, uint16_t len) {
 }
 
 bool Communication::Send(Protocol::PacketInfo packet) {
-	if (hUsbDeviceFS.dev_state == USBD_STATE_CONFIGURED) {
-		uint16_t len = Protocol::EncodePacket(packet, outputBuffer,
-				sizeof(outputBuffer));
-		while (CDC_Transmit_FS(outputBuffer, len) != USBD_OK)
-			;
-		return true;
-	} else {
-		// not connected, do not attempt to send
-		return false;
-	}
+	uint16_t len = Protocol::EncodePacket(packet, outputBuffer,
+					sizeof(outputBuffer));
+	return usb_transmit(outputBuffer, len);
+//	if (hUsbDeviceFS.dev_state == USBD_STATE_CONFIGURED) {
+//		uint16_t len = Protocol::EncodePacket(packet, outputBuffer,
+//				sizeof(outputBuffer));
+//		while (CDC_Transmit_FS(outputBuffer, len) != USBD_OK)
+//			;
+//		return true;
+//	} else {
+//		// not connected, do not attempt to send
+//		return false;
+//	}
 }
 
-void communication_usb_input(uint8_t *buf, uint16_t len) {
+void communication_usb_input(const uint8_t *buf, uint16_t len) {
 	Communication::Input(buf, len);
 }

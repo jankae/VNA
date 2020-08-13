@@ -79,10 +79,10 @@ Device::Device(QString serial)
 
     // Found the correct device, now connect
     /* claim the interfaces */
-    for (int if_num = 1; if_num < 2; if_num++) {
-        if (libusb_kernel_driver_active(m_handle, if_num)) {
-            libusb_detach_kernel_driver(m_handle, if_num);
-        }
+    for (int if_num = 0; if_num < 1; if_num++) {
+//        if (libusb_kernel_driver_active(m_handle, if_num)) {
+//            libusb_detach_kernel_driver(m_handle, if_num);
+//        }
         int ret = libusb_claim_interface(m_handle, if_num);
         if (ret < 0) {
             qCritical() << "Failed to claim interface: "
@@ -100,20 +100,20 @@ Device::~Device()
     if(m_connected) {
         m_connected = false;
         m_receiveThread->join();
-        for (int if_num = 1; if_num < 2; if_num++) {
+        for (int if_num = 0; if_num < 1; if_num++) {
             int ret = libusb_release_interface(m_handle, if_num);
             if (ret < 0) {
                 qCritical() << "Error releasing interface" << libusb_error_name(ret);
             }
-            // TODO this doesn't work
-            if (libusb_kernel_driver_active(m_handle, if_num)) {
-                qDebug() << "Reattaching CDC ACM kernel driver." << endl;
-                ret = libusb_attach_kernel_driver(m_handle, if_num);
-                if (ret < 0) {
-                    qCritical() << "Error reattaching CDC ACM kernel driver: "
-                            << libusb_error_name(ret);
-                }
-            }
+//            // TODO this doesn't work
+//            if (libusb_kernel_driver_active(m_handle, if_num)) {
+//                qDebug() << "Reattaching CDC ACM kernel driver." << endl;
+//                ret = libusb_attach_kernel_driver(m_handle, if_num);
+//                if (ret < 0) {
+//                    qCritical() << "Error reattaching CDC ACM kernel driver: "
+//                            << libusb_error_name(ret);
+//                }
+//            }
         }
         libusb_close(m_handle);
     }

@@ -8,6 +8,7 @@
 #include "FPGA.hpp"
 #include <complex>
 #include <cstring>
+#include "USB/usb.h"
 
 #define LOG_LEVEL	LOG_LEVEL_INFO
 #define LOG_MODULE	"App"
@@ -38,6 +39,7 @@ void VNAStatusCallback(FPGA::SamplingResult res) {
 }
 
 void App_Start() {
+	usb_init(communication_usb_input);
 	Log_Init();
 	LOG_INFO("Start");
 	Exti::Init();

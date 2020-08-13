@@ -58,7 +58,7 @@
 #define CDC_DATA_FS_MAX_PACKET_SIZE                 64U  /* Endpoint IN & OUT Packet size */
 #define CDC_CMD_PACKET_SIZE                         8U  /* Control Endpoint Packet size */
 
-#define USB_CDC_CONFIG_DESC_SIZ                     67U
+#define USB_CDC_CONFIG_DESC_SIZ                     32U
 #define CDC_DATA_HS_IN_PACKET_SIZE                  CDC_DATA_HS_MAX_PACKET_SIZE
 #define CDC_DATA_HS_OUT_PACKET_SIZE                 CDC_DATA_HS_MAX_PACKET_SIZE
 
@@ -90,22 +90,22 @@
 /**
   * @}
   */
-typedef struct
-{
-  uint32_t bitrate;
-  uint8_t  format;
-  uint8_t  paritytype;
-  uint8_t  datatype;
-}USBD_CDC_LineCodingTypeDef;
-
-typedef struct _USBD_CDC_Itf
-{
-  int8_t (* Init)          (void);
-  int8_t (* DeInit)        (void);
-  int8_t (* Control)       (uint8_t cmd, uint8_t* pbuf, uint16_t length);
-  int8_t (* Receive)       (uint8_t* Buf, uint32_t *Len);
-
-}USBD_CDC_ItfTypeDef;
+//typedef struct
+//{
+//  uint32_t bitrate;
+//  uint8_t  format;
+//  uint8_t  paritytype;
+//  uint8_t  datatype;
+//}USBD_CDC_LineCodingTypeDef;
+//
+//typedef struct _USBD_CDC_Itf
+//{
+//  int8_t (* Init)          (void);
+//  int8_t (* DeInit)        (void);
+//  int8_t (* Control)       (uint8_t cmd, uint8_t* pbuf, uint16_t length);
+//  int8_t (* Receive)       (uint8_t* Buf, uint32_t *Len);
+//
+//}USBD_CDC_ItfTypeDef;
 
 
 typedef struct
@@ -146,19 +146,12 @@ extern USBD_ClassTypeDef  USBD_CDC;
 /** @defgroup USB_CORE_Exported_Functions
   * @{
   */
-uint8_t  USBD_CDC_RegisterInterface  (USBD_HandleTypeDef   *pdev,
-                                      USBD_CDC_ItfTypeDef *fops);
 
-uint8_t  USBD_CDC_SetTxBuffer        (USBD_HandleTypeDef   *pdev,
-                                      uint8_t  *pbuff,
-                                      uint16_t length);
+typedef void(*usbd_cdc_callback_t)(const uint8_t *buf, uint16_t len);
 
-uint8_t  USBD_CDC_SetRxBuffer        (USBD_HandleTypeDef   *pdev,
-                                      uint8_t  *pbuff);
+void USBD_CDC_SetReceiveCallback(usbd_cdc_callback_t callback);
 
-uint8_t  USBD_CDC_ReceivePacket      (USBD_HandleTypeDef *pdev);
-
-uint8_t  USBD_CDC_TransmitPacket     (USBD_HandleTypeDef *pdev);
+uint8_t  USBD_CDC_TransmitPacket     (USBD_HandleTypeDef *pdev, const uint8_t *buf, uint16_t len);
 /**
   * @}
   */

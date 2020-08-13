@@ -32,8 +32,8 @@ signals:
     void DeviceInfoUpdated();
     void ConnectionLost();
 private:
-    static constexpr int VID = 1155;
-    static constexpr int PID = 22336;
+    static constexpr int VID = 0x0483;
+    static constexpr int PID = 0x564e;
     static constexpr int EP_Out_Addr = 0x01;
     static constexpr int EP_In_Addr = 0x81;
 

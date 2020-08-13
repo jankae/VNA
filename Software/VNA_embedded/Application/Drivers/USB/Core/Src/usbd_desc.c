@@ -63,15 +63,15 @@
   * @{
   */
 
-#define USBD_VID     1155
-#define USBD_LANGID_STRING     1033
-#define USBD_MANUFACTURER_STRING     "STMicroelectronics"
-#define USBD_PID_FS     22336
-#define USBD_PRODUCT_STRING_FS     "VNA"
-#define USBD_CONFIGURATION_STRING_FS     "CDC Config"
-#define USBD_INTERFACE_STRING_FS     "CDC Interface"
+#define USBD_VID     					0x0483
+#define USBD_PID_FS     				0x564E
+#define USBD_LANGID_STRING     			0x0409
+#define USBD_MANUFACTURER_STRING    	"STMicroelectronics"
+#define USBD_PRODUCT_STRING_FS     		"VNA"
+#define USBD_CONFIGURATION_STRING_FS	"CustomUSBDevice Config"
+#define USBD_INTERFACE_STRING_FS     	"CustomUSBDevice Interface"
 
-#define USB_SIZ_BOS_DESC            0x0C
+#define USB_SIZ_BOS_DESC            	0x0C
 
 /* USER CODE BEGIN PRIVATE_DEFINES */
 
@@ -171,8 +171,8 @@ __ALIGN_BEGIN uint8_t USBD_FS_DeviceDesc[USB_LEN_DEV_DESC] __ALIGN_END =
   0x00,                       /*bcdUSB */
 #endif /* (USBD_LPM_ENABLED == 1) */
   0x02,
-  0x02,                       /*bDeviceClass*/
-  0x02,                       /*bDeviceSubClass*/
+  0x00,                       /*bDeviceClass*/
+  0x00,                       /*bDeviceSubClass*/
   0x00,                       /*bDeviceProtocol*/
   USB_MAX_EP0_SIZE,           /*bMaxPacketSize*/
   LOBYTE(USBD_VID),           /*idVendor*/
