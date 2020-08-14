@@ -365,31 +365,21 @@ VNA::VNA(QWidget *parent)
     });
 
     connect(mCalSave, &MenuAction::triggered, [=](){
-        auto filename = QFileDialog::getSaveFileName(this, "Save calibration data", "", "Calibration files (*.cal)", nullptr, QFileDialog::DontUseNativeDialog);
-        if(filename.length() > 0) {
-            ofstream file;
-            file.open(filename.toStdString());
-            file << cal;
-            file.close();
-        }
+        cal.saveToFile();
     });
 
     connect(mCalLoad, &MenuAction::triggered, [=](){
-        auto filename = QFileDialog::getOpenFileName(this, "Save calibration data", "", "Calibration files (*.cal)", nullptr, QFileDialog::DontUseNativeDialog);
-        if(filename.length() > 0) {
-            ifstream file;
-            file.open(filename.toStdString());
-            file >> cal;
-            file.close();
-            auto msg = new QMessageBox();
-            msg->setText("Calibration loaded");
-            QString calInfo = "The calibration contains ";
-            calInfo.append(QString::number(cal.nPoints()));
-            calInfo.append(" points.");
-            msg->setInformativeText(calInfo);
-            msg->exec();
-            calValid = true;
-            mCalTraces->setEnabled(true);
+        if(cal.openFromFile()) {
+            // Check if applying calibration is available
+            if(cal.calculationPossible(Calibration::Type::Port1SOL)) {
+                mCalSOL1->setEnabled(true);
+            }
+            if(cal.calculationPossible(Calibration::Type::Port2SOL)) {
+                mCalSOL2->setEnabled(true);
+            }
+            if(cal.calculationPossible(Calibration::Type::FullSOLT)) {
+                mCalFullSOLT->setEnabled(true);
+            }
         }
     });
 

@@ -59,3 +59,14 @@ void CalibrationTraceDialog::on_bApply_clicked()
     emit applyCalibration(requestedType);
     accept();
 }
+
+void CalibrationTraceDialog::on_bOpen_clicked()
+{
+    cal->openFromFile();
+    UpdateApplyButton();
+}
+
+void CalibrationTraceDialog::on_bSave_clicked()
+{
+    cal->saveToFile();
+}

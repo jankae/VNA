@@ -1,6 +1,8 @@
 #include "calibration.h"
 #include <algorithm>
 #include <QMessageBox>
+#include <QFileDialog>
+#include <fstream>
 
 using namespace std;
 
@@ -434,26 +436,85 @@ void Calibration::addAsTraces(TraceModel &m)
     }
 }
 
+bool Calibration::openFromFile(QString filename)
+{
+    if(filename.isEmpty()) {
+        filename = QFileDialog::getOpenFileName(nullptr, "Load calibration data", "", "Calibration files (*.cal)", nullptr, QFileDialog::DontUseNativeDialog);
+        if(filename.isEmpty()) {
+            // aborted selection
+            return false;
+        }
+    }
+    ifstream file;
+    file.open(filename.toStdString());
+    try {
+        file >> *this;
+    } catch(runtime_error e) {
+        QMessageBox::warning(nullptr, "File parsing error", e.what());
+        return false;
+    }
+
+    return true;
+}
+
+bool Calibration::saveToFile(QString filename)
+{
+    if(filename.isEmpty()) {
+        filename = QFileDialog::getSaveFileName(nullptr, "Save calibration data", "", "Calibration files (*.cal)", nullptr, QFileDialog::DontUseNativeDialog);
+        if(filename.isEmpty()) {
+            // aborted selection
+            return false;
+        }
+    }
+    ofstream file;
+    file.open(filename.toStdString());
+    file << *this;
+    return true;
+}
+
 ostream& operator<<(ostream &os, const Calibration &c)
 {
-    os << c.points.size() << "\n";
-    for(auto p : c.points) {
-        os << p;
+    for(auto m : c.measurements) {
+        if(m.second.datapoints.size() > 0) {
+            os << c.MeasurementToString(m.first).toStdString() << endl;
+            os << m.second.timestamp.toSecsSinceEpoch() << endl;
+            os << m.second.datapoints.size() << endl;
+            for(auto p : m.second.datapoints) {
+                os << p.pointNum << " " << p.frequency << " ";
+                os << p.imag_S11 << " " << p.real_S11 << " " << p.imag_S21 << " " << p.real_S21 << " " << p.imag_S12 << " " << p.real_S12 << " " << p.imag_S22 << " " << p.real_S22;
+                os << endl;
+            }
+        }
     }
-    os << endl;
     return os;
 }
 
 istream& operator >>(istream &in, Calibration &c)
 {
-    c.clearMeasurements();
-    c.points.clear();
-    int npoints;
-    in >> npoints;
-    for(int i=0;i<npoints;i++) {
-        Calibration::Point p;
-        in >> p;
-        c.points.push_back(p);
+    std::string name;
+    while(getline(in, name)) {
+        for(auto m : Calibration::Measurements()) {
+            if(Calibration::MeasurementToString(m) == QString::fromStdString(name)) {
+                // this is the correct measurement
+                c.clearMeasurement(m);
+                uint timestamp;
+                in >> timestamp;
+                c.measurements[m].timestamp = QDateTime::fromSecsSinceEpoch(timestamp);
+                unsigned int points;
+                in >> points;
+                for(unsigned int i=0;i<points;i++) {
+                    Protocol::Datapoint p;
+                    in >> p.pointNum >> p.frequency;
+                    in >> p.imag_S11 >> p.real_S11 >> p.imag_S21 >> p.real_S21 >> p.imag_S12 >> p.real_S12 >> p.imag_S22 >> p.real_S22;
+                    c.measurements[m].datapoints.push_back(p);
+                    if(in.eof() || in.bad() || in.fail()) {
+                        c.clearMeasurement(m);
+                        throw runtime_error("Failed to parse measurement \"" + name + "\", aborting calibration data import");
+                    }
+                }
+                break;
+            }
+        }
     }
     return in;
 }

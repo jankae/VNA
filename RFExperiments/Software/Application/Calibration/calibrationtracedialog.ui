@@ -66,15 +66,22 @@
         </widget>
        </item>
        <item>
-        <widget class="QDialogButtonBox" name="buttonBox">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
+        <widget class="QPushButton" name="bOpen">
+         <property name="text">
+          <string>Open</string>
          </property>
-         <property name="standardButtons">
-          <set>QDialogButtonBox::Open|QDialogButtonBox::Save</set>
+         <property name="icon">
+          <iconset theme="document-open"/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="bSave">
+         <property name="text">
+          <string>Save</string>
+         </property>
+         <property name="icon">
+          <iconset theme="document-save"/>
          </property>
         </widget>
        </item>

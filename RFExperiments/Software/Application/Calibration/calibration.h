@@ -76,6 +76,9 @@ public:
     }
 
     void addAsTraces(TraceModel &m);
+
+    bool openFromFile(QString filename = QString());
+    bool saveToFile(QString filename = QString());
 private:
     void construct12TermPoints(Calkit c);
     void constructPort1SOL(Calkit c);
