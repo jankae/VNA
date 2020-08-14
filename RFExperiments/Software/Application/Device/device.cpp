@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QString>
 #include <QMessageBox>
+#include <mutex>
 
 using namespace std;
 
@@ -77,6 +78,7 @@ Device::~Device()
         }
         libusb_close(m_handle);
         m_receiveThread->join();
+        libusb_exit(m_context);
     }
 }
 
@@ -186,7 +188,7 @@ void Device::SearchDevices(std::function<bool (libusb_device_handle *, QString)>
             /* Failed to open */
             QString message =  "Found potential device but failed to open usb connection: \"";
             message.append(libusb_strerror((libusb_error) ret));
-            message.append("\" On linux this is most likely caused by a missing udev rule.");
+            message.append("\" On Linux this is most likely caused by a missing udev rule. On Windows it could be a missing driver. Try installing the WinUSB driver using Zadig (https://zadig.akeo.ie/)");
             qWarning() << message;
             auto msg = new QMessageBox(QMessageBox::Icon::Warning, "Error opening device", message);
             msg->exec();
@@ -300,8 +302,14 @@ USBInBuffer::USBInBuffer(libusb_device_handle *handle, unsigned char endpoint, i
 
 USBInBuffer::~USBInBuffer()
 {
-    while(transfer) {
+    if(transfer) {
+        qDebug() << "Start cancellation";
         libusb_cancel_transfer(transfer);
+        // wait for cancellation to complete
+        mutex mtx;
+        unique_lock<mutex> lck(mtx);
+        cv.wait(lck);
+        qDebug() << "Cancellation complete";
     }
     delete buffer;
 }
@@ -339,7 +347,10 @@ void USBInBuffer::Callback(libusb_transfer *transfer)
     case LIBUSB_TRANSFER_OVERFLOW:
     case LIBUSB_TRANSFER_STALL:
         qCritical() << "LIBUSB_TRANSFER_ERROR";
+        libusb_free_transfer(transfer);
+        this->transfer = nullptr;
         emit TransferError();
+        return;
         break;
     case LIBUSB_TRANSFER_TIMED_OUT:
         // nothing to do
@@ -348,6 +359,7 @@ void USBInBuffer::Callback(libusb_transfer *transfer)
         // destructor called, do not resubmit
         libusb_free_transfer(transfer);
         this->transfer = nullptr;
+        cv.notify_all();
         return;
         break;
     }

@@ -6,6 +6,7 @@
 #include <libusb-1.0/libusb.h>
 #include <thread>
 #include <QObject>
+#include <condition_variable>
 
 Q_DECLARE_METATYPE(Protocol::Datapoint);
 Q_DECLARE_METATYPE(Protocol::ManualStatus);
@@ -27,12 +28,13 @@ signals:
 
 private:
     void Callback(libusb_transfer *transfer);
-    static void CallbackTrampoline(libusb_transfer *transfer);
+    static void LIBUSB_CALL CallbackTrampoline(libusb_transfer *transfer);
     libusb_transfer *transfer;
     unsigned char *buffer;
     int buffer_size;
     int received_size;
     bool inCallback;
+    std::condition_variable cv;
 };
 
 
