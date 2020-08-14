@@ -484,10 +484,11 @@ VNA::VNA(QWidget *parent)
 
     ConstrainAndUpdateFrequencies();
 
-    // Attempt to autoconnect to first device available
-    ConnectToDevice();
     // List available devices
-    UpdateDeviceList();
+    if(UpdateDeviceList()) {
+        // at least one device available
+        ConnectToDevice();
+    }
 }
 
 void VNA::closeEvent(QCloseEvent *event)
@@ -600,7 +601,6 @@ void VNA::ConnectToDevice(QString serial)
         ui->actionDisconnect->setEnabled(true);
         ui->actionManual_Control->setEnabled(true);
     } catch (const runtime_error e) {
-        QMessageBox::warning(this, "Error connecting to device", e.what());
         DisconnectDevice();
         UpdateDeviceList();
     }
@@ -807,7 +807,7 @@ void VNA::CreateToolbars()
     addToolBar(tb_cal);
 }
 
-void VNA::UpdateDeviceList()
+int VNA::UpdateDeviceList()
 {
     ui->menuConnect_to->clear();
     auto devices = Device::GetDevices();
@@ -832,6 +832,7 @@ void VNA::UpdateDeviceList()
         // no devices available, disable connection option
         ui->menuConnect_to->setEnabled(false);
     }
+    return devices.size();
 }
 
 void VNA::StartManualControl()

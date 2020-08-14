@@ -68,10 +68,10 @@ private:
     static constexpr int EP_Data_In_Addr = 0x81;
     static constexpr int EP_Log_In_Addr = 0x82;
 
-    void ReceiveThread();
-    static void ReceiveTrampoline(Device *dev) {
-        dev->ReceiveThread();
-    }
+    void USBHandleThread();
+    // foundCallback is called for every device that is found. If it returns true the search continues, otherwise it is aborted.
+    // When the search is aborted the last found device is still opened
+    static void SearchDevices(std::function<bool(libusb_device_handle *handle, QString serial)> foundCallback, libusb_context *context);
 
     libusb_device_handle *m_handle;
     libusb_context *m_context;

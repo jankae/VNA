@@ -3,78 +3,36 @@
 #include <signal.h>
 #include <QDebug>
 #include <QString>
+#include <QMessageBox>
 
 using namespace std;
 
 Device::Device(QString serial)
 {
     qDebug() << "Starting device connection...";
-    libusb_device **devList;
-    m_context = nullptr;
+
     m_handle = nullptr;
-    m_connected = false;
-    lastInfoValid = false;
     libusb_init(&m_context);
-//    libusb_set_debug(m_context, 4);
-    auto ndevices = libusb_get_device_list(m_context, &devList);
 
-    for (ssize_t idx = 0; idx < ndevices; idx++) {
-        int ret;
-        libusb_device *device = devList[idx];
-        libusb_device_descriptor desc = {};
-
-        ret = libusb_get_device_descriptor(device, &desc);
-        if (ret) {
-            /* some error occured */
-            qCritical() << "Failed to get device descriptor: "
-                    << libusb_strerror((libusb_error) ret);
-            continue;
-        }
-
-        if (desc.idVendor != VID || desc.idProduct != PID) {
-            /* Not an STM virtual COM port */
-            continue;
-        }
-
-        /* Try to open the device */
-        libusb_device_handle *handle = nullptr;
-        ret = libusb_open(device, &handle);
-        if (ret) {
-            /* Failed to open */
-            qWarning() << "Failed to open device: "
-                    << libusb_strerror((libusb_error) ret);
-            continue;
-        }
-
-        char c_product[256];
-        char c_serial[256];
-        libusb_get_string_descriptor_ascii(handle, desc.iSerialNumber,
-                (unsigned char*) c_serial, sizeof(c_serial));
-        ret = libusb_get_string_descriptor_ascii(handle, desc.iProduct,
-                (unsigned char*) c_product, sizeof(c_product));
-        if (ret > 0) {
-            /* managed to read the product string */
-            QString product(c_product);
-            qDebug() << "Opened device: " << product;
-            if (product == "VNA") {
-                // check serial number if necessary
-                auto qSerial = QString(c_serial);
-                if(serial.isEmpty() || qSerial == serial) {
-                    m_handle = handle;
-                    m_serial = qSerial;
-                    break;
-                }
-            }
+    SearchDevices([=](libusb_device_handle *handle, QString found_serial) -> bool {
+        if(serial.isEmpty() || serial == found_serial) {
+            // accept connection to this device
+            m_serial = found_serial;
+            m_handle = handle;
+            // abort device search
+            return false;
         } else {
-            qWarning() << "Failed to get product descriptor: "
-                    << libusb_strerror((libusb_error) ret);
+            // not the requested device, continue search
+            return true;
         }
-        libusb_close(handle);
-    }
-    libusb_free_device_list(devList, 1);
+    }, m_context);
+
     if(!m_handle) {
-        qCritical() << "No device found";
-        throw std::runtime_error("No device found");
+        QString message =  "No device found";
+        auto msg = new QMessageBox(QMessageBox::Icon::Warning, "Error opening device", message);
+        msg->exec();
+        libusb_exit(m_context);
+        throw std::runtime_error(message.toStdString());
         return;
     }
 
@@ -83,14 +41,21 @@ Device::Device(QString serial)
     for (int if_num = 0; if_num < 1; if_num++) {
         int ret = libusb_claim_interface(m_handle, if_num);
         if (ret < 0) {
-            qCritical() << "Failed to claim interface: "
-                    << libusb_strerror((libusb_error) ret);
-            throw std::runtime_error("Failed to claim interface");
+            libusb_close(m_handle);
+            /* Failed to open */
+            QString message =  "Failed to claim interface: \"";
+            message.append(libusb_strerror((libusb_error) ret));
+            message.append("\" Maybe you are already connected to this device?");
+            qWarning() << message;
+            auto msg = new QMessageBox(QMessageBox::Icon::Warning, "Error opening device", message);
+            msg->exec();
+            libusb_exit(m_context);
+            throw std::runtime_error(message.toStdString());
         }
     }
     qInfo() << "USB connection established" << flush;
     m_connected = true;
-    m_receiveThread = new std::thread(ReceiveTrampoline, this);
+    m_receiveThread = new std::thread(&Device::USBHandleThread, this);
     dataBuffer = new USBInBuffer(m_handle, EP_Data_In_Addr, 2048);
     logBuffer = new USBInBuffer(m_handle, EP_Log_In_Addr, 2048);
     connect(dataBuffer, &USBInBuffer::DataReceived, this, &Device::ReceivedData, Qt::DirectConnection);
@@ -169,10 +134,31 @@ std::vector<QString> Device::GetDevices()
 {
     std::vector<QString> serials;
 
-    // TODO remove duplicate code (almost identical to constructor)
+    libusb_context *ctx;
+    libusb_init(&ctx);
+
+    SearchDevices([&serials](libusb_device_handle *handle, QString serial) -> bool {
+        serials.push_back(serial);
+        return true;
+    }, ctx);
+
+    libusb_exit(ctx);
+
+    return serials;
+}
+
+void Device::USBHandleThread()
+{
+    qInfo() << "Receive thread started" << flush;
+    while (m_connected) {
+        libusb_handle_events(m_context);
+    }
+    qDebug() << "Disconnected, receive thread exiting";
+}
+
+void Device::SearchDevices(std::function<bool (libusb_device_handle *, QString)> foundCallback, libusb_context *context)
+{
     libusb_device **devList;
-    libusb_context *context = nullptr;
-    libusb_init(&context);
     auto ndevices = libusb_get_device_list(context, &devList);
 
     for (ssize_t idx = 0; idx < ndevices; idx++) {
@@ -189,7 +175,7 @@ std::vector<QString> Device::GetDevices()
         }
 
         if (desc.idVendor != VID || desc.idProduct != PID) {
-            /* Not an STM virtual COM port */
+            /* Not the correct IDs */
             continue;
         }
 
@@ -198,8 +184,12 @@ std::vector<QString> Device::GetDevices()
         ret = libusb_open(device, &handle);
         if (ret) {
             /* Failed to open */
-            qWarning() << "Failed to open device: "
-                    << libusb_strerror((libusb_error) ret);
+            QString message =  "Found potential device but failed to open usb connection: \"";
+            message.append(libusb_strerror((libusb_error) ret));
+            message.append("\" On linux this is most likely caused by a missing udev rule.");
+            qWarning() << message;
+            auto msg = new QMessageBox(QMessageBox::Icon::Warning, "Error opening device", message);
+            msg->exec();
             continue;
         }
 
@@ -214,7 +204,11 @@ std::vector<QString> Device::GetDevices()
             QString product(c_product);
             qDebug() << "Opened device: " << product;
             if (product == "VNA") {
-                serials.push_back(QString(c_serial));
+                // this is a match
+                if(!foundCallback(handle, QString(c_serial))) {
+                    // abort search
+                    break;
+                }
             }
         } else {
             qWarning() << "Failed to get product descriptor: "
@@ -223,17 +217,6 @@ std::vector<QString> Device::GetDevices()
         libusb_close(handle);
     }
     libusb_free_device_list(devList, 1);
-
-    return serials;
-}
-
-void Device::ReceiveThread()
-{
-    qInfo() << "Receive thread started" << flush;
-    while (m_connected) {
-        libusb_handle_events(m_context);
-    }
-    qDebug() << "Disconnected, receive thread exiting";
 }
 
 Protocol::DeviceInfo Device::getLastInfo() const

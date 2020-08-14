@@ -40,7 +40,7 @@ private slots:
     void NewDatapoint(Protocol::Datapoint d);
     void ConnectToDevice(QString serial = QString());
     void DisconnectDevice();
-    void UpdateDeviceList();
+    int UpdateDeviceList();
     void StartManualControl();
     void StartImpedanceMatching();
     // Sweep control
