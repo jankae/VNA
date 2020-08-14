@@ -1,5 +1,5 @@
 HEADERS += \
-    ../RFExperiments/Application/Communication/Protocol.hpp \
+    ../../../Software/VNA_embedded/Application/Communication/Protocol.hpp \
     Calibration/calibration.h \
     Calibration/calibrationtracedialog.h \
     Calibration/calkit.h \
@@ -40,7 +40,7 @@ HEADERS += \
     vna.h
 
 SOURCES += \
-    ../RFExperiments/Application/Communication/Protocol.cpp \
+    ../../../Software/VNA_embedded/Application/Communication/Protocol.cpp \
     Calibration/calibration.cpp \
     Calibration/calibrationtracedialog.cpp \
     Calibration/calkit.cpp \

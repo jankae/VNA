@@ -4,6 +4,8 @@
 
 namespace Protocol {
 
+// When changing/adding/removing variables from these structs also adjust the decode/encode functions in Protocol.cpp
+
 using Datapoint = struct _datapoint {
 	float real_S11, imag_S11;
 	float real_S21, imag_S21;
@@ -11,15 +13,15 @@ using Datapoint = struct _datapoint {
 	float real_S22, imag_S22;
 	uint64_t frequency;
 	uint16_t pointNum;
-} __attribute__((packed));
+};
 
 using SweepSettings = struct _sweepSettings {
 	uint64_t f_start;
 	uint64_t f_stop;
-	uint16_t points;
-        uint32_t if_bandwidth;
-        int16_t cdbm_excitation; // in 1/100 dbm
-} __attribute__((packed));
+    uint16_t points;
+    uint32_t if_bandwidth;
+    int16_t cdbm_excitation; // in 1/100 dbm
+};
 
 using DeviceInfo = struct _deviceInfo {
     uint16_t FW_major;
@@ -36,7 +38,7 @@ using DeviceInfo = struct _deviceInfo {
         uint8_t LO1;
         uint8_t MCU;
     } temperatures;
-} __attribute__((packed));
+};
 
 using ManualStatus = struct _manualstatus {
         int16_t port1min, port1max;
@@ -49,7 +51,7 @@ using ManualStatus = struct _manualstatus {
         uint8_t temp_LO;
         uint8_t source_locked :1;
         uint8_t LO_locked :1;
-} __attribute__((packed));
+};
 
 using ManualControl = struct _manualControl {
     // Highband Source
@@ -79,7 +81,7 @@ using ManualControl = struct _manualControl {
     uint8_t Port2EN :1;
     uint8_t RefEN :1;
     uint32_t Samples;
-} __attribute__((packed));
+};
 
 enum class PacketType : uint8_t {
 	None,

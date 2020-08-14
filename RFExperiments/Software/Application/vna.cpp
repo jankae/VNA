@@ -838,6 +838,9 @@ int VNA::UpdateDeviceList()
 void VNA::StartManualControl()
 {
     auto control = new ManualControlDialog(*device, this);
+    connect(control, &QDialog::finished, [this](){
+        SettingsChanged();
+    });
     control->show();
 }
 
