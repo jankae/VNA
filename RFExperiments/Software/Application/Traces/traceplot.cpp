@@ -44,7 +44,7 @@ void TracePlot::enableTrace(Trace *t, bool enabled)
     }
 }
 
-void TracePlot::mouseDoubleClickEvent(QMouseEvent *event) {
+void TracePlot::mouseDoubleClickEvent(QMouseEvent *) {
     emit doubleClicked(this);
 }
 
@@ -139,7 +139,7 @@ void TracePlot::markerAdded(TraceMarker *m)
     triggerReplot();
 }
 
-void TracePlot::markerRemoved(TraceMarker *m)
+void TracePlot::markerRemoved(TraceMarker *)
 {
     triggerReplot();
 }

@@ -31,7 +31,7 @@ void SIUnitEdit::setValue(double value)
     emit valueChanged(value);
 }
 
-bool SIUnitEdit::eventFilter(QObject *obj, QEvent *event)
+bool SIUnitEdit::eventFilter(QObject *, QEvent *event)
 {
     if (event->type() == QEvent::KeyPress) {
         int key = static_cast<QKeyEvent *>(event)->key();

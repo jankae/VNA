@@ -39,13 +39,13 @@ public:
     void clear();
     void addData(Data d);
     void setName(QString name);
-    void fillFromTouchstone(Touchstone &t, int parameter, QString filename = QString());
+    void fillFromTouchstone(Touchstone &t, unsigned int parameter, QString filename = QString());
     void fromLivedata(LivedataType type, LiveParameter param);
     QString name() { return _name; };
     QColor color() { return _color; };
     bool isVisible();
-    bool pause();
-    bool resume();
+    void pause();
+    void resume();
     bool isPaused();
     bool isTouchstone();
     bool isCalibration();
@@ -58,7 +58,7 @@ public:
     double maxFreq() { return _data.back().frequency; };
     Data sample(unsigned int index) { return _data.at(index); }
     QString getTouchstoneFilename() const;
-    int getTouchstoneParameter() const;
+    unsigned int getTouchstoneParameter() const;
     std::complex<double> getData(double frequency);
     int index(double frequency);
     std::set<TraceMarker *> getMarkers() const;
@@ -98,7 +98,7 @@ private:
     bool touchstone;
     bool calibration;
     QString touchstoneFilename;
-    int touchstoneParameter;
+    unsigned int touchstoneParameter;
     std::set<TraceMarker*> markers;
 };
 

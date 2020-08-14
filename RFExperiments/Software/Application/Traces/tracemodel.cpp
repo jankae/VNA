@@ -17,7 +17,7 @@ void TraceModel::addTrace(Trace *t)
     emit traceAdded(t);
 }
 
-void TraceModel::removeTrace(int index)
+void TraceModel::removeTrace(unsigned int index)
 {
     if (index < traces.size()) {
         beginRemoveRows(QModelIndex(), index, index);
@@ -29,12 +29,12 @@ void TraceModel::removeTrace(int index)
     }
 }
 
-Trace *TraceModel::trace(int index)
+Trace *TraceModel::trace(unsigned int index)
 {
     return traces.at(index);
 }
 
-void TraceModel::toggleVisibility(int index)
+void TraceModel::toggleVisibility(unsigned int index)
 {
     if (index < traces.size()) {
         traces[index]->setVisible(!traces[index]->isVisible());
@@ -42,7 +42,7 @@ void TraceModel::toggleVisibility(int index)
     }
 }
 
-void TraceModel::togglePause(int index)
+void TraceModel::togglePause(unsigned int index)
 {
     if (index < traces.size()) {
         if(traces[index]->isPaused()) {
@@ -54,12 +54,12 @@ void TraceModel::togglePause(int index)
     }
 }
 
-int TraceModel::rowCount(const QModelIndex &parent) const
+int TraceModel::rowCount(const QModelIndex &) const
 {
     return traces.size();
 }
 
-int TraceModel::columnCount(const QModelIndex &parent) const
+int TraceModel::columnCount(const QModelIndex &) const
 {
     return 3;
 }
@@ -69,7 +69,7 @@ QVariant TraceModel::data(const QModelIndex &index, int role) const
     if (!index.isValid())
         return QVariant();
 
-    if (index.row() >= traces.size())
+    if ((unsigned int) index.row() >= traces.size())
         return QVariant();
     if (index.column() == 0) {
         if (role == Qt::DecorationRole) {

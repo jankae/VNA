@@ -139,7 +139,7 @@ std::vector<QString> Device::GetDevices()
     libusb_context *ctx;
     libusb_init(&ctx);
 
-    SearchDevices([&serials](libusb_device_handle *handle, QString serial) -> bool {
+    SearchDevices([&serials](libusb_device_handle *, QString serial) -> bool {
         serials.push_back(serial);
         return true;
     }, ctx);

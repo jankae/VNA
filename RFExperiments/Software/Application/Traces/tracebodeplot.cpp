@@ -26,6 +26,7 @@ static double AxisTransformation(TraceBodePlot::YAxisType type, complex<double> 
             return (1+abs(data)) / (1-abs(data));
         }
         break;
+    default: break;
     }
     return numeric_limits<double>::quiet_NaN();
 }
@@ -297,7 +298,7 @@ void TraceBodePlot::updateContextMenu()
     });
 }
 
-bool TraceBodePlot::supported(Trace *t)
+bool TraceBodePlot::supported(Trace *)
 {
     // potentially possible to add every kind of trace (depends on axis)
     return true;

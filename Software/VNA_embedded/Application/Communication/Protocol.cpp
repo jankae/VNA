@@ -43,7 +43,7 @@ public:
             bitpos = 0;
             usedSize++;
         }
-        if(bufSize - usedSize < sizeof(T)) {
+        if(bufSize - usedSize < (long) sizeof(T)) {
             // not enough space left
             return false;
         }
@@ -377,6 +377,8 @@ uint16_t Protocol::DecodeBuffer(uint8_t *buf, uint16_t len, PacketInfo *info) {
     case PacketType::ManualControl:
         info->manual = DecodeManualControl(&data[4]);
         break;
+    case PacketType::None:
+        break;
 	}
 
 	return data - buf + length;
@@ -399,6 +401,8 @@ uint16_t Protocol::EncodePacket(PacketInfo packet, uint8_t *dest, uint16_t dests
         break;
     case PacketType::ManualControl:
         payload_size = EncodeManualControl(packet.manual, &dest[4], destsize - 8);
+        break;
+    case PacketType::None:
         break;
     }
 	if (payload_size == 0 || payload_size + 8 > destsize) {

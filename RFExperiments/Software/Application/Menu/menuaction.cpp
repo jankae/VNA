@@ -59,7 +59,7 @@ void MenuAction::mouseReleaseEvent(QMouseEvent *me)
     MenuItem::mouseReleaseEvent(me);
 }
 
-void MenuAction::mousePressEvent(QMouseEvent *me)
+void MenuAction::mousePressEvent(QMouseEvent *)
 {
     setFrameStyle(QFrame::Sunken | QFrame::Panel);
 }

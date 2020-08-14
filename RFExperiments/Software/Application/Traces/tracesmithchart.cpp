@@ -66,7 +66,7 @@ void TraceSmithChart::mouseMoveEvent(QMouseEvent *event)
         auto samples = t->size();
         double closestDistance = numeric_limits<double>::max();
         unsigned int closestIndex = 0;
-        for(int i=0;i<samples;i++) {
+        for(unsigned int i=0;i<samples;i++) {
             auto data = t->sample(i);
             auto distance = norm(data.S - mouseS);
             if(distance < closestDistance) {

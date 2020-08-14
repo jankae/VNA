@@ -34,8 +34,9 @@ double ESeries::ToESeries(double value, ESeries::Series s, ESeries::Type t)
     case Series::E24: series = E24; break;
     case Series::E12: series = E12; break;
     case Series::E6: series = E6; break;
+    case Series::Ideal: /* already handled */ break;
     }
-    int index = 0;
+    unsigned int index = 0;
     while(index < 96 && series[index] <= value) {
         index++;
     }

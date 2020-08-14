@@ -41,7 +41,7 @@ void TraceMarkerModel::addMarker(TraceMarker *t)
     emit markerAdded(t);
 }
 
-void TraceMarkerModel::removeMarker(int index, bool delete_marker)
+void TraceMarkerModel::removeMarker(unsigned int index, bool delete_marker)
 {
     if (index < markers.size()) {
         beginRemoveRows(QModelIndex(), index, index);
@@ -61,7 +61,7 @@ void TraceMarkerModel::removeMarker(TraceMarker *m)
     }
 }
 
-void TraceMarkerModel::markerDataChanged(TraceMarker *m)
+void TraceMarkerModel::markerDataChanged(TraceMarker *)
 {
     emit dataChanged(index(0, ColIndexFreq), index(markers.size()-1, ColIndexData));
 }
@@ -71,12 +71,12 @@ TraceMarker *TraceMarkerModel::marker(int index)
     return markers.at(index);
 }
 
-int TraceMarkerModel::rowCount(const QModelIndex &parent) const
+int TraceMarkerModel::rowCount(const QModelIndex &) const
 {
     return markers.size();
 }
 
-int TraceMarkerModel::columnCount(const QModelIndex &parent) const
+int TraceMarkerModel::columnCount(const QModelIndex &) const
 {
     return 4;
 }
@@ -125,9 +125,9 @@ QVariant TraceMarkerModel::headerData(int section, Qt::Orientation orientation, 
     }
 }
 
-bool TraceMarkerModel::setData(const QModelIndex &index, const QVariant &value, int role)
+bool TraceMarkerModel::setData(const QModelIndex &index, const QVariant &value, int)
 {
-    if(index.row() >= markers.size()) {
+    if((unsigned int) index.row() >= markers.size()) {
         return false;
     }
     auto m = markers[index.row()];
@@ -146,12 +146,14 @@ bool TraceMarkerModel::setData(const QModelIndex &index, const QVariant &value, 
         auto trace = qvariant_cast<Trace*>(value);
         m->assignTrace(trace);
     }
+        break;
     case ColIndexFreq: {
         auto newval = Unit::FromString(value.toString(), "Hz", " kMG");
         if(!qIsNaN(newval)) {
             m->setFrequency(newval);
         }
     }
+        break;
     }
 
     return false;
@@ -190,11 +192,11 @@ TraceModel &TraceMarkerModel::getModel()
     return model;
 }
 
-QWidget *TraceChooserDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
+QWidget *TraceChooserDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &index) const
 {
     auto model = (TraceMarkerModel*) index.model();
     auto c = new QComboBox(parent);
-    connect(c, qOverload<int>(&QComboBox::currentIndexChanged), [c](int index) {
+    connect(c, qOverload<int>(&QComboBox::currentIndexChanged), [c](int) {
         c->clearFocus();
     });
     auto traces = model->getModel().getTraces();

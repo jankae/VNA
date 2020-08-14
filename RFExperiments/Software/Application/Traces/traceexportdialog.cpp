@@ -52,6 +52,7 @@ bool TraceExportDialog::setPortNum(int ports)
         return false;
     }
     ui->sbPorts->setValue(ports);
+    return true;
 }
 
 void TraceExportDialog::on_buttonBox_accepted()
@@ -61,7 +62,7 @@ void TraceExportDialog::on_buttonBox_accepted()
         auto ports = ui->sbPorts->value();
         auto t = Touchstone(ports);
         // add trace points to touchstone
-        for(int s=0;s<points;s++) {
+        for(unsigned int s=0;s<points;s++) {
             Touchstone::Datapoint tData;
             for(int i=0;i<ports;i++) {
                 for(int j=0;j<ports;j++) {

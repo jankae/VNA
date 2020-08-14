@@ -66,29 +66,29 @@ ManualControlDialog::ManualControlDialog(Device &dev, QWidget *parent) :
         }
     };
 
-    connect(ui->IF1, &SIUnitEdit::valueChanged, [=](double dummy) {
+    connect(ui->IF1, &SIUnitEdit::valueChanged, [=](double) {
         UpdateLO1();
         UpdateLO2();
     });
-    connect(ui->LO1Frequency, &SIUnitEdit::valueChanged, [=](double dummy) {
+    connect(ui->LO1Frequency, &SIUnitEdit::valueChanged, [=](double) {
         UpdateLO1();
         UpdateLO2();
     });
-    connect(ui->IF2, &SIUnitEdit::valueChanged, [=](double dummy) {
+    connect(ui->IF2, &SIUnitEdit::valueChanged, [=](double) {
         UpdateLO2();
     });
-    connect(ui->LO2Frequency, &SIUnitEdit::valueChanged, [=](double dummy) {
+    connect(ui->LO2Frequency, &SIUnitEdit::valueChanged, [=](double) {
         UpdateLO2();
     });
     connect(ui->SourceSwitchGroup, qOverload<int, bool>(&QButtonGroup::buttonToggled), [=](int, bool) {
         UpdateLO1();
         UpdateLO2();
     });
-    connect(ui->SourceLowFrequency, &SIUnitEdit::valueChanged, [=](double dummy) {
+    connect(ui->SourceLowFrequency, &SIUnitEdit::valueChanged, [=](double) {
         UpdateLO1();
         UpdateLO2();
     });
-    connect(ui->SourceHighFrequency, &SIUnitEdit::valueChanged, [=](double dummy) {
+    connect(ui->SourceHighFrequency, &SIUnitEdit::valueChanged, [=](double) {
         UpdateLO1();
         UpdateLO2();
     });

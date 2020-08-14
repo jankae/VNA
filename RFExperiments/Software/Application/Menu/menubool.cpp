@@ -30,7 +30,7 @@ void MenuBool::mouseReleaseEvent(QMouseEvent *me)
     MenuItem::mouseReleaseEvent(me);
 }
 
-void MenuBool::mousePressEvent(QMouseEvent *me)
+void MenuBool::mousePressEvent(QMouseEvent *)
 {
     setFrameStyle(QFrame::Sunken | QFrame::Panel);
 }

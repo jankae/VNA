@@ -23,6 +23,7 @@ BodeplotAxisDialog::BodeplotAxisDialog(TraceBodePlot *plot) :
        case TraceBodePlot::YAxisType::Magnitude: unit = "db"; break;
        case TraceBodePlot::YAxisType::Phase: unit = "°"; break;
        case TraceBodePlot::YAxisType::VSWR: unit = ""; break;
+       default: unit = ""; break;
        }
        ui->Y1min->setUnit(unit);
        ui->Y1max->setUnit(unit);
@@ -48,6 +49,7 @@ BodeplotAxisDialog::BodeplotAxisDialog(TraceBodePlot *plot) :
        case TraceBodePlot::YAxisType::Magnitude: unit = "db"; break;
        case TraceBodePlot::YAxisType::Phase: unit = "°"; break;
        case TraceBodePlot::YAxisType::VSWR: unit = ""; break;
+       default: unit = ""; break;
        }
        ui->Y2min->setUnit(unit);
        ui->Y2max->setUnit(unit);

@@ -70,7 +70,7 @@ void Trace::setName(QString name) {
     emit nameChanged();
 }
 
-void Trace::fillFromTouchstone(Touchstone &t, int parameter, QString filename)
+void Trace::fillFromTouchstone(Touchstone &t, unsigned int parameter, QString filename)
 {
     if(parameter >= t.ports()*t.ports()) {
         throw runtime_error("Parameter for touchstone out of range");
@@ -88,7 +88,7 @@ void Trace::fillFromTouchstone(Touchstone &t, int parameter, QString filename)
     // check if parameter is square (e.i. S11/S22/S33/...)
     parameter++;
     bool isSquare = false;
-    for (int i = 1; i * i <= parameter; i++) {
+    for (unsigned int i = 1; i * i <= parameter; i++) {
 
         // If (i * i = n)
         if ((parameter % i == 0) && (parameter / i == i)) {
@@ -165,12 +165,12 @@ bool Trace::isVisible()
     return visible;
 }
 
-bool Trace::pause()
+void Trace::pause()
 {
     paused = true;
 }
 
-bool Trace::resume()
+void Trace::resume()
 {
     paused = false;
 }
@@ -210,7 +210,7 @@ void Trace::setTouchstoneFilename(const QString &value)
     touchstoneFilename = value;
 }
 
-int Trace::getTouchstoneParameter() const
+unsigned int Trace::getTouchstoneParameter() const
 {
     return touchstoneParameter;
 }

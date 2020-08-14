@@ -13,10 +13,10 @@ public:
     TraceModel(QObject *parent = 0);
 
     void addTrace(Trace *t);
-    void removeTrace(int index);
-    Trace *trace(int index);
-    void toggleVisibility(int index);
-    void togglePause(int index);
+    void removeTrace(unsigned int index);
+    Trace *trace(unsigned int index);
+    void toggleVisibility(unsigned int index);
+    void togglePause(unsigned int index);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;

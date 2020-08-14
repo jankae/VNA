@@ -36,7 +36,7 @@ void TraceWidget::on_remove_clicked()
     model.removeTrace(ui->view->currentIndex().row());
 }
 
-bool TraceWidget::eventFilter(QObject *obj, QEvent *event)
+bool TraceWidget::eventFilter(QObject *, QEvent *event)
 {
     if (event->type() == QEvent::KeyPress) {
         int key = static_cast<QKeyEvent *>(event)->key();
@@ -89,7 +89,7 @@ void TraceWidget::on_bExport_clicked()
     // 2 port export if the initial 4 traces have not been modified)
     e->setPortNum(2);
     auto traces = model.getTraces();
-    for(int i=0;i<4;i++) {
+    for(unsigned int i=0;i<4;i++) {
         if(i >= traces.size()) {
             break;
         }

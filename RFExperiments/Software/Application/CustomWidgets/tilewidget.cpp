@@ -133,7 +133,7 @@ void TileWidget::on_bBodeplot_clicked()
     setContent(new TraceBodePlot(model));
 }
 
-void TileWidget::traceDeleted(TracePlot *t)
+void TileWidget::traceDeleted(TracePlot *)
 {
     ui->stack->setCurrentWidget(ui->TilePage);
     hasContent = false;

@@ -562,6 +562,9 @@ void VNA::UpdateStatusPanel()
         case Calibration::InterpolationType::Unchanged:
             lCalibration.setText("Enabled");
             break;
+        default:
+            lCalibration.setText("Unknown");
+            break;
         }
     } else {
         lCalibration.setText("Off");
@@ -575,9 +578,6 @@ void VNA::SettingsChanged()
     }
     average.reset();
     traceModel.clearVNAData();
-    for(auto t : traceModel.getTraces()) {
-        // TODO ???
-    }
     UpdateStatusPanel();
     TracePlot::UpdateSpan(settings.f_start, settings.f_stop);
 }

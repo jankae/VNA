@@ -87,6 +87,8 @@ bool Calibration::constructErrorTerms(Calibration::Type type, Calkit c)
     case Type::FullSOLT:
         construct12TermPoints(c);
         break;
+    case Type::None:
+        break;
     }
     this->type = type;
     return true;
@@ -310,6 +312,8 @@ QString Calibration::MeasurementToString(Calibration::Measurement m)
         return "Through";
     case Measurement::Isolation:
         return "Isolation";
+    default:
+        return "Unknown";
     }
 }
 
@@ -319,6 +323,7 @@ QString Calibration::TypeToString(Calibration::Type t)
     case Type::Port1SOL: return "Port 1"; break;
     case Type::Port2SOL: return "Port 2"; break;
     case Type::FullSOLT: return "SOLT"; break;
+    default: return "None"; break;
     }
 }
 
@@ -340,6 +345,9 @@ const std::vector<Calibration::Measurement> Calibration::Measurements(Calibratio
         break;
     case Type::Port2SOL:
         return {Measurement::Port2Short, Measurement::Port2Open, Measurement::Port2Load};
+        break;
+    default:
+        return {};
         break;
     }
 }

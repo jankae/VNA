@@ -38,8 +38,8 @@ TraceEditDialog::TraceEditDialog(Trace &t, QWidget *parent) :
         } else {
             ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
             auto touchstone = ui->touchstoneImport->getTouchstone();
-            for(int i=0;i<touchstone.ports();i++) {
-                for(int j=0;j<touchstone.ports();j++) {
+            for(unsigned int i=0;i<touchstone.ports();i++) {
+                for(unsigned int j=0;j<touchstone.ports();j++) {
                     QString name = "S"+QString::number(i+1)+QString::number(j+1);
                     ui->CParameter->addItem(name);
                 }

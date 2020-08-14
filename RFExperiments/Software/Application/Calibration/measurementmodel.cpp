@@ -10,12 +10,12 @@ MeasurementModel::MeasurementModel(Calibration *cal, std::vector<Calibration::Me
 
 }
 
-int MeasurementModel::rowCount(const QModelIndex &parent) const
+int MeasurementModel::rowCount(const QModelIndex &) const
 {
     return measurements.size();
 }
 
-int MeasurementModel::columnCount(const QModelIndex &parent) const
+int MeasurementModel::columnCount(const QModelIndex &) const
 {
     return ColIndexLast;
 }

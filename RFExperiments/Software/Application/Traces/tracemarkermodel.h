@@ -43,7 +43,7 @@ public:
 
 public slots:
     void addMarker(TraceMarker *t);
-    void removeMarker(int index, bool delete_marker = true);
+    void removeMarker(unsigned int index, bool delete_marker = true);
     void removeMarker(TraceMarker *m);
 
 

@@ -16,7 +16,7 @@ public:
 
     virtual void enableTrace(Trace *t, bool enabled);
     void mouseDoubleClickEvent(QMouseEvent *event) override;
-    virtual void setXAxis(double min, double max){};
+    virtual void setXAxis(double min, double max){Q_UNUSED(min);Q_UNUSED(max)};
 
     static std::set<TracePlot *> getPlots();
     static void UpdateSpan(double fmin, double fmax);

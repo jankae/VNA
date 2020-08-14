@@ -6,8 +6,8 @@
 using namespace std;
 
 Menu::Menu(QStackedLayout &layout, QString name)
-    : m_containingLayout(layout),
-      name(name)
+    : name(name),
+      m_containingLayout(layout)
 {
     m_layout = new QVBoxLayout;
     setLayout(m_layout);

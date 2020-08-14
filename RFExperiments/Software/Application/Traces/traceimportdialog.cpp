@@ -46,7 +46,7 @@ TraceImportDialog::~TraceImportDialog()
 void TraceImportDialog::on_buttonBox_accepted()
 {
     auto t = ui->touchstoneImport->getTouchstone();
-    for(int i=0;i<tableModel->params.size();i++) {
+    for(unsigned int i=0;i<tableModel->params.size();i++) {
         if(tableModel->params[i].enabled) {
             auto trace = new Trace(tableModel->params[i].name, tableModel->params[i].color);
             trace->fillFromTouchstone(t, i, ui->touchstoneImport->getFilename());
@@ -55,11 +55,11 @@ void TraceImportDialog::on_buttonBox_accepted()
     }
 }
 
-int TouchstoneParameterModel::rowCount(const QModelIndex &parent) const {
+int TouchstoneParameterModel::rowCount(const QModelIndex &) const {
     return params.size();
 }
 
-int TouchstoneParameterModel::columnCount(const QModelIndex &parent) const {
+int TouchstoneParameterModel::columnCount(const QModelIndex &) const {
     return 4;
 }
 
@@ -67,7 +67,7 @@ QVariant TouchstoneParameterModel::data(const QModelIndex &index, int role) cons
     if (!index.isValid())
         return QVariant();
 
-    if (index.row() >= params.size())
+    if ((unsigned int) index.row() >= params.size())
         return QVariant();
     auto p = params[index.row()];
     if (index.column() == 0) {
@@ -124,7 +124,7 @@ QVariant TouchstoneParameterModel::headerData(int section, Qt::Orientation orien
 
 bool TouchstoneParameterModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    if(index.row() >= params.size()) {
+    if((unsigned int) index.row() >= params.size()) {
         return false;
     }
     auto &p = params[index.row()];

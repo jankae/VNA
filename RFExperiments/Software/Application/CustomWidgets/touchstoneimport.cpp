@@ -129,7 +129,7 @@ void TouchstoneImport::evaluateFile()
     ui->status->clear();
     try {
         touchstone = Touchstone::fromFile(ui->file->text().toStdString());
-        if (required_ports > 0 && touchstone.ports() < required_ports) {
+        if (required_ports > 0 && touchstone.ports() < (unsigned int) required_ports) {
             throw runtime_error("Not enough ports in file");
         }
         ui->port1_1->setEnabled(touchstone.ports() >= 1);
@@ -165,7 +165,7 @@ void TouchstoneImport::evaluateFile()
 
 void TouchstoneImport::preventCollisionWithGroup(QButtonGroup *group, int id)
 {
-    for(int i=0;i<touchstone.ports();i++) {
+    for(unsigned int i=0;i<touchstone.ports();i++) {
         group->button(i)->setEnabled(true);
     }
     // change selection in second group and mark invalid

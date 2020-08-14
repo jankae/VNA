@@ -31,7 +31,7 @@ void MarkerWidget::on_bAdd_clicked()
     updatePersistentEditors();
 }
 
-void MarkerWidget::updatePersistentEditors(Trace *dummy)
+void MarkerWidget::updatePersistentEditors(Trace *)
 {
     for(int i=0;i<model.rowCount();i++) {
         auto index = model.index(i, TraceMarkerModel::ColIndexTrace);
