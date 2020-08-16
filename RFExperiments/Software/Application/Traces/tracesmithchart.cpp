@@ -50,7 +50,6 @@ void TraceSmithChart::mousePressEvent(QMouseEvent *event)
             }
         }
     }
-    qDebug() << closestDistance;
     if(closestDistance <= 400) {
         selectedMarker = closestMarker;
     } else {

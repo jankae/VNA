@@ -73,11 +73,15 @@ VNA::VNA(QWidget *parent)
     connect(ui->actionManual_Control, &QAction::triggered, this, &VNA::StartManualControl);
     connect(ui->actionImpedance_Matching, &QAction::triggered, this, &VNA::StartImpedanceMatching);
     connect(ui->actionEdit_Calibration_Kit, &QAction::triggered, [=](){
-        calkit.edit();
+        cal.getCalibrationKit().edit();
+    });
+    connect(ui->actionImport_error_terms_as_traces, &QAction::triggered, [=](){
+       cal.addAsTraces(traceModel);
     });
     connect(ui->actionTracedata, &QAction::triggered, [=](){
        auto dialog = new CalibrationTraceDialog(&cal);
        connect(dialog, &CalibrationTraceDialog::triggerMeasurement, this, &VNA::StartCalibrationMeasurement);
+       connect(dialog, &CalibrationTraceDialog::applyCalibration, this, &VNA::ApplyCalibration);
        connect(this, &VNA::CalibrationMeasurementComplete, dialog, &CalibrationTraceDialog::measurementComplete);
        dialog->show();
     });
@@ -384,7 +388,7 @@ VNA::VNA(QWidget *parent)
     });
 
     connect(mEditKit, &MenuAction::triggered, [=](){
-        calkit.edit();
+        cal.getCalibrationKit().edit();
     });
 
     connect(mCalTraces, &MenuAction::triggered, [=](){
@@ -957,6 +961,7 @@ void VNA::DisableCalibration(bool force)
 {
     if(calValid || force) {
         calValid = false;
+        ui->actionImport_error_terms_as_traces->setEnabled(false);
         emit CalibrationDisabled();
         average.reset();
     }
@@ -966,9 +971,10 @@ void VNA::ApplyCalibration(Calibration::Type type)
 {
     if(cal.calculationPossible(type)) {
         try {
-            cal.constructErrorTerms(type, calkit);
+            cal.constructErrorTerms(type);
             calValid = true;
             average.reset();
+            ui->actionImport_error_terms_as_traces->setEnabled(true);
             emit CalibrationApplied(type);
         } catch (runtime_error e) {
             QMessageBox::critical(this, "Calibration failure", e.what());

@@ -83,6 +83,9 @@ Calkit Calkit::fromFile(std::string filename)
     Calkit c;
     ifstream file;
     file.open(filename);
+    if(!file.is_open()) {
+        throw runtime_error("Unable to open file");
+    }
     file >> c.open_measurements;
     file >> c.short_measurements;
     file >> c.load_measurements;

@@ -64,6 +64,7 @@ void CalibrationTraceDialog::on_bOpen_clicked()
 {
     cal->openFromFile();
     UpdateApplyButton();
+    emit applyCalibration(cal->getType());
 }
 
 void CalibrationTraceDialog::on_bSave_clicked()

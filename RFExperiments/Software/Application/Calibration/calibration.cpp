@@ -69,25 +69,25 @@ bool Calibration::calculationPossible(Calibration::Type type)
     return SanityCheckSamples(requiredMeasurements);
 }
 
-bool Calibration::constructErrorTerms(Calibration::Type type, Calkit c)
+bool Calibration::constructErrorTerms(Calibration::Type type)
 {
     if(!calculationPossible(type)) {
         return false;
     }
-    if(minFreq < c.minFreq() || maxFreq > c.maxFreq()) {
+    if(minFreq < kit.minFreq() || maxFreq > kit.maxFreq()) {
         // Calkit does not support complete calibration range
         QMessageBox::critical(nullptr, "Unable to perform calibration", "The calibration kit does not support the complete span. Please choose a different calibration kit or a narrower span.");
         return false;
     }
     switch(type) {
     case Type::Port1SOL:
-        constructPort1SOL(c);
+        constructPort1SOL();
         break;
     case Type::Port2SOL:
-        constructPort2SOL(c);
+        constructPort2SOL();
         break;
     case Type::FullSOLT:
-        construct12TermPoints(c);
+        construct12TermPoints();
         break;
     case Type::None:
         break;
@@ -102,7 +102,7 @@ void Calibration::resetErrorTerms()
     points.clear();
 }
 
-void Calibration::construct12TermPoints(Calkit c)
+void Calibration::construct12TermPoints()
 {
     std::vector<Measurement> requiredMeasurements;
     requiredMeasurements.push_back(Measurement::Port1Open);
@@ -141,7 +141,7 @@ void Calibration::construct12TermPoints(Calkit c)
         auto S22_through = complex<double>(measurements[Measurement::Through].datapoints[i].real_S22, measurements[Measurement::Through].datapoints[i].imag_S22);
         auto S12_through = complex<double>(measurements[Measurement::Through].datapoints[i].real_S12, measurements[Measurement::Through].datapoints[i].imag_S12);
 
-        auto actual = c.toReflection(p.frequency);
+        auto actual = kit.toReflection(p.frequency);
         // Forward calibration
         computeSOL(S11_short, S11_open, S11_load, p.fe00, p.fe11, p.fe10e01, actual.Open, actual.Short, actual.Load);
         p.fe30 = S21_isolation;
@@ -161,7 +161,7 @@ void Calibration::construct12TermPoints(Calkit c)
     }
 }
 
-void Calibration::constructPort1SOL(Calkit c)
+void Calibration::constructPort1SOL()
 {
     std::vector<Measurement> requiredMeasurements;
     requiredMeasurements.push_back(Measurement::Port1Open);
@@ -181,7 +181,7 @@ void Calibration::constructPort1SOL(Calkit c)
         auto S11_short = complex<double>(measurements[Measurement::Port1Short].datapoints[i].real_S11, measurements[Measurement::Port1Short].datapoints[i].imag_S11);
         auto S11_load = complex<double>(measurements[Measurement::Port1Load].datapoints[i].real_S11, measurements[Measurement::Port1Load].datapoints[i].imag_S11);
         // OSL port1
-        auto actual = c.toReflection(p.frequency);
+        auto actual = kit.toReflection(p.frequency);
         // See page 19 of http://www2.electron.frba.utn.edu.ar/~jcecconi/Bibliografia/04%20-%20Param_S_y_VNA/Network_Analyzer_Error_Models_and_Calibration_Methods.pdf
         computeSOL(S11_short, S11_open, S11_load, p.fe00, p.fe11, p.fe10e01, actual.Open, actual.Short, actual.Load);
         // All other calibration coefficients to ideal values
@@ -198,7 +198,7 @@ void Calibration::constructPort1SOL(Calkit c)
     }
 }
 
-void Calibration::constructPort2SOL(Calkit c)
+void Calibration::constructPort2SOL()
 {
     std::vector<Measurement> requiredMeasurements;
     requiredMeasurements.push_back(Measurement::Port2Open);
@@ -218,7 +218,7 @@ void Calibration::constructPort2SOL(Calkit c)
         auto S22_short = complex<double>(measurements[Measurement::Port2Short].datapoints[i].real_S22, measurements[Measurement::Port2Short].datapoints[i].imag_S22);
         auto S22_load = complex<double>(measurements[Measurement::Port2Load].datapoints[i].real_S22, measurements[Measurement::Port2Load].datapoints[i].imag_S22);
         // OSL port2
-        auto actual = c.toReflection(p.frequency);
+        auto actual = kit.toReflection(p.frequency);
         // See page 19 of http://www2.electron.frba.utn.edu.ar/~jcecconi/Bibliografia/04%20-%20Param_S_y_VNA/Network_Analyzer_Error_Models_and_Calibration_Methods.pdf
         computeSOL(S22_short, S22_open, S22_load, p.re33, p.re22, p.re23e32, actual.Open, actual.Short, actual.Load);
         // All other calibration coefficients to ideal values
@@ -445,6 +445,20 @@ bool Calibration::openFromFile(QString filename)
             return false;
         }
     }
+
+    // attempt to load associated calibration kit first (needs to be available when performing calibration)
+    auto calkit_file = filename;
+    auto dotPos = calkit_file.lastIndexOf('.');
+    if(dotPos >= 0) {
+        calkit_file.truncate(dotPos);
+    }
+    calkit_file.append(".calkit");
+    try {
+        kit = Calkit::fromFile(calkit_file.toStdString());
+    } catch (runtime_error e) {
+        QMessageBox::warning(nullptr, "Missing calibration kit", "The calibration kit file associated with the selected calibration could not be parsed. The calibration might not be accurate. (" + QString(e.what()) + ")");
+    }
+
     ifstream file;
     file.open(filename.toStdString());
     try {
@@ -466,9 +480,21 @@ bool Calibration::saveToFile(QString filename)
             return false;
         }
     }
+    // strip any potential file name extension and set default
+    auto dotPos = filename.lastIndexOf('.');
+    if(dotPos >= 0) {
+        filename.truncate(dotPos);
+    }
+    auto calibration_file = filename;
+    calibration_file.append(".cal");
     ofstream file;
-    file.open(filename.toStdString());
+    file.open(calibration_file.toStdString());
     file << *this;
+
+    auto calkit_file = filename;
+    calkit_file.append(".calkit");
+    kit.toFile(calkit_file.toStdString());
+
     return true;
 }
 
@@ -486,15 +512,16 @@ ostream& operator<<(ostream &os, const Calibration &c)
             }
         }
     }
+    os << Calibration::TypeToString(c.getType()).toStdString() << endl;
     return os;
 }
 
 istream& operator >>(istream &in, Calibration &c)
 {
-    std::string name;
-    while(getline(in, name)) {
+    std::string line;
+    while(getline(in, line)) {
         for(auto m : Calibration::Measurements()) {
-            if(Calibration::MeasurementToString(m) == QString::fromStdString(name)) {
+            if(Calibration::MeasurementToString(m) == QString::fromStdString(line)) {
                 // this is the correct measurement
                 c.clearMeasurement(m);
                 uint timestamp;
@@ -509,11 +536,22 @@ istream& operator >>(istream &in, Calibration &c)
                     c.measurements[m].datapoints.push_back(p);
                     if(in.eof() || in.bad() || in.fail()) {
                         c.clearMeasurement(m);
-                        throw runtime_error("Failed to parse measurement \"" + name + "\", aborting calibration data import");
+                        throw runtime_error("Failed to parse measurement \"" + line + "\", aborting calibration data import.");
                     }
                 }
                 break;
             }
+        }
+        for(auto t : Calibration::Types()) {
+            if(Calibration::TypeToString(t) == QString::fromStdString(line)) {
+                // try to apply this calibration type
+                if(c.calculationPossible(t)) {
+                    c.constructErrorTerms(t);
+                } else {
+                    throw runtime_error("Incomplete calibration data, the requested \"" + line + "\"-Calibration could not be performed.");
+                }
+            }
+            break;
         }
     }
     return in;
@@ -609,6 +647,21 @@ void Calibration::computeSOL(std::complex<double> s_m, std::complex<double> o_m,
 std::complex<double> Calibration::correctSOL(std::complex<double> measured, std::complex<double> directivity, std::complex<double> match, std::complex<double> tracking)
 {
     return (measured - directivity) / (measured * match - directivity * match + tracking);
+}
+
+Calkit &Calibration::getCalibrationKit()
+{
+    return kit;
+}
+
+void Calibration::setCalibrationKit(const Calkit &value)
+{
+    kit = value;
+}
+
+Calibration::Type Calibration::getType() const
+{
+    return type;
 }
 
 

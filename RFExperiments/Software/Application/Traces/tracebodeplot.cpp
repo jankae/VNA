@@ -105,7 +105,6 @@ TraceBodePlot::TraceBodePlot(TraceModel &model, QWidget *parent)
                 closestMarker = m.first;
             }
         }
-        qDebug() << closestDistance;
         if(closestDistance <= 400) {
             selectedMarker = closestMarker;
             selectedCurve = curves[0][selectedMarker->trace()].curve;
@@ -352,7 +351,6 @@ void TraceBodePlot::enableTraceAxis(Trace *t, int axis, bool enabled)
             // clean up and delete
             if(curves[axis].find(t) != curves[axis].end()) {
                 if(curves[axis][t].curve) {
-                    qDebug() << "Deleting curve: " << curves[axis][t].curve;
                     delete curves[axis][t].curve;
                 }
                 curves[axis].erase(t);

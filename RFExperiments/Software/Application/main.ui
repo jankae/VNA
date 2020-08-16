@@ -80,6 +80,7 @@
     <addaction name="actionCalDisabled"/>
     <addaction name="separator"/>
     <addaction name="actionTracedata"/>
+    <addaction name="actionImport_error_terms_as_traces"/>
     <addaction name="actionEdit_Calibration_Kit"/>
    </widget>
    <addaction name="menuFile"/>
@@ -162,6 +163,14 @@
   <action name="actionEdit_Calibration_Kit">
    <property name="text">
     <string>Edit Calibration Kit</string>
+   </property>
+  </action>
+  <action name="actionImport_error_terms_as_traces">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Import error terms as traces</string>
    </property>
   </action>
  </widget>
