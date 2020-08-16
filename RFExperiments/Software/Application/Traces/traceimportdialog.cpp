@@ -5,36 +5,14 @@
 #include <QModelIndex>
 #include <QColorDialog>
 
-TraceImportDialog::TraceImportDialog(TraceModel &model, QWidget *parent) :
+TraceImportDialog::TraceImportDialog(TraceModel &model, std::vector<Trace*> traces, QString prefix, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::TraceImportDialog),
     model(model)
 {
     ui->setupUi(this);
-    tableModel = new TouchstoneParameterModel();
+    tableModel = new TraceParameterModel(traces, prefix);
     ui->tableView->setModel(tableModel);
-
-    auto updateModel = [=](bool ok) {
-        if(ok) {
-            auto t = ui->touchstoneImport->getTouchstone();
-            auto filename = ui->touchstoneImport->getFilename();
-            // remove any directory names (keep only the filename itself)
-            int lastSlash = qMax(filename.lastIndexOf('/'), filename.lastIndexOf('\\'));
-            if(lastSlash != -1) {
-                filename.remove(0, lastSlash + 1);
-            }
-            // remove file type
-            filename.truncate(filename.indexOf('.'));
-            tableModel->fromTouchstone(t, filename);
-        } else {
-             tableModel->clear();
-        }
-     };
-
-    connect(ui->touchstoneImport, &TouchstoneImport::statusChanged, updateModel);
-    connect(ui->touchstoneImport, &TouchstoneImport::filenameChanged, [=](QString) {
-        updateModel(ui->touchstoneImport->getStatus());
-    });
 }
 
 TraceImportDialog::~TraceImportDialog()
@@ -45,25 +23,33 @@ TraceImportDialog::~TraceImportDialog()
 
 void TraceImportDialog::on_buttonBox_accepted()
 {
-    auto t = ui->touchstoneImport->getTouchstone();
-    for(unsigned int i=0;i<tableModel->params.size();i++) {
-        if(tableModel->params[i].enabled) {
-            auto trace = new Trace(tableModel->params[i].name, tableModel->params[i].color);
-            trace->fillFromTouchstone(t, i, ui->touchstoneImport->getFilename());
-            model.addTrace(trace);
-        }
+    tableModel->import(model);
+}
+
+TraceParameterModel::TraceParameterModel(std::vector<Trace *> traces, QString prefix, QObject *parent)
+    : QAbstractTableModel(parent),
+      traces(traces)
+{
+    int hue = 0;
+    for(auto t : traces) {
+        Parameter p;
+        p.name = prefix + t->name();
+        p.color = QColor::fromHsl((hue++ * 30) % 360, 250, 128);
+        p.enabled = true;
+        p.trace = t->name();
+        params.push_back(p);
     }
 }
 
-int TouchstoneParameterModel::rowCount(const QModelIndex &) const {
+int TraceParameterModel::rowCount(const QModelIndex &) const {
     return params.size();
 }
 
-int TouchstoneParameterModel::columnCount(const QModelIndex &) const {
+int TraceParameterModel::columnCount(const QModelIndex &) const {
     return 4;
 }
 
-QVariant TouchstoneParameterModel::data(const QModelIndex &index, int role) const {
+QVariant TraceParameterModel::data(const QModelIndex &index, int role) const {
     if (!index.isValid())
         return QVariant();
 
@@ -107,7 +93,7 @@ QVariant TouchstoneParameterModel::data(const QModelIndex &index, int role) cons
     }
 }
 
-QVariant TouchstoneParameterModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant TraceParameterModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if(orientation == Qt::Horizontal && role == Qt::DisplayRole) {
         switch(section) {
@@ -122,7 +108,7 @@ QVariant TouchstoneParameterModel::headerData(int section, Qt::Orientation orien
     }
 }
 
-bool TouchstoneParameterModel::setData(const QModelIndex &index, const QVariant &value, int role)
+bool TraceParameterModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if((unsigned int) index.row() >= params.size()) {
         return false;
@@ -146,7 +132,7 @@ bool TouchstoneParameterModel::setData(const QModelIndex &index, const QVariant 
     return false;
 }
 
-Qt::ItemFlags TouchstoneParameterModel::flags(const QModelIndex &index) const
+Qt::ItemFlags TraceParameterModel::flags(const QModelIndex &index) const
 {
     int flags = Qt::NoItemFlags;
     if(index.column() == 0) {
@@ -167,27 +153,17 @@ Qt::ItemFlags TouchstoneParameterModel::flags(const QModelIndex &index) const
     return (Qt::ItemFlags) flags;
 }
 
-void TouchstoneParameterModel::fromTouchstone(Touchstone &t, QString name_prefix) {
-    clear();
-    int ports = t.ports();
-    beginInsertRows(QModelIndex(), 0, ports * ports - 1);
-    for(int i=0;i<ports;i++) {
-        for(int j=0;j<ports;j++) {
-            Parameter p;
-            p.enabled = true;
-            p.trace = "S" + QString::number(i+1) + QString::number(j+1);
-            p.name = name_prefix + "_" + p.trace;
-            p.color = QColor::fromHsl(((i*ports + j) * 50) % 360, 250, 128);
-            params.push_back(p);
+void TraceParameterModel::import(TraceModel &model)
+{
+    for(unsigned int i=0;i<params.size();i++) {
+        if(params[i].enabled) {
+            traces[i]->setColor(params[i].color);
+            traces[i]->setName(params[i].name);
+            model.addTrace(traces[i]);
+        } else {
+            delete traces[i];
         }
     }
-    endInsertRows();
-}
-
-void TouchstoneParameterModel::clear() {
-    beginRemoveRows(QModelIndex(), 0, params.size() - 1);
-    params.clear();
-    endRemoveRows();
 }
 
 void TraceImportDialog::on_tableView_doubleClicked(const QModelIndex &index)

@@ -76,7 +76,7 @@ public:
         return points.size();
     }
 
-    void addAsTraces(TraceModel &m);
+    std::vector<Trace*> getErrorTermTraces();
 
     bool openFromFile(QString filename = QString());
     bool saveToFile(QString filename = QString());

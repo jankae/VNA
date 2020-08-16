@@ -80,7 +80,8 @@ VNA::VNA(QWidget *parent)
         cal.getCalibrationKit().edit();
     });
     connect(ui->actionImport_error_terms_as_traces, &QAction::triggered, [=](){
-       cal.addAsTraces(traceModel);
+        auto import = new TraceImportDialog(traceModel, cal.getErrorTermTraces());
+        import->show();
     });
     connect(ui->actionTracedata, &QAction::triggered, [=](){
        auto dialog = new CalibrationTraceDialog(&cal);
@@ -302,10 +303,6 @@ VNA::VNA(QWidget *parent)
     auto mEditKit = new MenuAction("Edit CalKit");
     mCalibration->addItem(mEditKit);
 
-    auto mCalTraces = new MenuAction("Add coefficient traces");
-    mCalTraces->setDisabled(true);
-    mCalibration->addItem(mCalTraces);
-
     mCalibration->finalize();
     mMain->addMenu(mCalibration);
 
@@ -409,10 +406,6 @@ VNA::VNA(QWidget *parent)
 
     connect(mEditKit, &MenuAction::triggered, [=](){
         cal.getCalibrationKit().edit();
-    });
-
-    connect(mCalTraces, &MenuAction::triggered, [=](){
-       cal.addAsTraces(traceModel);
     });
 
     // Manual control trigger

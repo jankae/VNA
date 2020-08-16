@@ -5,6 +5,7 @@
 #include "traceeditdialog.h"
 #include "traceimportdialog.h"
 #include "traceexportdialog.h"
+#include <QFileDialog>
 
 TraceWidget::TraceWidget(TraceModel &model, QWidget *parent) :
     QWidget(parent),
@@ -78,8 +79,29 @@ void TraceWidget::on_view_clicked(const QModelIndex &index)
 
 void TraceWidget::on_bImport_clicked()
 {
-    auto i = new TraceImportDialog(model);
-    i->show();
+    auto filename = QFileDialog::getOpenFileName(nullptr, "Open measurement file", "", "Touchstone files (*.s1p *.s2p *.s3p *.s4p)", nullptr, QFileDialog::DontUseNativeDialog);
+    if (filename.length() > 0) {
+        auto t = Touchstone::fromFile(filename.toStdString());
+        std::vector<Trace*> traces;
+        for(unsigned int i=0;i<t.ports()*t.ports();i++) {
+            auto trace = new Trace();
+            trace->fillFromTouchstone(t, i, filename);
+            unsigned int sink = i / t.ports() + 1;
+            unsigned int source = i % t.ports() + 1;
+            trace->setName("S"+QString::number(sink)+QString::number(source));
+            traces.push_back(trace);
+        }
+        // contruct prefix from filename
+        // remove any directory names (keep only the filename itself)
+        int lastSlash = qMax(filename.lastIndexOf('/'), filename.lastIndexOf('\\'));
+        if(lastSlash != -1) {
+            filename.remove(0, lastSlash + 1);
+        }
+        // remove file type
+        filename.truncate(filename.indexOf('.'));
+        auto i = new TraceImportDialog(model, traces, filename+"_");
+        i->show();
+    }
 }
 
 void TraceWidget::on_bExport_clicked()

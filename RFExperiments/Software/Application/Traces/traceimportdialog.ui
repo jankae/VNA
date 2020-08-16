@@ -15,9 +15,6 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="TouchstoneImport" name="touchstoneImport" native="true"/>
-   </item>
-   <item>
     <widget class="QTableView" name="tableView">
      <attribute name="horizontalHeaderCascadingSectionResizes">
       <bool>false</bool>
@@ -48,14 +45,6 @@
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>TouchstoneImport</class>
-   <extends>QWidget</extends>
-   <header>CustomWidgets/touchstoneimport.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections>
   <connection>
