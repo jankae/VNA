@@ -42,11 +42,22 @@
      </property>
      <addaction name="actionDummy"/>
     </widget>
+    <widget class="QMenu" name="menuDefault_Calibration">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="title">
+      <string>Default Calibration</string>
+     </property>
+     <addaction name="actionAssignDefaultCal"/>
+     <addaction name="actionRemoveDefaultCal"/>
+    </widget>
     <addaction name="actionUpdate_Device_List"/>
     <addaction name="menuConnect_to"/>
     <addaction name="actionDisconnect"/>
     <addaction name="separator"/>
     <addaction name="actionManual_Control"/>
+    <addaction name="menuDefault_Calibration"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -171,6 +182,19 @@
    </property>
    <property name="text">
     <string>Import error terms as traces</string>
+   </property>
+  </action>
+  <action name="actionAssignDefaultCal">
+   <property name="text">
+    <string>Assign...</string>
+   </property>
+  </action>
+  <action name="actionRemoveDefaultCal">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Remove</string>
    </property>
   </action>
  </widget>

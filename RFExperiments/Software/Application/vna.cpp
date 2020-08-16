@@ -20,6 +20,7 @@
 #include "Menu/menubool.h"
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QFile>
 #include <iostream>
 #include <fstream>
 #include <QDateTime>
@@ -47,6 +48,9 @@ VNA::VNA(QWidget *parent)
     , deviceActionGroup(new QActionGroup(this))
     , ui(new Ui::MainWindow)
 {
+    QCoreApplication::setOrganizationName("VNA");
+    QCoreApplication::setOrganizationName("Application");
+
     settings = defaultSweep;
     averages = 1;
     calValid = false;
@@ -84,6 +88,22 @@ VNA::VNA(QWidget *parent)
        connect(dialog, &CalibrationTraceDialog::applyCalibration, this, &VNA::ApplyCalibration);
        connect(this, &VNA::CalibrationMeasurementComplete, dialog, &CalibrationTraceDialog::measurementComplete);
        dialog->show();
+    });
+    connect(ui->actionAssignDefaultCal, &QAction::triggered, [=](){
+       if(device) {
+           auto key = "DefaultCalibration"+device->serial();
+           QSettings settings;
+           auto filename = QFileDialog::getOpenFileName(nullptr, "Load calibration data", settings.value(key).toString(), "Calibration files (*.cal)", nullptr, QFileDialog::DontUseNativeDialog);
+           if(!filename.isEmpty()) {
+               settings.setValue(key, filename);
+               ui->actionRemoveDefaultCal->setEnabled(true);
+           }
+       }
+    });
+    connect(ui->actionRemoveDefaultCal, &QAction::triggered, [=](){
+       QSettings settings;
+       settings.remove("DefaultCalibration"+device->serial());
+       ui->actionRemoveDefaultCal->setEnabled(false);
     });
 
 
@@ -449,7 +469,7 @@ VNA::VNA(QWidget *parent)
     statusDock->close();
 
     // fill dock/toolbar hide/show menu and set initial state if available
-    QSettings settings("VNA", "Application");
+    QSettings settings;
     ui->menuDocks->clear();
     for(auto d : findChildren<QDockWidget*>()) {
         ui->menuDocks->addAction(d->toggleViewAction());
@@ -487,7 +507,7 @@ VNA::VNA(QWidget *parent)
 
 void VNA::closeEvent(QCloseEvent *event)
 {
-    QSettings settings("VNA", "Application");
+    QSettings settings;
     // save dock/toolbar visibility
     for(auto d : findChildren<QDockWidget*>()) {
         settings.setValue("dock_"+d->windowTitle(), d->isHidden());
@@ -582,8 +602,10 @@ void VNA::ConnectToDevice(QString serial)
         DisconnectDevice();
     }
     try {
+        qDebug() << "Attempting to connect to device...";
         device = new Device(serial);
         lConnectionStatus.setText("Connected to " + device->serial());
+        qInfo() << "Connected to " << device->serial();
         lDeviceInfo.setText(device->getLastDeviceInfoString());
         device->Configure(settings);
         connect(device, &Device::DatapointReceived, this, &VNA::NewDatapoint);
@@ -594,6 +616,22 @@ void VNA::ConnectToDevice(QString serial)
         });
         ui->actionDisconnect->setEnabled(true);
         ui->actionManual_Control->setEnabled(true);
+        ui->menuDefault_Calibration->setEnabled(true);
+        // Check if default calibration exists and attempt to load it
+        QSettings settings;
+        auto key = "DefaultCalibration"+device->serial();
+        if (settings.contains(key)) {
+            auto filename = settings.value(key).toString();
+            qDebug() << "Attempting to load default calibration file \"" << filename << "\"";
+            if(QFile::exists(filename)) {
+                cal.openFromFile(filename);
+                ApplyCalibration(cal.getType());
+            }
+            ui->actionRemoveDefaultCal->setEnabled(true);
+        } else {
+            qDebug() << "No default calibration file set for this device";
+            ui->actionRemoveDefaultCal->setEnabled(false);
+        }
     } catch (const runtime_error e) {
         DisconnectDevice();
         UpdateDeviceList();
@@ -608,6 +646,7 @@ void VNA::DisconnectDevice()
     }
     ui->actionDisconnect->setEnabled(false);
     ui->actionManual_Control->setEnabled(false);
+    ui->menuDefault_Calibration->setEnabled(false);
     if(deviceActionGroup->checkedAction()) {
         deviceActionGroup->checkedAction()->setChecked(false);
     }

@@ -38,6 +38,7 @@ void TraceMarkerModel::addMarker(TraceMarker *t)
     markers.push_back(t);
     endInsertRows();
     connect(t, &TraceMarker::dataChanged, this, &TraceMarkerModel::markerDataChanged);
+    connect(t, &TraceMarker::deleted, this, qOverload<TraceMarker*>(&TraceMarkerModel::removeMarker));
     emit markerAdded(t);
 }
 

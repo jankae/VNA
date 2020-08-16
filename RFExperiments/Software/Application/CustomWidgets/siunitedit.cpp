@@ -55,7 +55,11 @@ bool SIUnitEdit::eventFilter(QObject *, QEvent *event)
             return true;
         }
     } else if(event->type() == QEvent::FocusOut) {
-        setValueQuiet(_value);
+        if(!text().isEmpty()) {
+            parseNewValue(1.0);
+        } else {
+            setValueQuiet(_value);
+        }
     }
     return false;
 }
