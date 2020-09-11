@@ -67,6 +67,7 @@
     <file xil_pn:fileType="FILE_DIRECTORY" xil_pn:name="planAhead_run_2"/>
     <file xil_pn:fileType="FILE_VHDL_INSTTEMPLATE" xil_pn:name="spi_slave.vhi"/>
     <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_BITGEN_REPORT" xil_pn:name="top.bgn" xil_pn:subbranch="FPGAConfiguration"/>
+    <file xil_pn:fileType="FILE_BIN" xil_pn:name="top.bin"/>
     <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_BIT" xil_pn:name="top.bit" xil_pn:subbranch="FPGAConfiguration"/>
     <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_NGDBUILD_LOG" xil_pn:name="top.bld"/>
     <file xil_pn:fileType="FILE_CMD_LOG" xil_pn:name="top.cmd_log"/>
@@ -312,12 +313,13 @@
       <outfile xil_pn:name="top_pad.txt"/>
       <outfile xil_pn:name="top_par.xrpt"/>
     </transform>
-    <transform xil_pn:end_ts="1591356965" xil_pn:in_ck="154288912438" xil_pn:name="TRANEXT_bitFile_spartan6" xil_pn:prop_ck="5341574683187206424" xil_pn:start_ts="1591356950">
+    <transform xil_pn:end_ts="1598630405" xil_pn:in_ck="154288912438" xil_pn:name="TRANEXT_bitFile_spartan6" xil_pn:prop_ck="4970201210546912173" xil_pn:start_ts="1598630392">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="WarningsGenerated"/>
       <status xil_pn:value="ReadyToRun"/>
       <outfile xil_pn:name="_xmsgs/bitgen.xmsgs"/>
       <outfile xil_pn:name="top.bgn"/>
+      <outfile xil_pn:name="top.bin"/>
       <outfile xil_pn:name="top.bit"/>
       <outfile xil_pn:name="top.drc"/>
       <outfile xil_pn:name="top.ut"/>
@@ -328,6 +330,8 @@
     <transform xil_pn:end_ts="1591357065" xil_pn:in_ck="154288899584" xil_pn:name="TRAN_impactProgrammingTool" xil_pn:prop_ck="-2382555676865099342" xil_pn:start_ts="1591357065">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
+      <status xil_pn:value="OutOfDateForInputs"/>
+      <status xil_pn:value="InputChanged"/>
       <outfile xil_pn:name="_impact.cmd"/>
       <outfile xil_pn:name="_impact.log"/>
       <outfile xil_pn:name="_impactbatch.log"/>
@@ -336,7 +340,9 @@
     <transform xil_pn:end_ts="1591357024" xil_pn:in_ck="154288899584" xil_pn:name="TRAN_configureTargetDevice" xil_pn:prop_ck="-8856759851099153863" xil_pn:start_ts="1591357024">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
+      <status xil_pn:value="OutOfDateForInputs"/>
       <status xil_pn:value="OutOfDateForOutputs"/>
+      <status xil_pn:value="InputChanged"/>
       <status xil_pn:value="OutputChanged"/>
       <outfile xil_pn:name="_impact.cmd"/>
       <outfile xil_pn:name="_impact.log"/>
@@ -346,7 +352,9 @@
     <transform xil_pn:end_ts="1591357058" xil_pn:in_ck="154288899584" xil_pn:name="TRAN_genImpactFile" xil_pn:prop_ck="7381105705363676227" xil_pn:start_ts="1591357058">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
+      <status xil_pn:value="OutOfDateForInputs"/>
       <status xil_pn:value="OutOfDateForOutputs"/>
+      <status xil_pn:value="InputChanged"/>
       <status xil_pn:value="OutputChanged"/>
       <outfile xil_pn:name="_impact.cmd"/>
       <outfile xil_pn:name="_impact.log"/>

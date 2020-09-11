@@ -83,13 +83,25 @@ using ManualControl = struct _manualControl {
     uint32_t Samples;
 };
 
+
+static constexpr uint16_t FirmwareChunkSize = 256;
+using FirmwarePacket = struct _firmwarePacket {
+    uint32_t address;
+    uint8_t data[FirmwareChunkSize];
+};
+
 enum class PacketType : uint8_t {
-	None,
-	Datapoint,
-	SweepSettings,
-    Status,
-    ManualControl,
-    DeviceInfo,
+	None = 0,
+	Datapoint = 1,
+	SweepSettings = 2,
+    Status = 3,
+    ManualControl = 4,
+    DeviceInfo = 5,
+    FirmwarePacket = 6,
+    Ack = 7,
+	ClearFlash = 8,
+	PerformFirmwareUpdate = 9,
+	Nack = 10,
 };
 
 using PacketInfo = struct _packetinfo {
@@ -100,9 +112,11 @@ using PacketInfo = struct _packetinfo {
         DeviceInfo info;
         ManualControl manual;
         ManualStatus status;
+        FirmwarePacket firmware;
 	};
 };
 
+uint32_t CRC32(uint32_t crc, const void *data, uint32_t len);
 uint16_t DecodeBuffer(uint8_t *buf, uint16_t len, PacketInfo *info);
 uint16_t EncodePacket(PacketInfo packet, uint8_t *dest, uint16_t destsize);
 

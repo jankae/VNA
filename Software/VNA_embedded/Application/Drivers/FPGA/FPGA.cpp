@@ -2,49 +2,84 @@
 #include "delay.hpp"
 #include "stm.hpp"
 #include "main.h"
+#include "FPGA_HAL.hpp"
 
 #define LOG_LEVEL	LOG_LEVEL_DEBUG
 #define LOG_MODULE	"FPGA"
 #include "Log.h"
 
-extern SPI_HandleTypeDef hspi3;
-
-static inline void Low(GPIO_TypeDef *gpio, uint16_t pin) {
-	gpio->BSRR = pin << 16;
-}
-static inline void High(GPIO_TypeDef *gpio, uint16_t pin) {
-	gpio->BSRR = pin;
-}
-
 static FPGA::HaltedCallback halted_cb;
 static uint16_t SysCtrlReg = 0x0000;
 static uint16_t ISRMaskReg = 0x0000;
 
+using namespace FPGAHAL;
+
 void WriteRegister(FPGA::Reg reg, uint16_t value) {
 	uint16_t cmd[2] = {(uint16_t) (0x8000 | (uint16_t) reg), value};
-	Low(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
-	HAL_SPI_Transmit(&hspi3, (uint8_t*) cmd, 2, 100);
-	High(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
+	Low(CS);
+	HAL_SPI_Transmit(&FPGA_SPI, (uint8_t*) cmd, 2, 100);
+	High(CS);
+}
+
+bool FPGA::Configure(Flash *f, uint32_t start_address, uint32_t bitstream_size) {
+	if(!PROGRAM_B.gpio) {
+		LOG_WARN("PROGRAM_B not defined, assuming FPGA configures itself in master configuration");
+		// wait too allow enough time for FPGA configuration
+		HAL_Delay(2000);
+		return true;
+	}
+	LOG_INFO("Loading bitstream of size %lu...", bitstream_size);
+	Low(PROGRAM_B);
+	while(isHigh(INIT_B));
+	High(PROGRAM_B);
+	while(!isHigh(INIT_B));
+
+	uint8_t buf[256];
+	while(bitstream_size > 0) {
+		uint16_t size = sizeof(buf);
+		if(size > bitstream_size) {
+			size = bitstream_size;
+		}
+		// TODO this part might be doable with the DMA instead of the buffer
+		// get chunk of bitstream from flash...
+		f->read(start_address, size, buf);
+		// ... and pass it on to FPGA
+		HAL_SPI_Transmit(&CONFIGURATION_SPI, buf, size, 100);
+		bitstream_size -= size;
+		start_address += size;
+	}
+	Delay::ms(1);
+	if(!isHigh(INIT_B)) {
+		LOG_CRIT("INIT_B asserted after configuration, CRC error occurred");
+		return false;
+	}
+	if(!isHigh(DONE)) {
+		LOG_CRIT("DONE still low after configuration");
+		return false;
+	}
+	LOG_INFO("...configured");
+	return true;
 }
 
 bool FPGA::Init(HaltedCallback cb) {
 	halted_cb = cb;
 	// Reset FPGA
-	High(FPGA_RESET_GPIO_Port, FPGA_RESET_Pin);
+	High(FPGA_RESET);
 	SetMode(Mode::FPGA);
 	Delay::us(1);
-	Low(FPGA_RESET_GPIO_Port, FPGA_RESET_Pin);
+	Low(FPGA_RESET);
 	Delay::ms(10);
 
 	// Check if FPGA response is as expected
 	uint16_t cmd[2] = {0x4000, 0x0000};
 	uint16_t recv[2];
-	Low(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
-	HAL_SPI_TransmitReceive(&hspi3, (uint8_t*) cmd, (uint8_t*) recv, 2, 100);
-	High(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
+	Low(CS);
+	HAL_SPI_TransmitReceive(&FPGA_SPI, (uint8_t*) cmd, (uint8_t*) recv, 2, 100);
+	High(CS);
 
 	if(recv[1] != 0xF0A5) {
 		LOG_ERR("Initialization failed, got 0x%04x instead of 0xF0A5", recv[1]);
+		return false;
 	}
 
 	LOG_DEBUG("Initialized, status register: 0x%04x", recv[0]);
@@ -147,9 +182,9 @@ void FPGA::WriteSweepConfig(uint16_t pointnum, bool lowband, uint32_t *SourceReg
 	send[5] = (SourceRegs[4] & 0x00300000) >> 6 | (SourceRegs[3] & 0xFC000000) >> 18 | (SourceRegs[1] & 0x00007F80) >> 7;
 	send[6] = (SourceRegs[1] & 0x00000078) << 9 | (SourceRegs[0] & 0x00007FF8) >> 3;
 	send[7] = (SourceRegs[0] & 0x7FFF8000) >> 15;
-	Low(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
-	HAL_SPI_Transmit(&hspi3, (uint8_t*) send, 8, 100);
-	High(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
+	Low(CS);
+	HAL_SPI_Transmit(&FPGA_SPI, (uint8_t*) send, 8, 100);
+	High(CS);
 }
 
 static inline int64_t sign_extend_64(int64_t x, uint16_t bits) {
@@ -166,8 +201,8 @@ bool FPGA::InitiateSampleRead(ReadCallback cb) {
 	uint16_t cmd = 0xC000;
 	uint16_t status;
 
-	Low(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
-	HAL_SPI_TransmitReceive(&hspi3, (uint8_t*) &cmd, (uint8_t*) &status, 1,
+	Low(CS);
+	HAL_SPI_TransmitReceive(&FPGA_SPI, (uint8_t*) &cmd, (uint8_t*) &status, 1,
 			100);
 
 	if (status & 0x0010) {
@@ -178,7 +213,7 @@ bool FPGA::InitiateSampleRead(ReadCallback cb) {
 
 	if (!(status & 0x0004)) {
 		// no new data available yet
-		High(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
+		High(CS);
 
 		if (halted) {
 			if (halted_cb) {
@@ -191,14 +226,14 @@ bool FPGA::InitiateSampleRead(ReadCallback cb) {
 	}
 
 	// Start data read
-	HAL_SPI_Receive_DMA(&hspi3, (uint8_t*) raw, 18);
+	HAL_SPI_Receive_DMA(&FPGA_SPI, (uint8_t*) raw, 18);
 	return true;
 }
 
 extern "C" {
 void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi) {
 	FPGA::SamplingResult result;
-	High(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
+	High(CS);
 	// Assemble data from words
 	result.P1I = sign_extend_64(
 			(uint64_t) raw[17] << 32 | (uint32_t) raw[16] << 16 | raw[15], 48);
@@ -222,35 +257,35 @@ void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi) {
 }
 
 void FPGA::StartSweep() {
-	Low(FPGA_AUX3_GPIO_Port, FPGA_AUX3_Pin);
+	Low(AUX3);
 	Delay::us(1);
-	High(FPGA_AUX3_GPIO_Port, FPGA_AUX3_Pin);
+	High(AUX3);
 }
 
 void FPGA::AbortSweep() {
-	Low(FPGA_AUX3_GPIO_Port, FPGA_AUX3_Pin);
+	Low(AUX3);
 }
 
 void FPGA::SetMode(Mode mode) {
 	switch(mode) {
 	case Mode::FPGA:
 		// Both AUX1/2 low
-		Low(FPGA_AUX1_GPIO_Port, FPGA_AUX1_Pin);
-		Low(FPGA_AUX2_GPIO_Port, FPGA_AUX2_Pin);
+		Low(AUX1);
+		Low(AUX2);
 		Delay::us(1);
-		High(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
+		High(CS);
 		break;
 	case Mode::SourcePLL:
-		Low(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
-		Low(FPGA_AUX2_GPIO_Port, FPGA_AUX2_Pin);
+		Low(CS);
+		Low(AUX2);
 		Delay::us(1);
-		High(FPGA_AUX1_GPIO_Port, FPGA_AUX1_Pin);
+		High(AUX1);
 		break;
 	case Mode::LOPLL:
-		Low(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
-		Low(FPGA_AUX1_GPIO_Port, FPGA_AUX1_Pin);
+		Low(CS);
+		Low(AUX1);
 		Delay::us(1);
-		High(FPGA_AUX2_GPIO_Port, FPGA_AUX2_Pin);
+		High(AUX2);
 		break;
 	}
 	Delay::us(1);
@@ -259,34 +294,35 @@ void FPGA::SetMode(Mode mode) {
 uint16_t FPGA::GetStatus() {
 	uint16_t cmd = 0x4000;
 	uint16_t status;
-	Low(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
-	HAL_SPI_TransmitReceive(&hspi3, (uint8_t*) &cmd, (uint8_t*) &status, 1,
+	Low(CS);
+	HAL_SPI_TransmitReceive(&FPGA_SPI, (uint8_t*) &cmd, (uint8_t*) &status, 1,
 			100);
-	High(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
+	High(CS);
 	return status;
 }
 
 FPGA::ADCLimits FPGA::GetADCLimits() {
 	uint16_t cmd = 0xE000;
-	Low(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
-	HAL_SPI_Transmit(&hspi3, (uint8_t*) &cmd, 1, 100);
+	Low(CS);
+	HAL_SPI_Transmit(&FPGA_SPI, (uint8_t*) &cmd, 1, 100);
 	ADCLimits limits;
-	HAL_SPI_Receive(&hspi3, (uint8_t*) &limits, 6, 100);
-	High(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
+	HAL_SPI_Receive(&FPGA_SPI, (uint8_t*) &limits, 6, 100);
+	High(CS);
 	return limits;
 }
 
 void FPGA::ResetADCLimits() {
 	uint16_t cmd = 0x6000;
-	Low(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
-	HAL_SPI_Transmit(&hspi3, (uint8_t*) &cmd, 1, 100);
-	High(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
+	Low(CS);
+	HAL_SPI_Transmit(&FPGA_SPI, (uint8_t*) &cmd, 1, 100);
+	High(CS);
 }
 
 void FPGA::ResumeHaltedSweep() {
 	uint16_t cmd = 0x2000;
-	Low(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
-	HAL_SPI_Transmit(&hspi3, (uint8_t*) &cmd, 1, 100);
-	High(FPGA_CS_GPIO_Port, FPGA_CS_Pin);
+	Low(CS);
+	HAL_SPI_Transmit(&FPGA_SPI, (uint8_t*) &cmd, 1, 100);
+	High(CS);
 }
+
 

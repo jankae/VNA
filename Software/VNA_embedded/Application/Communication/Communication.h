@@ -8,8 +8,12 @@
 
 namespace Communication {
 
+using Callback = void(*)(Protocol::PacketInfo);
+
+void SetCallback(Callback cb);
 void Input(const uint8_t *buf, uint16_t len);
 bool Send(Protocol::PacketInfo packet);
+bool SendWithoutPayload(Protocol::PacketType type);
 
 }
 
