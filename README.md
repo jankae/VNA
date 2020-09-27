@@ -1,5 +1,7 @@
 # 1MHz - 6GHz VNA
 
+**There is a [new and improved version](https://github.com/jankae/VNA2) of this project under development**
+
 ![](Pictures/VNA.JPG)
 
 ## Motivation
